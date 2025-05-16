@@ -1,18 +1,35 @@
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { Text, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
+import { CustomInput } from '@/src/components/inputs/CustomInput';
 
 export const EmailLogin = () => {
   return (
-    <View style={[styles.page]}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+      style={[styles.page]}
+    >
       <Text style={[styles.title]}>Sign in</Text>
 
-      <TextInput style={[styles.input]} placeholder="email" />
-      <TextInput style={[styles.input]} placeholder="password" secureTextEntry />
+      <CustomInput
+        placeholder="email"
+        autoFocus
+        autoCapitalize="none"
+        keyboardType="email-address"
+        autoComplete="email"
+        autoCorrect={false}
+      />
+
+      <CustomInput
+        style={[styles.input]}
+        placeholder="password"
+        secureTextEntry
+        autoCapitalize="none"
+      />
 
       <Pressable style={[styles.signInButton]} onPress={() => {}}>
         <Text style={[styles.signInButtonText]}>Sign In</Text>
       </Pressable>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

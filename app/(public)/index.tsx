@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { images } from '@/src/constants/images';
 import { supportedLanguages } from '@/src/i18n';
 
-import { LoadingSpinner } from '@/src/components/Loading';
+import { LoadingSpinner } from '@/src/components/loaders/Loading';
 import { SSOButton } from '@/src/components/buttons/SSOButton';
 import { LanguageButton } from '@/src/components/buttons/LanguageButton';
 
