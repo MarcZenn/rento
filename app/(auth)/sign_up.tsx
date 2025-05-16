@@ -3,9 +3,21 @@ import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native-unistyles';
 import { CustomInput } from '@/src/components/inputs/CustomInput';
 import { CustomButton } from '@/src/components/buttons/CustomButton';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const signInSchema = z.object({
+  email: z.string({ message: 'Email is required' }).email('Invalid email'),
+  password: z
+    .string({ message: 'Password is required' })
+    .min(8, 'Password should be at least 8 characters long'),
+});
 
 export const EmailLogin = () => {
-  const { control, handleSubmit } = useForm(); // handles form validation
+  // handles form validation w/ zod schema
+  const { control, handleSubmit } = useForm({
+    resolver: zodResolver(signInSchema),
+  });
 
   const onSignIn = (data: any) => {
     console.log(data);

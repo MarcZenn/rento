@@ -14,7 +14,6 @@ export const CustomInput = ({ control, name, ...textInputProps }: CustomInputPro
     <Controller
       name="email"
       control={control}
-      rules={{ required: 'This field is required.' }}
       render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
         <View style={[styles.inputContainer]}>
           <TextInput
