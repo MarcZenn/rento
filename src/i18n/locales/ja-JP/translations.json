@@ -1,0 +1,9 @@
+{
+    "login_screen": {
+        "brand_text": "Rento",
+        "LINE_login": "LINEで続ける",
+        "google_login": "Googleで続ける",
+        "email_login": "メールアドレスで続ける",
+        "sign_up": "新規登録"
+    }
+}

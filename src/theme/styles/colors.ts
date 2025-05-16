@@ -1,0 +1,39 @@
+import { THEME_COLORS } from '../types';
+
+export const LIGHT_COLORS: THEME_COLORS = {
+  brand: '#9CCBB9',
+  secondaryBrand: '#E6F2ED',
+  appBackground: '#F5F5F5',
+  card: '#FFFFFF',
+  elevatedSurface: '#FAFAFA',
+  border: '#E0E0E0',
+  headingText: '#2C2C2C',
+  bodyText: '#6E6E6E',
+  mutedText: '#A0A0A0',
+  accentSky: '#B2DFFC',
+  accentCoral: '#FCD5C5',
+  accentLavender: '#D6C9F5',
+  accentSakura: '#FADADD',
+  accentMatcha: '#CDE3C5',
+  accentSumi: '#1B1B1B',
+  accentShoji: '#FBFBF7',
+} as const;
+
+export const DARK_COLORS: THEME_COLORS = {
+  brand: '#9CCBB9',
+  secondaryBrand: '#375E50',
+  appBackground: '#121212',
+  card: '#1E1E1E',
+  elevatedSurface: '#2A2A2A',
+  border: '#3A3A3A',
+  headingText: '#F0F0F0',
+  bodyText: '#B5B5B5',
+  mutedText: '#777777',
+  accentSky: '#5CAEDC',
+  accentCoral: '#E8B8A2',
+  accentLavender: '#B9A8E5',
+  accentSakura: '#A26678',
+  accentMatcha: '#6E9278',
+  accentSumi: '#0A0A0A',
+  accentShoji: '#2E2E2A',
+} as const;

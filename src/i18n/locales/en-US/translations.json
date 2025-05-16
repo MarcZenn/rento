@@ -1,0 +1,9 @@
+{
+    "login_screen": {
+        "brand_text": "Rento",
+        "LINE_login": "Continue with LINE",
+        "google_login": "Contine with Google",
+        "email_login": "Contine with email",
+        "sign_up": "Sign Up"
+    }
+}
