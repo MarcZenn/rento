@@ -17,6 +17,7 @@ export const LIGHT_COLORS: THEME_COLORS = {
   accentMatcha: '#CDE3C5',
   accentSumi: '#1B1B1B',
   accentShoji: '#FBFBF7',
+  error: '#DC143C',
 } as const;
 
 export const DARK_COLORS: THEME_COLORS = {
@@ -36,4 +37,5 @@ export const DARK_COLORS: THEME_COLORS = {
   accentMatcha: '#6E9278',
   accentSumi: '#0A0A0A',
   accentShoji: '#2E2E2A',
+  error: '#DC143C',
 } as const;

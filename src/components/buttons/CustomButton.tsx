@@ -3,13 +3,13 @@ import { StyleSheet } from 'react-native-unistyles';
 
 type CustomButtonProps = {
   // custom props
-  text: string;
+  text?: string;
 } & PressableProps;
 
-export const CustomButton = ({ text, ...pressableProps }: CustomButtonProps) => {
+export const CustomButton = ({ text, style, ...pressableProps }: CustomButtonProps) => {
   return (
     <Pressable {...pressableProps} style={[styles.signInButton]}>
-      <Text style={[styles.signInButtonText]}>{text}</Text>
+      {text && <Text style={[styles.signInButtonText]}>{text}</Text>}
     </Pressable>
   );
 };

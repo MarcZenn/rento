@@ -20,6 +20,7 @@ const buildTheme = (colors: THEME_COLORS) => {
     accentSumi,
     accentShoji,
     accentMatcha,
+    error,
   } = colors;
 
   return {
@@ -39,6 +40,7 @@ const buildTheme = (colors: THEME_COLORS) => {
     accentSumi,
     accentShoji,
     accentMatcha,
+    error,
   };
 };
 
