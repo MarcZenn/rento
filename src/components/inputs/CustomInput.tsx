@@ -2,9 +2,9 @@ import { TextInput, TextInputProps } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 // extends TextInput from react native.
-// accepts styles as prop
+// accepts override styles as prop
 type CustomInputProps = {
-  // custom fields
+  // custom props
 } & TextInputProps;
 
 export const CustomInput = (props: CustomInputProps) => {

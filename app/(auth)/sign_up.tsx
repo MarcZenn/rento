@@ -1,6 +1,7 @@
 import { Text, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { CustomInput } from '@/src/components/inputs/CustomInput';
+import { CustomButton } from '@/src/components/buttons/CustomButton';
 
 export const EmailLogin = () => {
   return (
@@ -19,16 +20,9 @@ export const EmailLogin = () => {
         autoCorrect={false}
       />
 
-      <CustomInput
-        style={[styles.input]}
-        placeholder="password"
-        secureTextEntry
-        autoCapitalize="none"
-      />
+      <CustomInput placeholder="password" secureTextEntry autoCapitalize="none" />
 
-      <Pressable style={[styles.signInButton]} onPress={() => {}}>
-        <Text style={[styles.signInButtonText]}>Sign In</Text>
-      </Pressable>
+      <CustomButton onPress={() => {}} text="Sign In" />
     </KeyboardAvoidingView>
   );
 };
@@ -52,16 +46,5 @@ const styles = StyleSheet.create(theme => ({
     padding: 10,
     borderRadius: 5,
     borderColor: theme.colors.elevatedSurface,
-  },
-  signInButton: {
-    backgroundColor: theme.colors.elevatedSurface,
-    padding: 15,
-    borderWidth: 1,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  signInButtonText: {
-    color: theme.colors.bodyText,
-    fontSize: theme.fontSizes.medium,
   },
 }));
