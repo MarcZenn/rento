@@ -8,4 +8,7 @@ export const images = {
     japan: require('@/src/assets/images/japan_flag.png'),
     uk: require('@/src/assets/images/uk_flag.png'),
   },
+  icons: {
+    email: require('@/src/assets/images/email_icon.png'),
+  },
 };

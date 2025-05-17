@@ -6,10 +6,10 @@ import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 type CustomInputProps<T extends FieldValues> = {
   // custom props
   control: Control<T>;
-  name: Path<T>; // this is a path of T where T = specific type passed down from parent.
+  name: Path<T>; // This is a path of T where T is specific type passed down from parent.
 } & TextInputProps;
 
-// T = specific type passed in from parent
+// T = generic type from a specific type passed in from parent
 export const CustomInput = <T extends FieldValues>({
   control,
   name,
