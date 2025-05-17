@@ -13,13 +13,15 @@ const signInSchema = z.object({
     .min(8, 'Password should be at least 8 characters long'),
 });
 
+type SignInFields = z.infer<typeof signInSchema>;
+
 export const EmailLogin = () => {
   // handles form validation w/ zod schema
   const { control, handleSubmit } = useForm({
     resolver: zodResolver(signInSchema),
   });
 
-  const onSignIn = (data: any) => {
+  const onSignIn = (data: SignInFields) => {
     console.log(data);
   };
 

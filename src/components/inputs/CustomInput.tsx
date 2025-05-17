@@ -1,18 +1,23 @@
 import { TextInput, TextInputProps, Text, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { Controller } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 
 // accepts override styles as prop
-type CustomInputProps = {
+type CustomInputProps<T extends FieldValues> = {
   // custom props
-  control: any;
-  name: string;
+  control: Control<T>;
+  name: Path<T>; // this is a path of T where T = specific type passed down from parent.
 } & TextInputProps;
 
-export const CustomInput = ({ control, name, ...textInputProps }: CustomInputProps) => {
+// T = specific type passed in from parent
+export const CustomInput = <T extends FieldValues>({
+  control,
+  name,
+  ...textInputProps
+}: CustomInputProps<T>) => {
   return (
     <Controller
-      name="email"
+      name={name}
       control={control}
       render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
         <View style={[styles.inputContainer]}>
