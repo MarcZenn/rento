@@ -11,6 +11,8 @@ import { CustomButton } from '@/src/components/buttons/CustomButton';
 type SignUpFields = z.infer<typeof signUpSchema>;
 
 const signUpSchema = z.object({
+  surname: z.string({ message: 'Surname is required' }),
+  firstName: z.string({ message: 'First name is required' }),
   email: z.string({ message: 'Email is required' }).email('Invalid email'),
   password: z
     .string({ message: 'Password is required' })
@@ -42,10 +44,27 @@ const SignUp = () => {
 
       <View style={[styles.form]}>
         <CustomInput
+          placeholder="first name"
+          name="firstName"
+          control={control}
+          autoFocus
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={[styles.input]}
+        />
+        <CustomInput
+          placeholder="surname"
+          name="surname"
+          control={control}
+          autoFocus
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={[styles.input]}
+        />
+        <CustomInput
           placeholder="email"
           name="email"
           control={control}
-          autoFocus
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"

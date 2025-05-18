@@ -29,7 +29,10 @@ const styles = StyleSheet.create(theme => ({
   },
   flagButton: {
     backgroundColor: theme.colors.elevatedSurface,
-    borderRadius: 7,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    borderRadius: 5,
+    alignItems: 'center',
     width: 50,
     height: 50,
     padding: 0,
@@ -41,8 +44,6 @@ const styles = StyleSheet.create(theme => ({
   },
   flagImg: {
     flex: 1,
-    width: 50,
-    height: 50,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
 }));

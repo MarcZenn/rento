@@ -1,10 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Slot } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
 import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';
+import { Stack } from 'expo-router';
+import { View } from 'react-native';
+
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
+import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/hooks/useFonts';
 import '@/src/i18n';
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
+
+// Set the animation options. This is optional.
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if (!clerkPublishableKey) {
@@ -14,10 +26,13 @@ if (!clerkPublishableKey) {
 }
 
 const InitialLayout = () => {
-  return <Slot />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+    </Stack>
+  );
 };
 
-// Top level navigator - includes initialization code, loading fonts etc
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -35,10 +50,28 @@ export default function RootLayout() {
     init();
   }, []);
 
+  const onLayoutRootView = useCallback(() => {
+    if (appIsReady) {
+      // If we call this after `setAppIsReady`, then we may see a blank screen
+      // while the app is loading its initial state and rendering its first
+      // pixels. So instead, we hide the splash screen once we know the root
+      // view has already performed layout.
+      SplashScreen.hide();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
+
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
       <ClerkLoaded>
-        <ThemeProvider>{appIsReady && <InitialLayout />}</ThemeProvider>
+        <ThemeProvider>
+          <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+            <InitialLayout />
+          </View>
+        </ThemeProvider>
       </ClerkLoaded>
     </ClerkProvider>
   );

@@ -1,6 +1,6 @@
 export const images = {
   logos: {
-    rento: require('@/src/assets/images/login_img.png'),
+    rento: require('@/src/assets/images/logo_img.png'),
     line: require('@/src/assets/images/LINE_logo.png'),
     google: require('@/src/assets/images/google_logo.png'),
   },

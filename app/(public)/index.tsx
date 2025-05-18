@@ -9,7 +9,6 @@ import { images } from '@/src/constants/images';
 import { supportedLanguages } from '@/src/i18n';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { HeroLogo } from '@/src/components/HeroLogo';
-// import { LoadingSpinner } from '@/src/components/loaders/Loading';
 import { CustomButton } from '@/src/components/buttons/CustomButton';
 import { LanguageButton } from '@/src/components/buttons/LanguageButton';
 
@@ -32,13 +31,7 @@ const authMethods = [
 ];
 
 export default function Welcome() {
-  // const router = useRouter();
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(true);
-
-  // if (!loading) {
-  //   return <LoadingSpinner />;
-  // }
 
   return (
     <View style={[styles.page]}>
@@ -67,7 +60,12 @@ export default function Welcome() {
             </Link>
           ))}
         </View>
+
+        <Link href={'/sign_up'} style={[styles.signUpLink]}>
+          Don't have an account? Sign up.
+        </Link>
       </ScrollView>
+
       <StatusBar style="auto" />
     </View>
   );
@@ -76,29 +74,25 @@ export default function Welcome() {
 const styles = StyleSheet.create(theme => ({
   page: {
     display: 'flex',
+    flexDirection: 'column',
     flex: 1,
     backgroundColor: theme.colors.appBackground,
     paddingTop: 75,
+    gap: 0,
   },
   languageButtonsContainer: {
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
     gap: 5,
   },
   ssoButtonsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
     backgroundColor: theme.colors.appBackground,
     alignItems: 'center',
-    height: '100%',
-    width: '100%',
     gap: 10,
   },
   ssoButton: {
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.colors.elevatedSurface,
@@ -133,5 +127,11 @@ const styles = StyleSheet.create(theme => ({
   btnIcon: {
     flex: 1,
     alignItems: 'center',
+  },
+  signUpLink: {
+    color: theme.colors.accentSky,
+    fontFamily: theme.fonts.interLight,
+    textAlign: 'center',
+    marginTop: 10,
   },
 }));
