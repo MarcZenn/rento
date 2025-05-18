@@ -26,7 +26,8 @@ export const CustomInput = <T extends FieldValues>({
             onChangeText={onChange}
             onBlur={onBlur}
             {...textInputProps}
-            style={[styles.input, textInputProps.style]}
+            placeholderTextColor={'grey'}
+            style={[textInputProps.style]}
           />
           <Text style={[styles.errorText]}>{error?.message}</Text>
         </View>
@@ -39,15 +40,10 @@ const styles = StyleSheet.create(theme => ({
   inputContainer: {
     gap: 4,
   },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-    borderColor: theme.colors.elevatedSurface,
-  },
   errorText: {
     fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.interThin,
     color: theme.colors.error,
+    paddingBottom: 5,
   },
 }));

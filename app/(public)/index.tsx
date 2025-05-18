@@ -1,76 +1,70 @@
 import { useState } from 'react';
-import { Image, View, ScrollView, Text, ImageSourcePropType } from 'react-native';
+import { Image, View, ScrollView, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter, Link } from 'expo-router';
+import { Link } from 'expo-router';
 
 import { images } from '@/src/constants/images';
 import { supportedLanguages } from '@/src/i18n';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LoadingSpinner } from '@/src/components/loaders/Loading';
+import { HeroLogo } from '@/src/components/HeroLogo';
+// import { LoadingSpinner } from '@/src/components/loaders/Loading';
 import { CustomButton } from '@/src/components/buttons/CustomButton';
 import { LanguageButton } from '@/src/components/buttons/LanguageButton';
 
+const authMethods = [
+  {
+    image: images.logos.line,
+    text: 'login_screen.LINE_login',
+    link: '(auth)/sign_in',
+  },
+  {
+    image: images.logos.google,
+    text: 'login_screen.google_login',
+    link: '(auth)/sign_in',
+  },
+  {
+    image: images.icons.email,
+    text: 'login_screen.email_login',
+    link: '(auth)/sign_in',
+  },
+];
+
 export default function Welcome() {
-  const router = useRouter();
+  // const router = useRouter();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
 
-  const buttons = [
-    {
-      image: images.logos.line,
-      text: t('login_screen.LINE_login'),
-      link: '',
-    },
-    {
-      image: images.logos.google,
-      text: t('login_screen.google_login'),
-      link: '',
-    },
-    {
-      image: images.icons.email,
-      text: t('login_screen.email_login'),
-      link: '(auth)/sign_in',
-    },
-  ];
-
-  const onSignInMethodSelect = (path: string) => {
-    router.push('(auth)/sign_in');
-  };
-
-  if (!loading) {
-    return <LoadingSpinner />;
-  }
+  // if (!loading) {
+  //   return <LoadingSpinner />;
+  // }
 
   return (
     <View style={[styles.page]}>
-      <View style={[styles.hero]}>
-        <Image source={images.logos.rento} style={styles.heroImg} />
-        <Text style={[styles.heroText]}>{t('login_screen.brand_text')}</Text>
-      </View>
+      <HeroLogo />
 
       <View style={[styles.languageButtonsContainer]}>
         <LanguageButton lng={supportedLanguages.japanese} imgSrc={images.flags.japan} />
         <LanguageButton lng={supportedLanguages.english} imgSrc={images.flags.uk} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.page}>
+      <ScrollView>
         <View style={[styles.ssoButtonsContainer]}>
-          {buttons.map(obj => (
-            <CustomButton key={obj.text} style={[styles.ssoButton]}>
-              <Link href={obj.link}>
+          {authMethods.map((obj, index) => (
+            <Link style={[styles.ssoButton]} key={index} href={obj.link} asChild>
+              <CustomButton>
                 <View style={[styles.imgWrapper]}>
                   <Image source={obj.image} style={styles.img} />
                 </View>
                 <View style={[styles.btnTextWrapper]}>
-                  <Text style={[styles.btnText]}>{obj.text}</Text>
+                  <Text style={[styles.btnText]}>{t(obj.text)}</Text>
                 </View>
                 <View style={[styles.btnIcon]}>
                   <Ionicons name="chevron-forward" size={20} color={'grey'} />
                 </View>
-              </Link>
-            </CustomButton>
+              </CustomButton>
+            </Link>
           ))}
         </View>
       </ScrollView>
@@ -81,31 +75,17 @@ export default function Welcome() {
 
 const styles = StyleSheet.create(theme => ({
   page: {
+    display: 'flex',
     flex: 1,
     backgroundColor: theme.colors.appBackground,
-  },
-  hero: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginTop: 75,
-    height: 375,
-    alignItems: 'center',
-  },
-  heroText: {
-    fontSize: theme.fontSizes.xxxxl,
-    color: theme.colors.brand,
-    fontFamily: theme.fonts.notoJpMedium,
-    textAlign: 'center',
-  },
-  heroImg: {
-    height: '70%',
-    width: '75%',
+    paddingTop: 75,
   },
   languageButtonsContainer: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 10,
     gap: 5,
   },
   ssoButtonsContainer: {
@@ -113,10 +93,9 @@ const styles = StyleSheet.create(theme => ({
     flexDirection: 'column',
     backgroundColor: theme.colors.appBackground,
     alignItems: 'center',
-    paddingTop: 20,
     height: '100%',
     width: '100%',
-    gap: 15,
+    gap: 10,
   },
   ssoButton: {
     display: 'flex',
