@@ -1,28 +1,24 @@
 import { Text, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+import { useSignUpSchema } from '@/src/utils/validation/schemas';
+import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
+import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
 import { HeroLogo } from '@/src/components/HeroLogo';
-import { CustomInput } from '@/src/components/inputs/CustomInput';
-import { CustomButton } from '@/src/components/buttons/CustomButton';
+import { Header } from '@/src/components/Header';
 
-type SignUpFields = z.infer<typeof signUpSchema>;
-
-const signUpSchema = z.object({
-  surname: z.string({ message: 'Surname is required' }),
-  firstName: z.string({ message: 'First name is required' }),
-  email: z.string({ message: 'Email is required' }).email('Invalid email'),
-  password: z
-    .string({ message: 'Password is required' })
-    .min(8, 'Password should be at least 8 characters long'),
-});
+type SignUpFields = z.infer<ReturnType<typeof useSignUpSchema>>;
 
 const SignUp = () => {
+  const { t } = useTranslation();
+
   // handles form validation w/ zod schema
   const { control, handleSubmit } = useForm({
-    resolver: zodResolver(signUpSchema),
+    resolver: zodResolver(useSignUpSchema()),
   });
 
   const onSignUp = (data: SignUpFields) => {
@@ -38,13 +34,15 @@ const SignUp = () => {
       behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
       style={[styles.page]}
     >
+      <Header />
+
       <HeroLogo />
 
-      <Text style={[styles.title]}>Create an account</Text>
+      <Text style={[styles.title]}>{t('auth.create_account')}</Text>
 
       <View style={[styles.form]}>
         <CustomInput
-          placeholder="first name"
+          placeholder={t('forms.name.placeholder')}
           name="firstName"
           control={control}
           autoFocus
@@ -53,7 +51,7 @@ const SignUp = () => {
           style={[styles.input]}
         />
         <CustomInput
-          placeholder="surname"
+          placeholder={t('forms.surname.placeholder')}
           name="surname"
           control={control}
           autoFocus
@@ -62,7 +60,7 @@ const SignUp = () => {
           style={[styles.input]}
         />
         <CustomInput
-          placeholder="email"
+          placeholder={t('forms.email.placeholder')}
           name="email"
           control={control}
           autoCapitalize="none"
@@ -72,7 +70,7 @@ const SignUp = () => {
           style={[styles.input]}
         />
         <CustomInput
-          placeholder="password"
+          placeholder={t('forms.password.placeholder')}
           name="password"
           control={control}
           secureTextEntry
@@ -80,7 +78,7 @@ const SignUp = () => {
           style={[styles.input]}
         />
         <CustomButton onPress={handleSubmit(onSignUp)} style={styles.signUpButton}>
-          <Text style={[styles.signUpButtonText]}>Sign In</Text>
+          <Text style={[styles.signUpButtonText]}>{t('auth.sign_up')}</Text>
         </CustomButton>
       </View>
     </KeyboardAvoidingView>

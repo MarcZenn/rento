@@ -1,9 +1,35 @@
 {
-    "login_screen": {
-        "brand_text": "Rento",
+    "brand_text": "Rento",
+    "welcome_screen": {
         "LINE_login": "Continue with LINE",
         "google_login": "Contine with Google",
         "email_login": "Contine with email",
         "sign_up": "Sign Up"
+    },
+    "auth": {
+        "sign_up": "Sign up",
+        "sign_in": "Sign in",
+        "create_account": "Create an account",
+        "no_account": "Don't have an account? Sign up."
+    },
+    "forms": {
+        "email": {
+            "required": "Email is required",
+            "invalid": "Invalid email",
+            "placeholder": "email"
+        },
+        "password": {
+            "required": "Password is required",
+            "min": "Password should be at least 8 characters long",
+            "placeholder": "password"
+        },
+        "name": {
+            "required": "First name is required",
+            "placeholder": "first name"
+        },
+        "surname": {
+            "required": "Surname is required",
+            "placeholder": "surname"
+        }
     }
 }

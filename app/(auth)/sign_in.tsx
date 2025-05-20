@@ -1,27 +1,25 @@
 import { Text, KeyboardAvoidingView, Platform, View } from 'react-native';
-import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Link } from 'expo-router';
 import { z } from 'zod';
 
-import { Link } from 'expo-router';
+import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
+import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
+import { useSignInSchema } from '@/src/utils/validation/schemas';
 import { HeroLogo } from '@/src/components/HeroLogo';
-import { CustomInput } from '@/src/components/inputs/CustomInput';
-import { CustomButton } from '@/src/components/buttons/CustomButton';
+import { Header } from '@/src/components/Header';
 
-const signInSchema = z.object({
-  email: z.string({ message: 'Email is required' }).email('Invalid email'),
-  password: z
-    .string({ message: 'Password is required' })
-    .min(8, 'Password should be at least 8 characters long'),
-});
-
-type SignInFields = z.infer<typeof signInSchema>;
+type SignInFields = z.infer<ReturnType<typeof useSignInSchema>>;
 
 const SignIn = () => {
+  const { t } = useTranslation();
+
   // handles form validation w/ zod schema
   const { control, handleSubmit } = useForm({
-    resolver: zodResolver(signInSchema),
+    resolver: zodResolver(useSignInSchema()),
   });
 
   const onSignIn = (data: SignInFields) => {
@@ -33,13 +31,15 @@ const SignIn = () => {
       behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
       style={[styles.page]}
     >
+      <Header />
+
       <HeroLogo />
 
-      <Text style={[styles.title]}>Sign in</Text>
+      <Text style={[styles.title]}>{t('auth.sign_in')}</Text>
 
       <View style={[styles.form]}>
         <CustomInput
-          placeholder="email"
+          placeholder={t('forms.email.placeholder')}
           name="email"
           control={control}
           autoFocus
@@ -50,7 +50,7 @@ const SignIn = () => {
           style={[styles.input]}
         />
         <CustomInput
-          placeholder="password"
+          placeholder={t(t('forms.password.placeholder'))}
           name="password"
           control={control}
           secureTextEntry
@@ -58,11 +58,11 @@ const SignIn = () => {
           style={[styles.input]}
         />
         <CustomButton onPress={handleSubmit(onSignIn)} style={[styles.signInButton]}>
-          <Text style={[styles.signInButtonText]}>Sign In</Text>
+          <Text style={[styles.signInButtonText]}>{t('auth.sign_in')}</Text>
         </CustomButton>
 
         <Link href={'/sign_up'} style={[styles.signUpLink]}>
-          Don't have an account? Sign up.
+          {t('auth.no_account')}
         </Link>
       </View>
     </KeyboardAvoidingView>

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Image, View, ScrollView, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
@@ -6,26 +5,25 @@ import { StatusBar } from 'expo-status-bar';
 import { Link } from 'expo-router';
 
 import { images } from '@/src/constants/images';
-import { supportedLanguages } from '@/src/i18n';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { HeroLogo } from '@/src/components/HeroLogo';
-import { CustomButton } from '@/src/components/buttons/CustomButton';
-import { LanguageButton } from '@/src/components/buttons/LanguageButton';
+import { Header } from '@/src/components/Header';
+import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
 
 const authMethods = [
   {
     image: images.logos.line,
-    text: 'login_screen.LINE_login',
+    text: 'welcome_screen.LINE_login',
     link: '(auth)/sign_in',
   },
   {
     image: images.logos.google,
-    text: 'login_screen.google_login',
+    text: 'welcome_screen.google_login',
     link: '(auth)/sign_in',
   },
   {
     image: images.icons.email,
-    text: 'login_screen.email_login',
+    text: 'welcome_screen.email_login',
     link: '(auth)/sign_in',
   },
 ];
@@ -35,12 +33,9 @@ export default function Welcome() {
 
   return (
     <View style={[styles.page]}>
-      <HeroLogo />
+      <Header />
 
-      <View style={[styles.languageButtonsContainer]}>
-        <LanguageButton lng={supportedLanguages.japanese} imgSrc={images.flags.japan} />
-        <LanguageButton lng={supportedLanguages.english} imgSrc={images.flags.uk} />
-      </View>
+      <HeroLogo />
 
       <ScrollView>
         <View style={[styles.ssoButtonsContainer]}>
@@ -62,7 +57,7 @@ export default function Welcome() {
         </View>
 
         <Link href={'/sign_up'} style={[styles.signUpLink]}>
-          Don't have an account? Sign up.
+          {t('auth.no_account')}
         </Link>
       </ScrollView>
 
@@ -79,13 +74,6 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: theme.colors.appBackground,
     paddingTop: 75,
     gap: 0,
-  },
-  languageButtonsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    gap: 5,
   },
   ssoButtonsContainer: {
     backgroundColor: theme.colors.appBackground,

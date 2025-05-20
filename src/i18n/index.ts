@@ -4,29 +4,62 @@ import { getLocales } from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import translationEn from './locales/en-US/translations.json';
 import translationJa from './locales/ja-JP/translations.json';
-import { supportedLanguages } from './supportedLanguages';
+import { SUPPORTED_LOCALES } from './types';
 import { useTranslate } from './useTranslate';
+import { images } from '../constants/images';
 
-const { english, japanese } = supportedLanguages;
+const supported_locales: SUPPORTED_LOCALES = [
+  {
+    locale: 'Japan',
+    lang: 'japanese',
+    code: 'ja-JP',
+    resource: translationJa,
+    short: 'ja',
+    flag: images.flags.japan,
+  },
+  {
+    locale: 'USA',
+    lang: 'english',
+    code: 'en-US',
+    resource: translationEn,
+    short: 'en',
+    flag: images.flags.uk,
+  },
+];
 
-const resources = {
-  [english]: {
-    translation: translationEn,
-  },
-  en: {
-    translation: translationEn,
-  },
-  [japanese]: {
-    translation: translationJa,
-  },
-  ja: {
-    translation: translationJa,
-  },
+const getTranslationResources = () => {
+  let resources: any = {};
+
+  supported_locales.forEach(value => {
+    resources[value.code] = { translation: value.resource };
+    resources[value.short] = { translation: value.resource };
+  });
+
+  return resources;
 };
+
+// const resources = {
+//   ['en-US']: {
+//     translation: translationEn,
+//   },
+//   en: {
+//     translation: translationEn,
+//   },
+//   ['ja-JP']: {
+//     translation: translationJa,
+//   },
+//   ja: {
+//     translation: translationJa,
+//   },
+// };
 
 export const LANGUAGE_KEY = '@rento_language';
 
+const defaultLang = 'en-US';
+
 const initI18n = async () => {
+  const resources = getTranslationResources();
+
   try {
     // Try to get saved language preference
     const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
@@ -34,12 +67,10 @@ const initI18n = async () => {
     // Determine which language to use
     let selectedLanguage = savedLanguage;
 
-    console.log(english, 'wtf');
-
     if (!selectedLanguage) {
       // If no saved language, use device locale or fallback
       const deviceLocales = getLocales();
-      const deviceLocale = deviceLocales[0]?.languageTag || english;
+      const deviceLocale = deviceLocales[0]?.languageTag || defaultLang;
       const languageCode = deviceLocale.split('-')[0];
 
       // Try exact locale match first
@@ -51,7 +82,7 @@ const initI18n = async () => {
       else if (languageCode in resources) {
         selectedLanguage = languageCode;
       } else {
-        selectedLanguage = english; // fallback
+        selectedLanguage = defaultLang; // fallback
       }
     }
 
@@ -59,9 +90,9 @@ const initI18n = async () => {
       resources,
       lng: selectedLanguage,
       fallbackLng: {
-        'en-*': [english, 'en'],
-        'ja-*': [japanese, 'ja', english],
-        default: [english],
+        'en-*': [defaultLang, 'en'],
+        // 'ja-*': [japanese.code, 'ja', defaultLang],
+        default: [defaultLang],
       },
       interpolation: {
         escapeValue: false,
@@ -81,8 +112,8 @@ const initI18n = async () => {
     // Initialize with defaults if there's an error
     await i18n.use(initReactI18next).init({
       resources,
-      lng: english,
-      fallbackLng: english,
+      lng: defaultLang,
+      fallbackLng: defaultLang,
       interpolation: {
         escapeValue: false,
       },
@@ -95,5 +126,5 @@ const initI18n = async () => {
 
 initI18n();
 
-export { supportedLanguages, useTranslate };
+export { supported_locales, useTranslate };
 export default i18n;
