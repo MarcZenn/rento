@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import { StatusBar } from 'expo-status-bar';
 import { Link, Redirect } from 'expo-router';
 
-import { useAuth } from '@/src/providers/AuthProvider';
+import { useAuth } from '@clerk/clerk-expo';
 import { images } from '@/src/constants/images';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { HeroLogo } from '@/src/components/HeroLogo';
@@ -30,10 +30,10 @@ const authMethods = [
 ];
 
 export default function Welcome() {
-  const { isAuthenticated } = useAuth();
+  const { isSignedIn } = useAuth();
 
-  if (isAuthenticated) {
-    return <Redirect href={'/(protected)/'} />;
+  if (isSignedIn) {
+    return <Redirect href={'/(protected)/home'} />;
   }
 
   const { t } = useTranslation();

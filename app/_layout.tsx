@@ -5,7 +5,6 @@ import { View } from 'react-native';
 
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
-import { AuthProvider } from '@/src/providers/AuthProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/hooks/useFonts';
 import '@/src/i18n';
@@ -63,13 +62,11 @@ export default function RootLayout() {
     <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
       <ClerkLoaded>
         <ThemeProvider>
-          <AuthProvider>
-            <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-              </Stack>
-            </View>
-          </AuthProvider>
+          <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+            </Stack>
+          </View>
         </ThemeProvider>
       </ClerkLoaded>
     </ClerkProvider>

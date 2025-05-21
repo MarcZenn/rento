@@ -18,8 +18,9 @@ export const useSignInSchema = () => {
 
 const createSignUpSchema = (t: TranslationFunction) =>
   z.object({
-    surname: z.string({ message: t('forms.surname.required') }),
     firstName: z.string({ message: t('forms.name.required') }),
+    surname: z.string({ message: t('forms.surname.required') }),
+    username: z.string({ message: t('forms.username.required') }),
     email: z.string({ message: t('forms.email.required') }).email(t('forms.email.invalid')),
     password: z.string({ message: t('forms.password.required') }).min(8, t('forms.password.min')),
   });
@@ -28,4 +29,15 @@ export const useSignUpSchema = () => {
   const { t } = useTranslation();
 
   return useMemo(() => createSignUpSchema(t), [t]);
+};
+
+const createVerifyEmailSchema = (t: TranslationFunction) =>
+  z.object({
+    code: z.string({ message: t('forms.email.code_required') }),
+  });
+
+export const useVerifyEmailSchema = () => {
+  const { t } = useTranslation();
+
+  return useMemo(() => createVerifyEmailSchema(t), [t]);
 };

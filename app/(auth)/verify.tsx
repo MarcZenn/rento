@@ -3,16 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link } from 'expo-router';
 
+import { useVerifyEmailSchema } from '@/src/utils/validation/schemas';
 import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
-import { useSignInSchema } from '@/src/utils/validation/schemas';
-import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
 import { useAuthActions } from '@/src/hooks/useAuthActions';
 
-const SignIn = () => {
+export const VerifyEmail = () => {
   const { t } = useTranslation();
   const {
     control,
@@ -20,9 +18,9 @@ const SignIn = () => {
     setError,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(useSignInSchema()),
+    resolver: zodResolver(useVerifyEmailSchema()),
   });
-  const { logIn } = useAuthActions(setError);
+  const { verifyEmail } = useAuthActions(setError);
 
   return (
     <KeyboardAvoidingView
@@ -31,40 +29,23 @@ const SignIn = () => {
     >
       <Header />
 
-      <HeroLogo />
-
-      <Text style={[styles.title]}>{t('auth.sign_in')}</Text>
+      <Text style={[styles.title]}>{t('forms.email.verify')}</Text>
 
       <View style={[styles.form]}>
         <CustomInput
-          placeholder={t('forms.email.placeholder')}
-          name="email"
+          name="code"
           control={control}
           autoFocus
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-          autoCorrect={false}
-          style={[styles.input]}
-        />
-        <CustomInput
-          placeholder={t(t('forms.password.placeholder'))}
-          name="password"
-          control={control}
-          secureTextEntry
-          autoCapitalize="none"
+          keyboardType="number-pad"
+          autoComplete="one-time-code"
           style={[styles.input]}
         />
 
         <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
 
-        <CustomButton onPress={handleSubmit(logIn)} style={[styles.signInButton]}>
-          <Text style={[styles.signInButtonText]}>{t('auth.sign_in')}</Text>
+        <CustomButton onPress={handleSubmit(verifyEmail)} style={styles.signUpButton}>
+          <Text style={[styles.signUpButtonText]}>{t('forms.submit')}</Text>
         </CustomButton>
-
-        <Link href={'/sign_up'} style={[styles.signUpLink]}>
-          {t('auth.no_account')}
-        </Link>
       </View>
     </KeyboardAvoidingView>
   );
@@ -96,23 +77,17 @@ const styles = StyleSheet.create(theme => ({
     borderColor: theme.colors.accentMatcha,
     color: theme.colors.bodyText,
   },
-  signInButtonText: {
+  signUpButtonText: {
     color: theme.colors.bodyText,
     fontSize: theme.fontSizes.medium,
   },
-  signInButton: {
+  signUpButton: {
     marginTop: 15,
     padding: 15,
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 5,
     alignItems: 'center',
     backgroundColor: theme.colors.elevatedSurface,
-  },
-  signUpLink: {
-    color: theme.colors.accentSky,
-    fontFamily: theme.fonts.interLight,
-    textAlign: 'center',
-    marginTop: 10,
   },
   errorText: {
     fontSize: theme.fontSizes.small,
@@ -121,5 +96,3 @@ const styles = StyleSheet.create(theme => ({
     paddingBottom: 5,
   },
 }));
-
-export default SignIn;

@@ -17,7 +17,9 @@
         "email": {
             "required": "Email is required",
             "invalid": "Invalid email",
-            "placeholder": "email"
+            "placeholder": "email",
+            "verify": "Verify your email",
+            "code_required": "Code is required"
         },
         "password": {
             "required": "Password is required",
@@ -31,6 +33,11 @@
         "surname": {
             "required": "Surname is required",
             "placeholder": "surname"
-        }
+        },
+        "username": {
+            "required": "Username is required",
+            "placeholder": "username"
+        },
+        "submit": "Submit"
     }
 }

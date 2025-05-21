@@ -1,11 +1,12 @@
 import { Redirect, Slot } from 'expo-router';
-import { useAuth } from '@/src/providers/AuthProvider';
+import { useAuth } from '@clerk/clerk-expo';
 
 export default function ProtectedLayout() {
-  const { isAuthenticated } = useAuth();
+  const { isSignedIn } = useAuth();
 
-  if (!isAuthenticated) {
+  if (!isSignedIn) {
     return <Redirect href={'/'} />;
   }
+
   return <Slot />;
 }

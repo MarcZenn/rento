@@ -3,31 +3,26 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from 'expo-router';
-import { z } from 'zod';
+import { Link, router } from 'expo-router';
 
-import { useAuth } from '@/src/providers/AuthProvider';
 import { useSignUpSchema } from '@/src/utils/validation/schemas';
 import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
+import { useAuthActions } from '@/src/hooks/useAuthActions';
 import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
 
-type SignUpFields = z.infer<ReturnType<typeof useSignUpSchema>>;
-
 const SignUp = () => {
-  const { signUp } = useAuth();
   const { t } = useTranslation();
-
-  // handles form validation w/ zod schema
-  const { control, handleSubmit } = useForm({
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(useSignUpSchema()),
   });
-
-  const onSignUp = (data: SignUpFields) => {
-    console.log(data);
-    signUp();
-  };
+  const { createAccount } = useAuthActions(setError);
 
   return (
     <KeyboardAvoidingView
@@ -54,7 +49,14 @@ const SignUp = () => {
           placeholder={t('forms.surname.placeholder')}
           name="surname"
           control={control}
-          autoFocus
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={[styles.input]}
+        />
+        <CustomInput
+          placeholder={t('forms.username.placeholder')}
+          name="username"
+          control={control}
           autoCapitalize="none"
           autoCorrect={false}
           style={[styles.input]}
@@ -77,7 +79,10 @@ const SignUp = () => {
           autoCapitalize="none"
           style={[styles.input]}
         />
-        <CustomButton onPress={handleSubmit(onSignUp)} style={styles.signUpButton}>
+
+        <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
+
+        <CustomButton onPress={handleSubmit(createAccount)} style={styles.signUpButton}>
           <Text style={[styles.signUpButtonText]}>{t('auth.sign_up')}</Text>
         </CustomButton>
 
@@ -132,6 +137,12 @@ const styles = StyleSheet.create(theme => ({
     fontFamily: theme.fonts.interLight,
     textAlign: 'center',
     marginTop: 10,
+  },
+  errorText: {
+    fontSize: theme.fontSizes.small,
+    fontFamily: theme.fonts.interThin,
+    color: theme.colors.error,
+    paddingBottom: 5,
   },
 }));
 
