@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Link } from 'expo-router';
 import { z } from 'zod';
 
+import { useAuth } from '@/src/providers/AuthProvider';
 import { useSignUpSchema } from '@/src/utils/validation/schemas';
 import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
@@ -14,6 +16,7 @@ import { Header } from '@/src/components/Header';
 type SignUpFields = z.infer<ReturnType<typeof useSignUpSchema>>;
 
 const SignUp = () => {
+  const { signUp } = useAuth();
   const { t } = useTranslation();
 
   // handles form validation w/ zod schema
@@ -22,11 +25,8 @@ const SignUp = () => {
   });
 
   const onSignUp = (data: SignUpFields) => {
-    // console.log(data);
-    // first name
-    // last name
-    // email
-    // username
+    console.log(data);
+    signUp();
   };
 
   return (
@@ -80,6 +80,10 @@ const SignUp = () => {
         <CustomButton onPress={handleSubmit(onSignUp)} style={styles.signUpButton}>
           <Text style={[styles.signUpButtonText]}>{t('auth.sign_up')}</Text>
         </CustomButton>
+
+        <Link href={'/sign_up'} style={[styles.signInLink]}>
+          {t('auth.have_account')}
+        </Link>
       </View>
     </KeyboardAvoidingView>
   );
@@ -122,6 +126,12 @@ const styles = StyleSheet.create(theme => ({
     borderRadius: 5,
     alignItems: 'center',
     backgroundColor: theme.colors.elevatedSurface,
+  },
+  signInLink: {
+    color: theme.colors.accentSky,
+    fontFamily: theme.fonts.interLight,
+    textAlign: 'center',
+    marginTop: 10,
   },
 }));
 

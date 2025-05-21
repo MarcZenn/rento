@@ -5,6 +5,7 @@ import { View } from 'react-native';
 
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
+import { AuthProvider } from '@/src/providers/AuthProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/hooks/useFonts';
 import '@/src/i18n';
@@ -18,20 +19,14 @@ SplashScreen.setOptions({
   fade: true,
 });
 
+// TODO:: Test device default language selelction - change simulator langauge to JP and see if app is in JP when initially opened
+
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if (!clerkPublishableKey) {
   throw new Error(
-    'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in you env.'
+    'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your env.'
   );
 }
-
-const InitialLayout = () => {
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-    </Stack>
-  );
-};
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -68,9 +63,13 @@ export default function RootLayout() {
     <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
       <ClerkLoaded>
         <ThemeProvider>
-          <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-            <InitialLayout />
-          </View>
+          <AuthProvider>
+            <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+              </Stack>
+            </View>
+          </AuthProvider>
         </ThemeProvider>
       </ClerkLoaded>
     </ClerkProvider>

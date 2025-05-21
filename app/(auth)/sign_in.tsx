@@ -11,10 +11,12 @@ import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
 import { useSignInSchema } from '@/src/utils/validation/schemas';
 import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
+import { useAuth } from '@/src/providers/AuthProvider';
 
 type SignInFields = z.infer<ReturnType<typeof useSignInSchema>>;
 
 const SignIn = () => {
+  const { signIn } = useAuth();
   const { t } = useTranslation();
 
   // handles form validation w/ zod schema
@@ -24,6 +26,7 @@ const SignIn = () => {
 
   const onSignIn = (data: SignInFields) => {
     console.log(data);
+    signIn();
   };
 
   return (

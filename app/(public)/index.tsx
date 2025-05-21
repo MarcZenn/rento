@@ -2,8 +2,9 @@ import { Image, View, ScrollView, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
 import { StatusBar } from 'expo-status-bar';
-import { Link } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
 
+import { useAuth } from '@/src/providers/AuthProvider';
 import { images } from '@/src/constants/images';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { HeroLogo } from '@/src/components/HeroLogo';
@@ -29,6 +30,12 @@ const authMethods = [
 ];
 
 export default function Welcome() {
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Redirect href={'/(protected)/'} />;
+  }
+
   const { t } = useTranslation();
 
   return (
