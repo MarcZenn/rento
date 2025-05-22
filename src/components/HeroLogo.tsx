@@ -14,13 +14,15 @@ const styles = StyleSheet.create(theme => ({
   heroContainer: {
     display: 'flex',
     flexDirection: 'column',
-    height: 375,
+    height: 300,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 0,
   },
   heroImg: {
-    height: '70%',
-    width: '75%',
+    height: '100%',
+    width: '100%',
+    resizeMode: 'contain',
   },
 }));

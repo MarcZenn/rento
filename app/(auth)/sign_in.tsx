@@ -33,9 +33,9 @@ const SignIn = () => {
 
       <HeroLogo />
 
-      <Text style={[styles.title]}>{t('auth.sign_in')}</Text>
-
       <View style={[styles.form]}>
+        <Text style={[styles.title]}>{t('auth.sign_in')}</Text>
+
         <CustomInput
           placeholder={t('forms.email.placeholder')}
           name="email"
@@ -74,14 +74,12 @@ const styles = StyleSheet.create(theme => ({
   page: {
     display: 'flex',
     flex: 1,
-    paddingLeft: 20,
-    paddingRight: 20,
-    justifyContent: 'center',
     backgroundColor: theme.colors.appBackground,
     gap: 10,
   },
   form: {
-    gap: 5,
+    gap: 10,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: theme.fontSizes.medium,
@@ -101,7 +99,7 @@ const styles = StyleSheet.create(theme => ({
     fontSize: theme.fontSizes.medium,
   },
   signInButton: {
-    marginTop: 15,
+    marginTop: 5,
     padding: 15,
     borderWidth: 0.5,
     borderRadius: 5,

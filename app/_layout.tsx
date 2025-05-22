@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';
-import { Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 import { View } from 'react-native';
 
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
@@ -8,6 +8,9 @@ import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/hooks/useFonts';
 import '@/src/i18n';
+
+// TODO:: Test device default language selelction - change simulator langauge to JP and see if app is in JP when initially opened
+// TODO:: Add clerk localization!
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -18,14 +21,22 @@ SplashScreen.setOptions({
   fade: true,
 });
 
-// TODO:: Test device default language selelction - change simulator langauge to JP and see if app is in JP when initially opened
-
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if (!clerkPublishableKey) {
   throw new Error(
     'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your env.'
   );
 }
+
+// const InitialLayout = () => {
+//   const { isSignedIn } = useAuth();
+
+//   if (isSignedIn) {
+//     return <Redirect href="/(protected)" />;
+//   }
+
+//   return <Slot screenOptions={{ headerShown: false }} />;
+// };
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -63,9 +74,8 @@ export default function RootLayout() {
       <ClerkLoaded>
         <ThemeProvider>
           <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-            </Stack>
+            {/* <InitialLayout /> */}
+            <Slot screenOptions={{ headerShown: false }} />
           </View>
         </ThemeProvider>
       </ClerkLoaded>

@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect } from 'react';
-import * as WebBrowser from 'expo-web-browser';
+import React, { useCallback, useEffect, PropsWithChildren } from 'react';
+import { StyleSheet } from 'react-native-unistyles';
 import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 import { useSSO } from '@clerk/clerk-expo';
 
 import { CustomButton } from './CustomButton';
@@ -26,7 +27,7 @@ export const useWarmUpBrowser = () => {
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
 
-export const SignInWith = ({ strategy }: Props) => {
+export const SignInWith = ({ children, strategy }: PropsWithChildren<Props>) => {
   useWarmUpBrowser();
 
   // Use the `useSSO()` hook to access the `startSSOFlow()` method
@@ -36,7 +37,6 @@ export const SignInWith = ({ strategy }: Props) => {
     try {
       // Start the authentication process by calling `startSSOFlow()`
       const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        // strategy: 'oauth_google',
         strategy: strategy,
         // For web, defaults to current path
         // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
@@ -60,5 +60,25 @@ export const SignInWith = ({ strategy }: Props) => {
     }
   }, []);
 
-  return <CustomButton onPress={onPress}></CustomButton>;
+  return (
+    <CustomButton style={[styles.ssoButton]} onPress={onPress}>
+      {children}
+    </CustomButton>
+  );
 };
+
+const styles = StyleSheet.create(theme => ({
+  ssoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.elevatedSurface,
+    paddingLeft: 2,
+    paddingRight: 2,
+    paddingTop: 15,
+    paddingBottom: 15,
+    borderRadius: 5,
+    borderWidth: 0.5,
+    borderColor: theme.colors.border,
+    width: '85%',
+  },
+}));

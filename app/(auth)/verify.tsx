@@ -10,7 +10,7 @@ import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
 import { Header } from '@/src/components/Header';
 import { useAuthActions } from '@/src/hooks/useAuthActions';
 
-export const VerifyEmail = () => {
+const VerifyEmail = () => {
   const { t } = useTranslation();
   const {
     control,
@@ -96,3 +96,5 @@ const styles = StyleSheet.create(theme => ({
     paddingBottom: 5,
   },
 }));
+
+export default VerifyEmail;

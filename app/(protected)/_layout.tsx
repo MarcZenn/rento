@@ -1,12 +1,16 @@
-import { Redirect, Slot } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
 
 export default function ProtectedLayout() {
   const { isSignedIn } = useAuth();
 
   if (!isSignedIn) {
-    return <Redirect href={'/'} />;
+    return <Redirect href={'/(public)'} />;
   }
 
-  return <Slot />;
+  return (
+    <Tabs screenOptions={{ headerShown: false }}>
+      <Tabs.Screen name="index" />
+    </Tabs>
+  );
 }

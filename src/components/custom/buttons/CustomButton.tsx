@@ -3,7 +3,7 @@ import { Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 type CustomButtonProps = {
-  style?: StyleProp<ViewStyle>; // override to standard ViewStyle
+  style?: StyleProp<ViewStyle>;
 } & PressableProps;
 
 export const CustomButton = ({

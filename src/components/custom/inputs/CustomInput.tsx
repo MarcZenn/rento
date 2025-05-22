@@ -42,7 +42,7 @@ const styles = StyleSheet.create(theme => ({
   },
   errorText: {
     fontSize: theme.fontSizes.small,
-    fontFamily: theme.fonts.interThin,
+    fontFamily: theme.fonts.interRegular,
     color: theme.colors.error,
     paddingBottom: 5,
   },

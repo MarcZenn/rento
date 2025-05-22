@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, ReactNode } from 'react';
+import React, { useContext, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UnistylesRuntime } from 'react-native-unistyles';
 import { View } from 'react-native';
@@ -8,40 +8,42 @@ import { THEME_NAME, THEME_NAMES } from './types';
 const THEME_STORAGE_KEY = 'user-theme-mode';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const setTheme = async (newTheme: THEME_NAME) => {
-    await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
+  const setTheme = useCallback(async (newTheme: THEME_NAME) => {
+    try {
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
 
-    if (newTheme) {
-      // disable adaptive themes
-      UnistylesRuntime.setAdaptiveThemes(false);
-
-      // set theme
-      UnistylesRuntime.setTheme(newTheme);
+      if (newTheme) {
+        // disable adaptive themes
+        UnistylesRuntime.setAdaptiveThemes(false);
+        // set theme
+        UnistylesRuntime.setTheme(newTheme);
+      }
+    } catch (error) {
+      console.error('Error setting theme:', error);
     }
-  };
+  }, []); // Empty dependency array since it doesn't depend on any props or state
 
-  const loadTheme = async () => {
-    // get preferred theme
-    const selectedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+  const loadTheme = useCallback(async () => {
+    try {
+      const selectedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
 
-    // determine which theme to use
-    if (selectedTheme && Object.values(THEME_NAMES).includes(selectedTheme as THEME_NAME)) {
-      // disable adaptive themes
-      UnistylesRuntime.setAdaptiveThemes(false);
-
-      // set theme again
-      UnistylesRuntime.setTheme(selectedTheme as THEME_NAME);
+      if (selectedTheme && Object.values(THEME_NAMES).includes(selectedTheme as THEME_NAME)) {
+        UnistylesRuntime.setAdaptiveThemes(false);
+        UnistylesRuntime.setTheme(selectedTheme as THEME_NAME);
+      }
+    } catch (error) {
+      console.error('Error loading theme:', error);
     }
-
-    // unistyles will default to system theme automatically if none saved.
-  };
+  }, []); // Empty dependency array since it doesn't depend on any props or state
 
   useEffect(() => {
-    loadTheme();
-  }, []);
+    void loadTheme();
+  }, [loadTheme]);
+
+  const contextValue = useMemo(() => ({ setTheme }), [setTheme]);
 
   return (
-    <ThemeContext.Provider value={{ setTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       <View style={{ flex: 1 }}>{children}</View>
     </ThemeContext.Provider>
   );

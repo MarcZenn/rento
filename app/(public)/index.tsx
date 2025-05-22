@@ -1,7 +1,6 @@
 import { Image, View, ScrollView, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
-import { StatusBar } from 'expo-status-bar';
 import { Link, Redirect } from 'expo-router';
 
 import { useAuth } from '@clerk/clerk-expo';
@@ -10,32 +9,24 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
+import { SignInWith } from '@/src/components/custom/buttons/SignInWith';
 
-const authMethods = [
-  {
-    image: images.logos.line,
-    text: 'welcome_screen.LINE_login',
-    link: '(auth)/sign_in',
-  },
-  {
-    image: images.logos.google,
-    text: 'welcome_screen.google_login',
-    link: '(auth)/sign_in',
-  },
-  {
-    image: images.icons.email,
-    text: 'welcome_screen.email_login',
-    link: '(auth)/sign_in',
-  },
-];
+// test email signup
+// - check form errors
+// - check clerk errors
+// - ensure verify email works
+// - enssure redirect is right after verify email
+// - reload app make sure home page opens
+
+// test email login
+// - check form errors
+// - check clerk errors
+// -- check wrong password errors
+// - check wrong email clerk errors
+// - check redirect after sign in works
+// - reload app make sure home page opens
 
 export default function Welcome() {
-  const { isSignedIn } = useAuth();
-
-  if (isSignedIn) {
-    return <Redirect href={'/(protected)/home'} />;
-  }
-
   const { t } = useTranslation();
 
   return (
@@ -44,47 +35,74 @@ export default function Welcome() {
 
       <HeroLogo />
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={[styles.scrollView]}>
         <View style={[styles.ssoButtonsContainer]}>
-          {authMethods.map((obj, index) => (
-            <Link style={[styles.ssoButton]} key={index} href={obj.link} asChild>
-              <CustomButton>
-                <View style={[styles.imgWrapper]}>
-                  <Image source={obj.image} style={styles.img} />
-                </View>
-                <View style={[styles.btnTextWrapper]}>
-                  <Text style={[styles.btnText]}>{t(obj.text)}</Text>
-                </View>
-                <View style={[styles.btnIcon]}>
-                  <Ionicons name="chevron-forward" size={20} color={'grey'} />
-                </View>
-              </CustomButton>
-            </Link>
-          ))}
+          <SignInWith strategy="oauth_line">
+            <View style={[styles.imgWrapper]}>
+              <Image source={images.logos.line} style={styles.img} />
+            </View>
+            <View style={[styles.btnTextWrapper]}>
+              <Text style={[styles.btnText]}>{t('welcome_screen.LINE_login')}</Text>
+            </View>
+            <View style={[styles.btnIcon]}>
+              <Ionicons name="chevron-forward" size={20} color={'grey'} />
+            </View>
+          </SignInWith>
+
+          <SignInWith strategy="oauth_google">
+            <View style={[styles.imgWrapper]}>
+              <Image source={images.logos.google} style={styles.img} />
+            </View>
+            <View style={[styles.btnTextWrapper]}>
+              <Text style={[styles.btnText]}>{t('welcome_screen.google_login')}</Text>
+            </View>
+            <View style={[styles.btnIcon]}>
+              <Ionicons name="chevron-forward" size={20} color={'grey'} />
+            </View>
+          </SignInWith>
+
+          <Link style={[styles.ssoButton]} href="(auth)/sign_in" asChild>
+            <CustomButton>
+              <View style={[styles.imgWrapper]}>
+                <Image source={images.icons.email} style={styles.img} />
+              </View>
+              <View style={[styles.btnTextWrapper]}>
+                <Text style={[styles.btnText]}>{t('welcome_screen.email_login')}</Text>
+              </View>
+              <View style={[styles.btnIcon]}>
+                <Ionicons name="chevron-forward" size={20} color={'grey'} />
+              </View>
+            </CustomButton>
+          </Link>
+
+          <Link href={'/sign_up'} style={[styles.signUpLink]}>
+            {t('auth.no_account')}
+          </Link>
         </View>
-
-        <Link href={'/sign_up'} style={[styles.signUpLink]}>
-          {t('auth.no_account')}
-        </Link>
       </ScrollView>
-
-      <StatusBar style="auto" />
     </View>
   );
 }
 
 const styles = StyleSheet.create(theme => ({
   page: {
-    display: 'flex',
-    flexDirection: 'column',
     flex: 1,
+    flexDirection: 'column',
     backgroundColor: theme.colors.appBackground,
-    paddingTop: 75,
     gap: 0,
+  },
+  scrollView: {
+    flex: 1,
+    height: '100%',
+    width: '100%',
+    paddingTop: 20,
   },
   ssoButtonsContainer: {
     backgroundColor: theme.colors.appBackground,
+    flex: 1,
+    height: '100%',
     alignItems: 'center',
+    paddingTop: 50,
     gap: 10,
   },
   ssoButton: {
@@ -98,7 +116,7 @@ const styles = StyleSheet.create(theme => ({
     borderRadius: 5,
     borderWidth: 0.5,
     borderColor: theme.colors.border,
-    width: '80%',
+    width: '85%',
   },
   imgWrapper: {
     flex: 1,
@@ -125,7 +143,7 @@ const styles = StyleSheet.create(theme => ({
   },
   signUpLink: {
     color: theme.colors.accentSky,
-    fontFamily: theme.fonts.interLight,
+    fontFamily: theme.fonts.interRegular,
     textAlign: 'center',
     marginTop: 10,
   },

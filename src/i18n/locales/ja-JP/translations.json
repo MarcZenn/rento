@@ -11,7 +11,7 @@
         "sign_in": "ログイン",
         "create_account": "アカウントを作成する。",
         "no_account": "アカウントをお持ちでないですか？登録する",
-        "have_acount": "アカウントをお持ちですか？ログイン" 
+        "have_account": "アカウントをお持ちですか？ログイン" 
     },
     "forms": {
         "email": {

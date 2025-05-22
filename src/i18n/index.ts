@@ -1,11 +1,12 @@
+import { useCallback } from 'react';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { getLocales } from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import translationEn from './locales/en-US/translations.json';
 import translationJa from './locales/ja-JP/translations.json';
-import { SUPPORTED_LOCALES } from './types';
-import { useTranslate } from './useTranslate';
+import { SUPPORTED_LOCALES, LANGUAGE_CODE } from './types';
+// import { useTranslate } from './useTranslate';
 import { images } from '../constants/images';
 
 const supported_locales: SUPPORTED_LOCALES = [
@@ -122,6 +123,19 @@ const initI18n = async () => {
       },
     });
   }
+};
+
+const useTranslate = () => {
+  const changeLanguage = useCallback(async (language: LANGUAGE_CODE) => {
+    try {
+      await i18n.changeLanguage(language);
+      await AsyncStorage.setItem(LANGUAGE_KEY, language);
+    } catch (error) {
+      console.error('Error changing language:', error);
+    }
+  }, []);
+
+  return changeLanguage;
 };
 
 initI18n();

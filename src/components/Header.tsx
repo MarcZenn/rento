@@ -1,8 +1,7 @@
 import { View, Pressable, Image, Text } from 'react-native';
+import { supported_locales, useTranslate } from '@/src/i18n';
 import { StyleSheet } from 'react-native-unistyles';
 import { useTranslation } from 'react-i18next';
-import { useTranslate } from '@/src/i18n';
-import { supported_locales } from '@/src/i18n';
 
 export const Header = () => {
   const { t } = useTranslation();
@@ -33,9 +32,9 @@ const styles = StyleSheet.create(theme => ({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 5,
     paddingBottom: 10,
+    paddingTop: 75,
+    paddingHorizontal: 20,
   },
   logoContainer: {
     flexDirection: 'row',

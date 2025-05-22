@@ -11,7 +11,7 @@
         "sign_in": "Sign in",
         "create_account": "Create an account",
         "no_account": "Don't have an account? Sign up.",
-        "have_acount": "Already have an account? Sign in." 
+        "have_account": "Already have an account? Sign in." 
     },
     "forms": {
         "email": {
