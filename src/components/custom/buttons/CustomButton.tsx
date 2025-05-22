@@ -1,18 +1,16 @@
 import { PropsWithChildren } from 'react';
 import { Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import { StyleSheet } from 'react-native-unistyles';
 
-interface CustomButtonProps extends PressableProps {
+type CustomButtonProps = {
   style?: StyleProp<ViewStyle>; // override to standard ViewStyle
-}
+} & PressableProps;
 
 export const CustomButton = ({
   children,
   style,
   ...props
 }: PropsWithChildren<CustomButtonProps>) => {
-  const { theme } = useUnistyles();
-
   return (
     <Pressable
       {...props}
