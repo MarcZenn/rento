@@ -62,7 +62,7 @@ const SignIn = () => {
           <Text style={[styles.signInButtonText]}>{t('auth.sign_in')}</Text>
         </CustomButton>
 
-        <Link href={'/sign_up'} style={[styles.signUpLink]}>
+        <Link href={'/sign_up'} push style={[styles.signUpLink]}>
           {t('auth.no_account')}
         </Link>
       </View>

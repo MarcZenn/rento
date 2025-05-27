@@ -28,16 +28,6 @@ if (!clerkPublishableKey) {
   );
 }
 
-// const InitialLayout = () => {
-//   const { isSignedIn } = useAuth();
-
-//   if (isSignedIn) {
-//     return <Redirect href="/(protected)" />;
-//   }
-
-//   return <Slot screenOptions={{ headerShown: false }} />;
-// };
-
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -74,7 +64,6 @@ export default function RootLayout() {
       <ClerkLoaded>
         <ThemeProvider>
           <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-            {/* <InitialLayout /> */}
             <Slot screenOptions={{ headerShown: false }} />
           </View>
         </ThemeProvider>
