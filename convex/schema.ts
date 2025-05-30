@@ -32,7 +32,6 @@ const users = {
   is_foreign_resident: v.optional(v.boolean()),
   nationality: v.optional(v.id('countries')), // one to one
   has_guarantor: v.optional(v.boolean()),
-  employment_status: v.optional(v.id('employment_statuses')),
   consecutive_years_employed: v.optional(v.int64()),
   rental_readiness_score: v.optional(v.int64()),
   preferred_wards: v.optional(v.id('wards')), // one to many
@@ -58,11 +57,12 @@ const tags_translations = {
   tags_id: v.id('tags'),
   language: v.id('languages'),
   slug: v.string(), // Machine-readable ID (e.g. "pet-ok", "no-key-money")
-  description: v.string(),
+  description: v.string(), //
 };
 
 const countries = {
   country_code: v.string(),
+  country_flag: v.string(), // url
   updated_at: v.optional(v.string()), // ISO8601 format
 };
 const country_translations = {
@@ -101,7 +101,7 @@ const wards_translations = {
 };
 
 const floor_plans = {
-  type: v.string(),
+  type: v.string(), // unique
   description: v.string(),
   updated_at: v.optional(v.string()), // ISO8601 format
 };
@@ -141,13 +141,19 @@ const agents_translations = {
 
 const properties = {
   name: v.string(),
+  prefecture: v.id('prefectures'),
+  city: v.id('cities'),
   ward: v.id('wards'),
   postal_code: v.int64(),
-  street_name: v.string(),
+  street: v.string(),
   rent_amount: v.float64(),
   key_money_amount: v.optional(v.float64()),
   deposit_amount: v.optional(v.float64()),
   maintenance_fee: v.optional(v.float64()),
+  guarantor_fee: v.optional(v.float64()),
+  management_fee: v.optional(v.float64()),
+  agency_fee: v.optional(v.float64()),
+  utilities_covered: v.boolean(),
   floor_plan: v.optional(v.id('floor_plans')),
   area_m2: v.optional(v.float64()),
   nearest_station_walk_min: v.optional(v.int64()),
@@ -162,6 +168,11 @@ const properties = {
   updated_at: v.optional(v.string()), // ISO8601 format
   lat: v.optional(v.float64()),
   lng: v.optional(v.float64()),
+};
+const properties_translations = {
+  properties_id: v.id('properties'),
+  language: v.id('languages'),
+  description: v.optional(v.string()),
 };
 
 const chat_statuses = {
@@ -203,13 +214,9 @@ const messages = {
 
 const languages = {
   language_code: v.string(),
+  language_name: v.string(), // in the target language
   is_supported: v.boolean(),
   rtl: v.boolean(), // right-to-left language
-  updated_at: v.optional(v.string()), // ISO8601 format
-};
-const language_translations = {
-  languages_id: v.id('languages'),
-  language_name: v.string(),
   updated_at: v.optional(v.string()), // ISO8601 format
 };
 
@@ -219,10 +226,6 @@ const language_translations = {
 // - Check for existing documents with the same value before inserting or updating a record.
 defineSchema({
   languages: defineTable(languages).index('language_code_index', ['language_code']),
-  language_translations: defineTable(language_translations).index('language_translation_index', [
-    'languages_id',
-    'language_name',
-  ]),
   tags: defineTable(tags).index('label_unique_index', ['label']),
   tags_translations: defineTable(tags_translations).index('tag_translation_index', [
     'tags_id',
@@ -268,6 +271,10 @@ defineSchema({
     'language',
   ]),
   properties: defineTable(properties).index('name_index', ['name']),
+  properties_translations: defineTable(properties_translations).index(
+    'property_translation_index',
+    ['properties_id', 'language']
+  ),
   chat_statuses: defineTable(chat_statuses),
   chats: defineTable(chats).index('agent_user_chat_index', ['agent_id', 'user_id']),
   messages: defineTable(messages),

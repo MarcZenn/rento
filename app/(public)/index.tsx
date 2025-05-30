@@ -11,21 +11,6 @@ import { Header } from '@/src/components/Header';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
 import { SignInWith } from '@/src/components/custom/buttons/SignInWith';
 
-// test email signup
-// - check form errors
-// - check clerk errors
-// - ensure verify email works
-// - enssure redirect is right after verify email
-// - reload app make sure home page opens
-
-// test email login
-// - check form errors
-// - check clerk errors
-// -- check wrong password errors
-// - check wrong email clerk errors
-// - check redirect after sign in works
-// - reload app make sure home page opens
-
 export default function Welcome() {
   const { t } = useTranslation();
 
