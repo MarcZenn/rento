@@ -1,5 +1,10 @@
 {
     "brand_text": "レント",
+    "landing_screen": {
+        "heading": "日本で借りるということ",
+        "explainer": "Rentoでアパートメントを検索。バイリンガル賃貸アプリ。",
+        "button": "スタート"
+    },
     "welcome_screen": {
         "LINE_login": "LINEで続ける",
         "google_login": "Googleで続ける",

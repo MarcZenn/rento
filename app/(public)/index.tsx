@@ -1,69 +1,37 @@
 import { Image, View, ScrollView, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
-import { Link, Redirect } from 'expo-router';
+import { useRouter } from 'expo-router';
 
-import { useAuth } from '@clerk/clerk-expo';
 import { images } from '@/src/constants/images';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
-import { SignInWith } from '@/src/components/custom/buttons/SignInWith';
 
 export default function Welcome() {
   const { t } = useTranslation();
+  const router = useRouter();
+
+  const getStarted = () => {
+    router.push('/(auth)/welcome');
+  };
 
   return (
     <View style={[styles.page]}>
       <Header />
 
-      <HeroLogo />
-
       <ScrollView contentContainerStyle={[styles.scrollView]}>
-        <View style={[styles.ssoButtonsContainer]}>
-          <SignInWith strategy="oauth_line">
-            <View style={[styles.imgWrapper]}>
-              <Image source={images.logos.line} style={styles.img} />
-            </View>
-            <View style={[styles.btnTextWrapper]}>
-              <Text style={[styles.btnText]}>{t('welcome_screen.LINE_login')}</Text>
-            </View>
-            <View style={[styles.btnIcon]}>
-              <Ionicons name="chevron-forward" size={20} color={'grey'} />
-            </View>
-          </SignInWith>
-
-          <SignInWith strategy="oauth_google">
-            <View style={[styles.imgWrapper]}>
-              <Image source={images.logos.google} style={styles.img} />
-            </View>
-            <View style={[styles.btnTextWrapper]}>
-              <Text style={[styles.btnText]}>{t('welcome_screen.google_login')}</Text>
-            </View>
-            <View style={[styles.btnIcon]}>
-              <Ionicons name="chevron-forward" size={20} color={'grey'} />
-            </View>
-          </SignInWith>
-
-          <Link style={[styles.ssoButton]} href="(auth)/sign_in" asChild>
-            <CustomButton>
-              <View style={[styles.imgWrapper]}>
-                <Image source={images.icons.email} style={styles.img} />
-              </View>
-              <View style={[styles.btnTextWrapper]}>
-                <Text style={[styles.btnText]}>{t('welcome_screen.email_login')}</Text>
-              </View>
-              <View style={[styles.btnIcon]}>
-                <Ionicons name="chevron-forward" size={20} color={'grey'} />
-              </View>
-            </CustomButton>
-          </Link>
-
-          <Link href={'/sign_up'} style={[styles.signUpLink]}>
-            {t('auth.no_account')}
-          </Link>
+        <View style={[styles.textWrapper]}>
+          <Text style={[styles.heading]}>{t('landing_screen.heading')}</Text>
+          <Text style={[styles.explainer]}>{t('landing_screen.explainer')}</Text>
         </View>
+
+        <View style={[styles.imgWrapper]}>
+          <Image source={images.landing} style={styles.img} />
+        </View>
+
+        <CustomButton onPress={getStarted} style={[styles.button]}>
+          <Text style={[styles.buttonText]}>{t('landing_screen.button')}</Text>
+        </CustomButton>
       </ScrollView>
     </View>
   );
@@ -80,56 +48,53 @@ const styles = StyleSheet.create(theme => ({
     flex: 1,
     height: '100%',
     width: '100%',
-    paddingTop: 20,
-  },
-  ssoButtonsContainer: {
-    backgroundColor: theme.colors.appBackground,
-    flex: 1,
-    height: '100%',
-    alignItems: 'center',
     paddingTop: 50,
-    gap: 10,
   },
-  ssoButton: {
-    flexDirection: 'row',
+  textWrapper: {
+    gap: 15,
+    paddingHorizontal: 20,
+  },
+  heading: {
+    fontSize: theme.fontSizes.xxxxl,
+    fontFamily: theme.fonts.interBold,
+    color: theme.colors.brand,
+    textAlign: 'center',
+  },
+  explainer: {
+    fontSize: theme.fontSizes.large,
+    fontFamily: theme.fonts.notoJpExtraLight,
+    color: theme.colors.bodyText,
+    textAlign: 'center',
+  },
+  imgWrapper: {
+    flexDirection: 'column',
+    height: 400,
+    width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
+  },
+  img: {
+    height: '100%',
+    width: '100%',
+    resizeMode: 'contain',
+  },
+  button: {
     backgroundColor: theme.colors.elevatedSurface,
     paddingLeft: 2,
     paddingRight: 2,
     paddingTop: 15,
     paddingBottom: 15,
-    borderRadius: 5,
-    borderWidth: 0.5,
-    borderColor: theme.colors.border,
-    width: '85%',
+    borderRadius: 25,
+    borderWidth: 1,
+    marginHorizontal: 'auto',
+    borderColor: theme.colors.brand,
+    width: '80%',
   },
-  imgWrapper: {
-    flex: 1,
-    alignItems: 'flex-end',
-    objectFit: 'contain',
-  },
-  img: {
-    height: 50,
-    width: 50,
-  },
-  btnTextWrapper: {
-    flex: 3,
-    paddingLeft: 10,
-  },
-  btnText: {
+  buttonText: {
     fontSize: theme.fontSizes.medium,
-    color: theme.colors.bodyText,
     fontFamily: theme.fonts.interMedium,
+    color: theme.colors.brand,
     textAlign: 'center',
-  },
-  btnIcon: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  signUpLink: {
-    color: theme.colors.accentSky,
-    fontFamily: theme.fonts.interRegular,
-    textAlign: 'center',
-    marginTop: 10,
   },
 }));

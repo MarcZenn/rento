@@ -76,7 +76,7 @@ const styles = StyleSheet.create(theme => ({
     paddingRight: 2,
     paddingTop: 15,
     paddingBottom: 15,
-    borderRadius: 5,
+    borderRadius: 15,
     borderWidth: 0.5,
     borderColor: theme.colors.border,
     width: '85%',
