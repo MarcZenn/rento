@@ -40,6 +40,7 @@ const SignUp = () => {
             placeholder={t('forms.name.placeholder')}
             name="firstName"
             control={control}
+            isSecureEntry={false}
             autoFocus
             autoCapitalize="none"
             autoCorrect={false}
@@ -49,6 +50,7 @@ const SignUp = () => {
             placeholder={t('forms.surname.placeholder')}
             name="surname"
             control={control}
+            isSecureEntry={false}
             autoCapitalize="none"
             autoCorrect={false}
             style={[styles.input]}
@@ -57,6 +59,7 @@ const SignUp = () => {
             placeholder={t('forms.username.placeholder')}
             name="username"
             control={control}
+            isSecureEntry={false}
             autoCapitalize="none"
             autoCorrect={false}
             style={[styles.input]}
@@ -65,6 +68,7 @@ const SignUp = () => {
             placeholder={t('forms.email.placeholder')}
             name="email"
             control={control}
+            isSecureEntry={false}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
@@ -75,7 +79,7 @@ const SignUp = () => {
             placeholder={t('forms.password.placeholder')}
             name="password"
             control={control}
-            secureTextEntry
+            isSecureEntry
             autoCapitalize="none"
             style={[styles.input]}
           />
@@ -121,10 +125,9 @@ const styles = StyleSheet.create(theme => ({
   },
   input: {
     borderWidth: 1,
-    padding: 10,
     borderRadius: 5,
+    height: 40,
     borderColor: theme.colors.accentMatcha,
-    color: theme.colors.bodyText,
   },
   signUpButtonText: {
     color: theme.colors.bodyText,
@@ -150,7 +153,7 @@ const styles = StyleSheet.create(theme => ({
     fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.interThin,
     color: theme.colors.error,
-    paddingBottom: 5,
+    marginTop: 5,
   },
 }));
 

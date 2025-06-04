@@ -16,6 +16,10 @@ export default function AuthLayout() {
         name="sign_up"
         options={{ headerShown: false, gestureEnabled: true, gestureDirection: 'horizontal' }}
       />
+      <Stack.Screen
+        name="verify"
+        options={{ headerShown: false, gestureEnabled: true, gestureDirection: 'horizontal' }}
+      />
     </Stack>
   );
 }

@@ -9,17 +9,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/hooks/useFonts';
 import '@/src/i18n';
 
-// TODO:: Test device default language selelction - change simulator langauge to JP and see if app is in JP when initially opened
-// TODO:: Add clerk localization!
+// TODO:: Test device default language selection - change simulator langauge to JP and see if app is in JP when initially opened
+// TODO:: Add logout functionality
+// TODO:: Add biometric auth
 
-// TODO:: test email signup
-// - check form errors - no email, no username, no names, no password
-// - check clerk errors - log back out - try to create new user with same email, same username
-// - ensure verify email works
-// - enssure redirect is right after verify email
-// - reload app make sure home page opens
-
-// test email login
+// TODO:: test email login
 // - check form errors
 // - check clerk errors
 // -- check wrong password errors

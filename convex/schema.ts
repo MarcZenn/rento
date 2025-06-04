@@ -27,14 +27,12 @@ const users = {
   phone_number: v.optional(v.string()), // unique
   first_name: v.string(),
   surname: v.string(),
-  language_preference: v.optional(v.id('languages')), // one to one
   user_type: v.optional(v.id('user_types')), // one to one
   is_foreign_resident: v.optional(v.boolean()),
   nationality: v.optional(v.id('countries')), // one to one
   has_guarantor: v.optional(v.boolean()),
   consecutive_years_employed: v.optional(v.int64()),
   rental_readiness_score: v.optional(v.int64()),
-  preferred_wards: v.optional(v.id('wards')), // one to many
   saved_properties: v.optional(v.id('properties')), // one to many
   onboarding_completed: v.optional(v.boolean()),
   last_active: v.optional(v.string()), // ISO8601 format
@@ -44,6 +42,24 @@ const user_translations = {
   user_id: v.id('users'), // one to many
   language: v.id('languages'), // one to many
   about: v.optional(v.string()),
+  updated_at: v.optional(v.string()), // ISO8601 format
+};
+
+const user_preferences = {
+  user_id: v.id('users'),
+  min_rent: v.optional(v.int64()), // in yen
+  max_rent: v.optional(v.int64()), // in yen
+  min_size: v.optional(v.int64()), // in meters
+  max_size: v.optional(v.int64()), // in meters
+  preferred_layouts: v.optional(v.array(v.id('floor_plans'))),
+  language_preference: v.optional(v.id('languages')), // one to one
+  preferred_wards: v.optional(v.array(v.id('wards'))),
+  no_key_money: v.optional(v.boolean()),
+  pets_allowed: v.optional(v.boolean()),
+  foreigner_friendly: v.optional(v.boolean()),
+  english_lease: v.optional(v.boolean()),
+  furnished: v.optional(v.boolean()),
+  station_distance_max: v.optional(v.boolean()),
   updated_at: v.optional(v.string()), // ISO8601 format
 };
 
@@ -237,6 +253,7 @@ defineSchema({
     .index('email_unique_index', ['email'])
     .index('phone_number_unique_index', ['phone_number'])
     .index('username_unique_index', ['username']),
+  user_preferences: defineTable(user_preferences),
   user_translations: defineTable(user_translations).index('user_translation_index', [
     'user_id',
     'language',

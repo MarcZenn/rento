@@ -1,13 +1,12 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
-export const HomeScreen = () => {
+import { Header } from '@/src/components/Header';
+
+const Home = () => {
   return (
     <View style={[styles.page]}>
-      <Text>
-        This will be the property search screen - by default it will show available properties in
-        preferred wards
-      </Text>
+      <Header />
     </View>
   );
 };
@@ -18,3 +17,5 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: theme.colors.appBackground,
   },
 }));
+
+export default Home;

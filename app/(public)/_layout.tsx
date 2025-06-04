@@ -6,7 +6,7 @@ const PublicLayout = () => {
   const { isSignedIn } = useAuth();
 
   if (isSignedIn) {
-    return <Redirect href="/(protected)" />;
+    return <Redirect href="/(protected)/home" />;
   }
 
   return (

@@ -33,15 +33,15 @@
         },
         "name": {
             "required": "First name is required",
-            "placeholder": "first name"
+            "placeholder": "First name"
         },
         "surname": {
             "required": "Surname is required",
-            "placeholder": "surname"
+            "placeholder": "Surname"
         },
         "username": {
             "required": "Username is required",
-            "placeholder": "username"
+            "placeholder": "Username"
         },
         "submit": "Submit"
     }

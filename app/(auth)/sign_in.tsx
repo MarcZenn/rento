@@ -40,6 +40,7 @@ const SignIn = () => {
           placeholder={t('forms.email.placeholder')}
           name="email"
           control={control}
+          isSecureEntry={false}
           autoFocus
           autoCapitalize="none"
           keyboardType="email-address"
@@ -51,6 +52,7 @@ const SignIn = () => {
           placeholder={t(t('forms.password.placeholder'))}
           name="password"
           control={control}
+          isSecureEntry
           secureTextEntry
           autoCapitalize="none"
           style={[styles.input]}

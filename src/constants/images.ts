@@ -1,5 +1,5 @@
 export const images = {
-  landing: require('@/src/assets/images/landing_page.png'),
+  landing: require('@/src/assets/images/landing_page2.png'),
   logos: {
     rento: require('@/src/assets/images/logo_img.png'),
     line: require('@/src/assets/images/LINE_logo.png'),

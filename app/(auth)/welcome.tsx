@@ -79,7 +79,7 @@ const styles = StyleSheet.create(theme => ({
     flex: 1,
     height: '100%',
     width: '100%',
-    paddingTop: 20,
+    paddingTop: 15,
   },
   ssoButtonsContainer: {
     backgroundColor: theme.colors.appBackground,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create(theme => ({
     paddingBottom: 15,
     borderRadius: 15,
     borderWidth: 0.5,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.brand,
     width: '85%',
   },
   imgWrapper: {

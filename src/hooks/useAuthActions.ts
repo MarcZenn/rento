@@ -24,6 +24,7 @@ const mapClerkErrorToSignInField = (err: any) => {
 };
 
 const mapClerkErrorToSignUpField = (err: any) => {
+  console.log(err, 'error');
   switch (err.meta?.paramName) {
     case 'email_address':
       return 'email';
@@ -59,10 +60,11 @@ export const useAuthActions = (
     code: string;
   }>
 ) => {
-  const logIn = async (data: SignInFields) => {
-    const { signIn, isLoaded, setActive } = useSignIn();
+  const { signIn, isLoaded: isSignInLoaded, setActive: setLoginActive } = useSignIn();
+  const { signUp, isLoaded: isSignUpLoaded, setActive: setSignUpActive } = useSignUp();
 
-    if (!isLoaded) return;
+  const logIn = async (data: SignInFields) => {
+    if (!isSignInLoaded) return;
 
     try {
       const signInAttempt = await signIn.create({
@@ -71,7 +73,7 @@ export const useAuthActions = (
       });
 
       if (signInAttempt.status === 'complete') {
-        setActive({ session: signInAttempt.createdSessionId });
+        setLoginActive({ session: signInAttempt.createdSessionId });
       } else {
         console.log('sign in failed');
         setError('root', {
@@ -95,9 +97,7 @@ export const useAuthActions = (
   };
 
   const createAccount = async (data: SignUpFields) => {
-    const { signUp, isLoaded } = useSignUp();
-
-    if (!isLoaded) return;
+    if (!isSignUpLoaded) return;
 
     try {
       await signUp.create({
@@ -129,9 +129,7 @@ export const useAuthActions = (
   };
 
   const verifyEmail = async (data: VerifyFields) => {
-    const { signUp, isLoaded, setActive } = useSignUp();
-
-    if (!isLoaded) return;
+    if (!isSignUpLoaded) return;
 
     try {
       const signUpAttempt = await signUp.attemptVerification({
@@ -140,8 +138,8 @@ export const useAuthActions = (
       });
 
       if (signUpAttempt.status === 'complete') {
-        setActive({ session: signUpAttempt.createdSessionId });
-        router.push('/(protected)/home');
+        setSignUpActive({ session: signUpAttempt.createdSessionId });
+        router.push('/home');
       } else {
         console.log('Verification failed');
         setError('root', {

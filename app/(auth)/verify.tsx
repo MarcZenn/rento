@@ -29,20 +29,18 @@ const VerifyEmail = () => {
     >
       <Header />
 
-      <Text style={[styles.title]}>{t('forms.email.verify')}</Text>
-
       <View style={[styles.form]}>
+        <Text style={[styles.title]}>{t('forms.email.verify')}</Text>
         <CustomInput
           name="code"
           control={control}
+          isSecureEntry={false}
           autoFocus
           keyboardType="number-pad"
           autoComplete="one-time-code"
           style={[styles.input]}
         />
-
         <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
-
         <CustomButton onPress={handleSubmit(verifyEmail)} style={styles.signUpButton}>
           <Text style={[styles.signUpButtonText]}>{t('forms.submit')}</Text>
         </CustomButton>
@@ -62,17 +60,20 @@ const styles = StyleSheet.create(theme => ({
     gap: 10,
   },
   form: {
-    gap: 5,
+    flex: 1,
+    justifyContent: 'center',
   },
   title: {
     fontSize: theme.fontSizes.medium,
     fontFamily: theme.fonts.notoJpBold,
     color: theme.colors.bodyText,
     textAlign: 'left',
+    marginBottom: 10,
   },
   input: {
     borderWidth: 1,
-    padding: 10,
+    paddingHorizontal: 5,
+    minHeight: 40,
     borderRadius: 5,
     borderColor: theme.colors.accentMatcha,
     color: theme.colors.bodyText,
@@ -90,7 +91,7 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: theme.colors.elevatedSurface,
   },
   errorText: {
-    fontSize: theme.fontSizes.small,
+    fontSize: theme.fontSizes.medium,
     fontFamily: theme.fonts.interThin,
     color: theme.colors.error,
     paddingBottom: 5,

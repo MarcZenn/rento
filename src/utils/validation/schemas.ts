@@ -16,14 +16,26 @@ export const useSignInSchema = () => {
   return useMemo(() => createSignInSchema(t), [t]);
 };
 
-const createSignUpSchema = (t: TranslationFunction) =>
-  z.object({
-    firstName: z.string({ message: t('forms.name.required') }),
-    surname: z.string({ message: t('forms.surname.required') }),
-    username: z.string({ message: t('forms.username.required') }),
+const createSignUpSchema = (t: TranslationFunction) => {
+  const signUpSchema = z.object({
+    firstName: z
+      .string()
+      .trim()
+      .min(1, { message: t('forms.name.required') }),
+    surname: z
+      .string()
+      .trim()
+      .min(1, { message: t('forms.surname.required') }),
+    username: z
+      .string()
+      .trim()
+      .min(1, { message: t('forms.username.required') }),
     email: z.string({ message: t('forms.email.required') }).email(t('forms.email.invalid')),
     password: z.string({ message: t('forms.password.required') }).min(8, t('forms.password.min')),
   });
+
+  return signUpSchema;
+};
 
 export const useSignUpSchema = () => {
   const { t } = useTranslation();
