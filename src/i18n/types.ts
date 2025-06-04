@@ -1,9 +1,24 @@
-export type ENGLISH = 'en-US';
-export type JAPANESE = 'ja-JP';
+import { ImageSourcePropType } from 'react-native';
 
-export type SUPPORTED_LANGUAGES = ENGLISH | JAPANESE;
+type EN = 'en-US';
+type JP = 'ja-JP';
+export type LANGUAGE_CODE = EN | JP;
 
-export interface SYSTEM_LANGUAGES {
-  english: ENGLISH;
-  japanese: JAPANESE;
-}
+type US = 'USA';
+type JA = 'Japan';
+type LOCALE = US | JA;
+
+type ENGLISH = 'english';
+type JAPANESE = 'japanese';
+type LANGUAGE = ENGLISH | JAPANESE;
+
+type SUPPORTED_LOCALE = {
+  locale: LOCALE;
+  lang: LANGUAGE;
+  code: LANGUAGE_CODE;
+  resource: any;
+  short: string;
+  flag: ImageSourcePropType;
+};
+
+export type SUPPORTED_LOCALES = SUPPORTED_LOCALE[];

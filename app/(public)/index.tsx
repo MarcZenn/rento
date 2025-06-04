@@ -1,44 +1,38 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Image, View, ScrollView, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
-import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
+
 import { images } from '@/src/constants/images';
-import { supportedLanguages } from '@/src/i18n';
+import { Header } from '@/src/components/Header';
+import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
 
-import { LoadingSpinner } from '@/src/components/Loading';
-import { SSOButton } from '@/src/components/buttons/SSOButton';
-import { LanguageButton } from '@/src/components/buttons/LanguageButton';
-
-export default function Root() {
-  // const router = useRouter();
+export default function Welcome() {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  if (!loading) {
-    return <LoadingSpinner />;
-  }
+  const getStarted = () => {
+    router.push('/(auth)/welcome');
+  };
 
   return (
     <View style={[styles.page]}>
-      <View style={[styles.hero]}>
-        <Image source={images.logos.rento} style={styles.heroImg} />
-        <Text style={[styles.heroText]}>{t('login_screen.brand_text')}</Text>
-      </View>
+      <Header />
 
-      <View style={[styles.languageButtonsContainer]}>
-        <LanguageButton lng={supportedLanguages.japanese} imgSrc={images.flags.japan} />
-        <LanguageButton lng={supportedLanguages.english} imgSrc={images.flags.uk} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.page}>
-        <View style={[styles.ssoButtonsContainer]}>
-          <SSOButton imgSrc={images.logos.line} buttonText={t('login_screen.LINE_login')} />
-          <SSOButton imgSrc={images.logos.google} buttonText={t('login_screen.google_login')} />
-          <SSOButton imgSrc={images.logos.google} buttonText={t('login_screen.email_login')} />
+      <ScrollView contentContainerStyle={[styles.scrollView]}>
+        <View style={[styles.textWrapper]}>
+          <Text style={[styles.heading]}>{t('landing_screen.heading')}</Text>
+          <Text style={[styles.explainer]}>{t('landing_screen.explainer')}</Text>
         </View>
+
+        <View style={[styles.imgWrapper]}>
+          <Image source={images.landing} style={styles.img} />
+        </View>
+
+        <CustomButton onPress={getStarted} style={[styles.button]}>
+          <Text style={[styles.buttonText]}>{t('landing_screen.button')}</Text>
+        </CustomButton>
       </ScrollView>
-      <StatusBar style="auto" />
     </View>
   );
 }
@@ -46,39 +40,61 @@ export default function Root() {
 const styles = StyleSheet.create(theme => ({
   page: {
     flex: 1,
-    backgroundColor: theme.colors.appBackground,
-  },
-  hero: {
-    display: 'flex',
     flexDirection: 'column',
-    marginTop: 75,
-    height: 375,
-    alignItems: 'center',
+    backgroundColor: theme.colors.appBackground,
+    gap: 0,
   },
-  heroText: {
+  scrollView: {
+    flex: 1,
+    height: '100%',
+    width: '100%',
+    paddingTop: 50,
+  },
+  textWrapper: {
+    gap: 15,
+    paddingHorizontal: 20,
+  },
+  heading: {
     fontSize: theme.fontSizes.xxxxl,
+    fontFamily: theme.fonts.interBold,
     color: theme.colors.brand,
-    fontFamily: theme.fonts.notoJpMedium,
     textAlign: 'center',
   },
-  heroImg: {
-    height: '70%',
-    width: '75%',
+  explainer: {
+    fontSize: theme.fontSizes.large,
+    fontFamily: theme.fonts.notoJpExtraLight,
+    color: theme.colors.bodyText,
+    textAlign: 'center',
   },
-  languageButtonsContainer: {
-    display: 'flex',
-    flexDirection: 'row',
+  imgWrapper: {
+    flexDirection: 'column',
+    height: 400,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
+    padding: 0,
   },
-  ssoButtonsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: theme.colors.appBackground,
-    alignItems: 'center',
-    paddingTop: 20,
+  img: {
     height: '100%',
-    gap: 15,
+    width: '100%',
+    resizeMode: 'contain',
+  },
+  button: {
+    backgroundColor: theme.colors.elevatedSurface,
+    paddingLeft: 2,
+    paddingRight: 2,
+    paddingTop: 15,
+    paddingBottom: 15,
+    borderRadius: 25,
+    borderWidth: 1,
+    marginHorizontal: 'auto',
+    borderColor: theme.colors.brand,
+    width: '80%',
+  },
+  buttonText: {
+    fontSize: theme.fontSizes.medium,
+    fontFamily: theme.fonts.interMedium,
+    color: theme.colors.brand,
+    textAlign: 'center',
   },
 }));

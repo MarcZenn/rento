@@ -40,6 +40,7 @@ export interface THEME_COLORS {
   accentSumi: string;
   accentShoji: string;
   accentMatcha: string;
+  error: string;
 }
 
 interface THEME {

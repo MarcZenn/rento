@@ -6,11 +6,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "icon": "./src/assets/images/login_img.png",
+    "icon": "./src/assets/images/logo_img.png",
     "newArchEnabled": true,
     "schema": "^[a-z][a-z0-9+.-]*$",
     "splash": {
-      "image": "./src/assets/images/login_img.png",
+      "image": "./src/assets/images/logo_img.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/login_img.png",
+        "foregroundImage": "./src/assets/images/logo_img.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -35,7 +35,17 @@
       "expo-secure-store",
       "react-native-edge-to-edge",
       "expo-web-browser",
-      "expo-localization"
+      "expo-localization",
+      ["expo-splash-screen",
+        {
+          "backgroundColor": "#F5F5F5",
+          "image": "./src/assets/images/logo_img.png",
+          "dark": {
+            "image": "./src/assets/images/logo_img.png",
+            "backgroundColor": "#121212"
+          },
+          "imageWidth": 200
+        }]
     ]
   }
 }

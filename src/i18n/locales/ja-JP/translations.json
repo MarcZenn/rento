@@ -1,9 +1,48 @@
 {
-    "login_screen": {
-        "brand_text": "Rento",
+    "brand_text": "レント",
+    "landing_screen": {
+        "heading": "日本で借りるということ",
+        "explainer": "Rentoでアパートメントを検索。バイリンガル賃貸アプリ。",
+        "button": "スタート"
+    },
+    "welcome_screen": {
         "LINE_login": "LINEで続ける",
         "google_login": "Googleで続ける",
         "email_login": "メールアドレスで続ける",
         "sign_up": "新規登録"
+    },
+    "auth": {
+        "sign_up": "登録する",
+        "sign_in": "ログイン",
+        "create_account": "アカウントを作成する。",
+        "no_account": "アカウントをお持ちでないですか？登録する",
+        "have_account": "アカウントをお持ちですか？ログイン" 
+    },
+    "forms": {
+        "email": {
+            "required": "Eメール必須",
+            "invalid": "無効なメールです。",
+            "placeholder": "メール",
+            "verify": "Verify your email",
+            "code_required": "Code is required"
+        },
+        "password": {
+            "required": "パスワードが必要です。",
+            "min": "パスワードは8文字以上でなければなりません。",
+            "placeholder": "パスワード"
+        },
+        "name": {
+            "required": "姓は必須。",
+            "placeholder": "ファーストネーム"
+        },
+        "surname": {
+            "required": "姓は必須。",
+            "placeholder": "苗字"
+        },
+        "username": {
+            "required": "Username is required",
+            "placeholder": "username"
+        },
+        "submit": "Submit"
     }
 }
