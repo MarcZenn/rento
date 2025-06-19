@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';
+import { ClerkProvider, ClerkLoaded, useAuth } from '@clerk/clerk-expo';
+import { tokenCache } from '@clerk/clerk-expo/token-cache';
+import { ConvexReactClient } from 'convex/react';
+import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import { Slot } from 'expo-router';
 import { View } from 'react-native';
 
-import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/hooks/useFonts';
@@ -21,13 +23,8 @@ import '@/src/i18n';
 // - check redirect after sign in works
 // - reload app make sure home page opens
 
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
-
-// Set the animation options. This is optional.
-SplashScreen.setOptions({
-  duration: 1000,
-  fade: true,
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+  unsavedChangesWarning: false,
 });
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -36,6 +33,13 @@ if (!clerkPublishableKey) {
     'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your env.'
   );
 }
+
+// Keep the splash screen visible w/ animation while we fetch resources
+SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -71,11 +75,13 @@ export default function RootLayout() {
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
       <ClerkLoaded>
-        <ThemeProvider>
-          <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-            <Slot screenOptions={{ headerShown: false }} />
-          </View>
-        </ThemeProvider>
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+          <ThemeProvider>
+            <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+              <Slot screenOptions={{ headerShown: false }} />
+            </View>
+          </ThemeProvider>
+        </ConvexProviderWithClerk>
       </ClerkLoaded>
     </ClerkProvider>
   );

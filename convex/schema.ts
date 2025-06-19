@@ -15,18 +15,27 @@ const employment_statuses = {
   status: v.union(
     v.literal('student'),
     v.literal('unemployed'),
-    v.literal('freelancer'),
+    v.literal('freelance'),
     v.literal('part-time'),
-    v.literal('salaried')
+    v.literal('salary'),
+    v.literal('hourly')
   ),
   updated_at: v.optional(v.string()), // ISO8601 format
 };
+const employment_statuses_translations = {
+  employment_statuses_id: v.id('employment_statuses'),
+  translated_status: v.string(),
+  language: v.id('languages'),
+  updated_at: v.optional(v.string()), // ISO8601 format
+};
+
 const users = {
   email: v.string(), // unique
   username: v.string(), // unique
   phone_number: v.optional(v.string()), // unique
   first_name: v.string(),
   surname: v.string(),
+  employment_status: v.optional(v.id('employment_statuses')),
   user_type: v.optional(v.id('user_types')), // one to one
   is_foreign_resident: v.optional(v.boolean()),
   nationality: v.optional(v.id('countries')), // one to one
@@ -64,7 +73,7 @@ const user_preferences = {
 };
 
 const tags = {
-  label: v.string(), // unique
+  slug: v.string(), // unique
   icon: v.optional(v.string()), // (Optional) Icon name or URL (e.g. "🐾", "🏷️", or "tag-key.svg")
   is_featured: v.boolean(),
   updated_at: v.optional(v.string()), // ISO8601 format
@@ -72,7 +81,7 @@ const tags = {
 const tags_translations = {
   tags_id: v.id('tags'),
   language: v.id('languages'),
-  slug: v.string(), // Machine-readable ID (e.g. "pet-ok", "no-key-money")
+  label: v.string(), // Machine-readable ID (e.g. "pet-ok", "no-key-money")
   description: v.string(), //
 };
 
@@ -83,7 +92,7 @@ const countries = {
 };
 const country_translations = {
   countries_id: v.id('countries'),
-  language: v.id('langauages'),
+  language: v.id('languages'),
   country_name: v.string(),
   updated_at: v.optional(v.string()), // ISO8601 format
 };
@@ -94,19 +103,9 @@ const prefectures = {
   updated_at: v.optional(v.string()), // ISO8601 format
 };
 
-const cities = {
-  prefecture_id: v.id('prefectures'),
-  updated_at: v.optional(v.string()), // ISO8601 format
-};
-const cities_translations = {
-  cities_id: v.id('cities'),
-  language: v.id('languages'),
-  name: v.string(),
-  updated_at: v.optional(v.string()), // ISO8601 format
-};
-
 const wards = {
-  city_id: v.id('cities'),
+  prefecture_id: v.id('prefectures'),
+  prefecture_name_en: v.string(),
   updated_at: v.optional(v.string()), // ISO8601 format
 };
 const wards_translations = {
@@ -118,8 +117,12 @@ const wards_translations = {
 
 const floor_plans = {
   type: v.string(), // unique
-  description: v.string(),
   updated_at: v.optional(v.string()), // ISO8601 format
+};
+const floor_plans_translations = {
+  floor_plans_id: v.id('floor_plans'),
+  language: v.id('languages'),
+  description: v.string(),
 };
 
 const agencies = {
@@ -158,7 +161,6 @@ const agents_translations = {
 const properties = {
   name: v.string(),
   prefecture: v.id('prefectures'),
-  city: v.id('cities'),
   ward: v.id('wards'),
   postal_code: v.int64(),
   street: v.string(),
@@ -231,6 +233,7 @@ const messages = {
 const languages = {
   language_code: v.string(),
   language_name: v.string(), // in the target language
+  endonym: v.string(),
   is_supported: v.boolean(),
   rtl: v.boolean(), // right-to-left language
   updated_at: v.optional(v.string()), // ISO8601 format
@@ -240,15 +243,19 @@ const languages = {
 // or database level in the same way as traditional SQL databases. To do this:
 // - Define an index on the field you want to be unique.
 // - Check for existing documents with the same value before inserting or updating a record.
-defineSchema({
+export default defineSchema({
   languages: defineTable(languages).index('language_code_index', ['language_code']),
-  tags: defineTable(tags).index('label_unique_index', ['label']),
+  tags: defineTable(tags).index('slug_unique_index', ['slug']),
   tags_translations: defineTable(tags_translations).index('tag_translation_index', [
     'tags_id',
     'language',
   ]),
   user_types: defineTable(user_types),
-  employment_statuses: defineTable(employment_statuses),
+  employment_statuses: defineTable(employment_statuses).index('status_unique_index', ['status']),
+  employment_statuses_translations: defineTable(employment_statuses_translations).index(
+    'employment_statuses_translations_index',
+    ['employment_statuses_id', 'language']
+  ),
   users: defineTable(users)
     .index('email_unique_index', ['email'])
     .index('phone_number_unique_index', ['phone_number'])
@@ -264,11 +271,6 @@ defineSchema({
     'language',
   ]),
   prefectures: defineTable(prefectures).index('prefecture_translation_index', ['name', 'language']),
-  cities: defineTable(cities),
-  cities_translations: defineTable(cities_translations).index('city_translation_index', [
-    'cities_id',
-    'language',
-  ]),
   wards: defineTable(wards),
   wards_translations: defineTable(wards_translations).index('ward_translation_index', [
     'wards_id',
@@ -296,4 +298,8 @@ defineSchema({
   chats: defineTable(chats).index('agent_user_chat_index', ['agent_id', 'user_id']),
   messages: defineTable(messages),
   floor_plans: defineTable(floor_plans).index('type_unique_index', ['type']),
+  floor_plans_translations: defineTable(floor_plans_translations).index(
+    'floor_plans_translations_index',
+    ['floor_plans_id', 'language']
+  ),
 });
