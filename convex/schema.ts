@@ -30,11 +30,17 @@ const employment_statuses_translations = {
 };
 
 const users = {
+  clerkId: v.string(),
   email: v.string(), // unique
   username: v.string(), // unique
+  updated_at: v.optional(v.string()), // ISO8601 format
+};
+
+const profiles = {
+  user_id: v.id('users'),
   phone_number: v.optional(v.string()), // unique
-  first_name: v.string(),
-  surname: v.string(),
+  first_name: v.optional(v.string()),
+  surname: v.optional(v.string()),
   employment_status: v.optional(v.id('employment_statuses')),
   user_type: v.optional(v.id('user_types')), // one to one
   is_foreign_resident: v.optional(v.boolean()),
@@ -44,11 +50,10 @@ const users = {
   rental_readiness_score: v.optional(v.int64()),
   saved_properties: v.optional(v.id('properties')), // one to many
   onboarding_completed: v.optional(v.boolean()),
-  last_active: v.optional(v.string()), // ISO8601 format
   updated_at: v.optional(v.string()), // ISO8601 format
 };
-const user_translations = {
-  user_id: v.id('users'), // one to many
+const profiles_translations = {
+  profile_id: v.id('profles'), // one to many
   language: v.id('languages'), // one to many
   about: v.optional(v.string()),
   updated_at: v.optional(v.string()), // ISO8601 format
@@ -258,11 +263,11 @@ export default defineSchema({
   ),
   users: defineTable(users)
     .index('email_unique_index', ['email'])
-    .index('phone_number_unique_index', ['phone_number'])
     .index('username_unique_index', ['username']),
   user_preferences: defineTable(user_preferences),
-  user_translations: defineTable(user_translations).index('user_translation_index', [
-    'user_id',
+  profiles: defineTable(profiles).index('phone_number_unique_index', ['phone_number']),
+  profiles_translations: defineTable(profiles_translations).index('profiles_translation_index', [
+    'profile_id',
     'language',
   ]),
   countries: defineTable(countries).index('country_code_index', ['country_code']),

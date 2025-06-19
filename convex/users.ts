@@ -10,8 +10,15 @@ export const getCurrentUser = query({
 
 export const getAllUsers = query({
   args: {},
-  handler: async (ctx, args) => {
+  handler: async (ctx, _) => {
     return await ctx.db.query('users').collect();
+  },
+});
+
+export const getUserTypes = query({
+  args: {},
+  handler: async (ctx, _) => {
+    return await ctx.db.query('user_types').collect();
   },
 });
 
@@ -20,20 +27,6 @@ export const createUser = internalMutation({
     clerkId: v.string(),
     email: v.string(),
     username: v.string(),
-    phone_number: v.optional(v.string()),
-    first_name: v.string(),
-    surname: v.string(),
-    employment_status: v.optional(v.id('employment_statuses')),
-    user_type: v.optional(v.id('user_types')),
-    is_foreign_resident: v.optional(v.boolean()),
-    nationality: v.optional(v.id('countries')),
-    has_guarantor: v.optional(v.boolean()),
-    consecutive_years_employed: v.optional(v.int64()),
-    rental_readiness_score: v.optional(v.int64()),
-    saved_properties: v.optional(v.id('properties')),
-    onboarding_completed: v.optional(v.boolean()),
-    last_active: v.optional(v.string()),
-    updated_at: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await ctx.db.insert('users', {

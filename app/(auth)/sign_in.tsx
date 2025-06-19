@@ -90,11 +90,12 @@ const styles = StyleSheet.create(theme => ({
     textAlign: 'left',
   },
   input: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-    borderColor: theme.colors.accentMatcha,
+    marginVertical: 10,
     color: theme.colors.bodyText,
+    borderWidth: 1,
+    borderRadius: 5,
+    minHeight: 40,
+    borderColor: theme.colors.accentMatcha,
   },
   signInButtonText: {
     color: theme.colors.bodyText,
