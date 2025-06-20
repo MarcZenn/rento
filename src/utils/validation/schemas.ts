@@ -18,14 +18,6 @@ export const useSignInSchema = () => {
 
 const createSignUpSchema = (t: TranslationFunction) => {
   const signUpSchema = z.object({
-    firstName: z
-      .string()
-      .trim()
-      .min(1, { message: t('forms.name.required') }),
-    surname: z
-      .string()
-      .trim()
-      .min(1, { message: t('forms.surname.required') }),
     username: z
       .string()
       .trim()

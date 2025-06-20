@@ -41,7 +41,7 @@
         },
         "username": {
             "required": "Username is required",
-            "placeholder": "Username"
+            "placeholder": "username"
         },
         "submit": "Submit"
     }

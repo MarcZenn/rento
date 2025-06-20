@@ -1,8 +1,8 @@
-import { Text, KeyboardAvoidingView, Platform, View, ScrollView } from 'react-native';
+import { Text, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { StyleSheet } from 'react-native-unistyles';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
-import { StyleSheet } from 'react-native-unistyles';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 
 import { useSignUpSchema } from '@/src/utils/validation/schemas';
@@ -29,72 +29,51 @@ const SignUp = () => {
       behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
       style={[styles.page]}
     >
-      <ScrollView contentContainerStyle={[styles.scrollView]} showsVerticalScrollIndicator={false}>
-        <Header />
+      <Header />
 
-        <HeroLogo />
+      <HeroLogo />
 
-        <View style={[styles.form]}>
-          <Text style={[styles.title]}>{t('auth.create_account')}</Text>
-          <CustomInput
-            placeholder={t('forms.name.placeholder')}
-            name="firstName"
-            control={control}
-            isSecureEntry={false}
-            autoFocus
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={[styles.input]}
-          />
-          <CustomInput
-            placeholder={t('forms.surname.placeholder')}
-            name="surname"
-            control={control}
-            isSecureEntry={false}
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={[styles.input]}
-          />
-          <CustomInput
-            placeholder={t('forms.username.placeholder')}
-            name="username"
-            control={control}
-            isSecureEntry={false}
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={[styles.input]}
-          />
-          <CustomInput
-            placeholder={t('forms.email.placeholder')}
-            name="email"
-            control={control}
-            isSecureEntry={false}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
-            autoCorrect={false}
-            style={[styles.input]}
-          />
-          <CustomInput
-            placeholder={t('forms.password.placeholder')}
-            name="password"
-            control={control}
-            isSecureEntry
-            autoCapitalize="none"
-            style={[styles.input]}
-          />
+      <View style={[styles.form]}>
+        <Text style={[styles.title]}>{t('auth.create_account')}</Text>
+        <CustomInput
+          placeholder={t('forms.username.placeholder')}
+          name="username"
+          control={control}
+          isSecureEntry={false}
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={[styles.input]}
+        />
+        <CustomInput
+          placeholder={t('forms.email.placeholder')}
+          name="email"
+          control={control}
+          isSecureEntry={false}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
+          autoCorrect={false}
+          style={[styles.input]}
+        />
+        <CustomInput
+          placeholder={t('forms.password.placeholder')}
+          name="password"
+          control={control}
+          isSecureEntry
+          autoCapitalize="none"
+          style={[styles.input]}
+        />
 
-          <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
+        <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
 
-          <CustomButton onPress={handleSubmit(createAccount)} style={styles.signUpButton}>
-            <Text style={[styles.signUpButtonText]}>{t('auth.sign_up')}</Text>
-          </CustomButton>
+        <CustomButton onPress={handleSubmit(createAccount)} style={styles.signUpButton}>
+          <Text style={[styles.signUpButtonText]}>{t('auth.sign_up')}</Text>
+        </CustomButton>
 
-          <Link href={'/sign_in'} push style={[styles.signInLink]}>
-            {t('auth.have_account')}
-          </Link>
-        </View>
-      </ScrollView>
+        <Link href={'/sign_in'} push style={[styles.signInLink]}>
+          {t('auth.have_account')}
+        </Link>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -103,19 +82,12 @@ const styles = StyleSheet.create(theme => ({
   page: {
     display: 'flex',
     flex: 1,
-    paddingTop: 5,
-    justifyContent: 'center',
     backgroundColor: theme.colors.appBackground,
     gap: 10,
   },
-  scrollView: {
-    paddingBottom: 100,
-  },
   form: {
-    paddingTop: 10,
-    paddingHorizontal: 20,
-    paddingBottom: 100,
     gap: 10,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: theme.fontSizes.medium,
@@ -124,9 +96,11 @@ const styles = StyleSheet.create(theme => ({
     textAlign: 'left',
   },
   input: {
+    marginVertical: 15,
+    color: theme.colors.bodyText,
     borderWidth: 1,
     borderRadius: 5,
-    height: 40,
+    minHeight: 40,
     borderColor: theme.colors.accentMatcha,
   },
   signUpButtonText: {

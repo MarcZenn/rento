@@ -103,8 +103,6 @@ export const useAuthActions = (
       await signUp.create({
         emailAddress: data.email,
         password: data.password,
-        firstName: data.firstName,
-        lastName: data.surname,
         username: data.username,
       });
 

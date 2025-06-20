@@ -23,8 +23,8 @@
             "required": "Eメール必須",
             "invalid": "無効なメールです。",
             "placeholder": "メール",
-            "verify": "Verify your email",
-            "code_required": "Code is required"
+            "verify": "Eメールを確認する",
+            "code_required": "コードが必要"
         },
         "password": {
             "required": "パスワードが必要です。",
@@ -40,8 +40,8 @@
             "placeholder": "苗字"
         },
         "username": {
-            "required": "Username is required",
-            "placeholder": "username"
+            "required": "ユーザー名は必須",
+            "placeholder": "ユーザー名"
         },
         "submit": "Submit"
     }
