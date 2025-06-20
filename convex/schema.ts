@@ -186,6 +186,7 @@ const properties = {
   photos: v.array(v.string()),
   agency_id: v.id('agencies'),
   agent_id: v.id('agents'),
+  is_available: v.boolean(),
   is_verified: v.optional(v.boolean()),
   date_listed: v.optional(v.string()), // ISO8601 format
   updated_at: v.optional(v.string()), // ISO8601 format

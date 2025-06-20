@@ -96,7 +96,7 @@ const styles = StyleSheet.create(theme => ({
     textAlign: 'left',
   },
   input: {
-    marginVertical: 10,
+    marginVertical: 15,
     color: theme.colors.bodyText,
     borderWidth: 1,
     borderRadius: 5,
