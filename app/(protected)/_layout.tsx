@@ -9,7 +9,7 @@ export default function ProtectedLayout() {
   const { isSignedIn } = useAuth();
 
   if (!isSignedIn) {
-    return <Redirect href={'/(public)'} />;
+    return <Redirect href={'/public'} />;
   }
 
   return (

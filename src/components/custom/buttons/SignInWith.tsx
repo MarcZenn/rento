@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native-unistyles';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { useSSO } from '@clerk/clerk-expo';
+import { router } from 'expo-router';
 
 import { CustomButton } from './CustomButton';
 
@@ -36,26 +37,37 @@ export const SignInWith = ({ children, strategy }: PropsWithChildren<Props>) => 
   const onPress = useCallback(async () => {
     try {
       // Start the authentication process by calling `startSSOFlow()`
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        strategy: strategy,
-        // For web, defaults to current path
-        // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
-        // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
-        redirectUrl: AuthSession.makeRedirectUri(),
-      });
+      const { createdSessionId, setActive, signIn, signUp, authSessionResult } = await startSSOFlow(
+        {
+          strategy: strategy,
+          // For web, defaults to current path
+          // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
+          // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
+          redirectUrl: AuthSession.makeRedirectUri({ path: 'app/(protected)' }),
+        }
+      );
 
       // If sign in was successful, set the active session
       if (createdSessionId) {
         setActive!({ session: createdSessionId });
       } else {
         // If there is no `createdSessionId`,
-        // there are missing requirements, such as MFA
-        // Use the `signIn` or `signUp` returned from `startSSOFlow`
-        // to handle next steps
+        // there are missing requirements, such as MFA, username formatting, etc.
+        // Use the `signIn` or `signUp` returned from `startSSOFlow` to handle next steps
+        const response = await signUp?.update({
+          username: signUp!.username
+            ? signUp!.username
+            : signUp!.emailAddress!.split('@')[0].replace(/\./g, ''),
+        });
+        if (response?.status === 'complete') {
+          await setActive!({ session: signUp!.createdSessionId });
+          router.push('/home');
+        }
       }
     } catch (err) {
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
+      console.log('error', err);
       console.error(JSON.stringify(err, null, 2));
     }
   }, []);
