@@ -20,9 +20,13 @@ export const createUser = httpAction(async (ctx, req) => {
 
       // TODO:: wrap all of this try catch statements.
       if (userId) {
-        await ctx.runMutation(internal.profiles.createUserProfile, {
-          user_id: userId,
-        });
+        try {
+          await ctx.runMutation(internal.profiles.createUserProfile, {
+            user_id: userId,
+          });
+        } catch (error) {
+          console.log(error, 'Clerk error: creating new user.');
+        }
       }
 
       break;

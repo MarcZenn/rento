@@ -3,14 +3,22 @@ import { supported_locales, useTranslate } from '@/src/i18n';
 import { StyleSheet } from 'react-native-unistyles';
 import { useTranslation } from 'react-i18next';
 
-export const Header = () => {
+type HeaderProps = {
+  isSignedIn?: boolean;
+};
+
+export const Header = ({ isSignedIn }: HeaderProps) => {
   const { t } = useTranslation();
   const changeLanguage = useTranslate();
 
   return (
     <View style={[styles.container]}>
       <View style={[styles.logoContainer]}>
-        <Text style={[styles.logoText]}>{t('brand_text')}</Text>
+        {isSignedIn ? (
+          <Text>username</Text>
+        ) : (
+          <Text style={[styles.logoText]}>{t('brand_text')}</Text>
+        )}
       </View>
 
       <View style={[styles.languageSelector]}>

@@ -1,5 +1,6 @@
 import { internalMutation } from '@/convex/_generated/server';
 import { v } from 'convex/values';
+import { mutation } from './_generated/server';
 
 export const createUserProfile = internalMutation({
   args: {
@@ -25,4 +26,9 @@ export const createUserProfile = internalMutation({
     });
     return profileId;
   },
+});
+
+export const updateUserProfile = mutation({
+  args: {},
+  handler: async (ctx, args) => {},
 });

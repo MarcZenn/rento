@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/clerk-expo';
 
 import { Header } from '@/src/components/Header';
 
-const Home = () => {
+const Page = () => {
   const { isSignedIn } = useAuth();
 
   return (
@@ -21,4 +21,4 @@ const styles = StyleSheet.create(theme => ({
   },
 }));
 
-export default Home;
+export default Page;

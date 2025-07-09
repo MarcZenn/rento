@@ -15,13 +15,10 @@ import '@/src/i18n';
 // TODO:: Add logout functionality
 // TODO:: Add biometric auth
 
-// TODO:: test email login
-// - check form errors
+// TODO:: test email loginp
 // - check clerk errors
 // -- check wrong password errors
 // - check wrong email clerk errors
-// - check redirect after sign in works
-// - reload app make sure home page opens
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
