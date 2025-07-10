@@ -10,7 +10,7 @@ import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
 import { useSignInSchema } from '@/src/utils/validation/schemas';
 import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
-import { useAuthActions } from '@/src/hooks/useAuthActions';
+import { useAuthActions } from '@/src/services/auth/useAuthActions';
 
 const SignIn = () => {
   const { t } = useTranslation();

@@ -8,7 +8,7 @@ import { Link } from 'expo-router';
 import { useSignUpSchema } from '@/src/utils/validation/schemas';
 import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
-import { useAuthActions } from '@/src/hooks/useAuthActions';
+import { useAuthActions } from '@/src/services/auth/useAuthActions';
 import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
 

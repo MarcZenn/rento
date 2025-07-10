@@ -5,7 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useSSO } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 
-import { CustomButton } from './CustomButton';
+import { CustomButton } from '../../../components/custom/buttons/CustomButton';
 
 type GoogleSSOStrategy = `oauth_google`;
 type LineSSOStrategy = `oauth_line`;
@@ -43,7 +43,7 @@ export const SignInWith = ({ children, strategy }: PropsWithChildren<Props>) => 
           // For web, defaults to current path
           // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
           // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
-          redirectUrl: AuthSession.makeRedirectUri({ path: 'app/(protected)' }),
+          redirectUrl: AuthSession.makeRedirectUri({ path: '/feed)' }),
         }
       );
 
@@ -61,7 +61,7 @@ export const SignInWith = ({ children, strategy }: PropsWithChildren<Props>) => 
         });
         if (response?.status === 'complete') {
           await setActive!({ session: signUp!.createdSessionId });
-          router.push('/home');
+          router.push('/feed');
         }
       }
     } catch (err) {

@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native-unistyles';
 
 import { Header } from '@/src/components/Header';
 
-const Home = () => {
+const Favorites = () => {
   return (
     <View style={[styles.page]}>
       <Header />
@@ -18,4 +18,4 @@ const styles = StyleSheet.create(theme => ({
   },
 }));
 
-export default Home;
+export default Favorites;

@@ -8,7 +8,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { HeroLogo } from '@/src/components/HeroLogo';
 import { Header } from '@/src/components/Header';
 import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
-import { SignInWith } from '@/src/components/custom/buttons/SignInWith';
+import { SignInWith } from '@/src/services/auth/components/SignInWith';
 
 export default function Welcome() {
   const { t } = useTranslation();

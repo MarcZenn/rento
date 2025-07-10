@@ -1,12 +1,15 @@
-import { Stack, Redirect } from 'expo-router';
+import { useEffect } from 'react';
+import { Stack, Redirect, router } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
 
 export default function AuthLayout() {
   const { isSignedIn } = useAuth();
 
-  if (isSignedIn) {
-    return <Redirect href={'/(protected)'} />;
-  }
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace('/(protected)/(tabs)/feed');
+    }
+  }, [isSignedIn]);
 
   return (
     <Stack>

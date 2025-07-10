@@ -8,8 +8,8 @@ import { View } from 'react-native';
 
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from '@/src/hooks/useFonts';
-import '@/src/i18n';
+import { useFonts } from '@/src/theme/useFonts';
+import '@/src/services/i18n';
 
 // TODO:: Test device default language selection - change simulator langauge to JP and see if app is in JP when initially opened
 // TODO:: Add logout functionality
