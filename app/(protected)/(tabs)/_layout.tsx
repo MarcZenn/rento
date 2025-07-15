@@ -1,15 +1,9 @@
-import { Redirect, Tabs } from 'expo-router';
-import { useAuth } from '@clerk/clerk-expo';
+import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 export default function ProtectedLayout() {
   const { theme } = useUnistyles();
-  // const { isSignedIn } = useAuth();
-
-  // if (!isSignedIn) {
-  //   return <Redirect href={'/public'} />;
-  // }
 
   return (
     <Tabs

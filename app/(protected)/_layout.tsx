@@ -1,16 +1,6 @@
-import { useEffect } from 'react';
-import { Redirect, Stack, router } from 'expo-router';
-import { useAuth } from '@clerk/clerk-expo';
+import { Stack } from 'expo-router';
 
 export default function ProtectedLayout() {
-  // const { isSignedIn } = useAuth();
-
-  // useEffect(() => {
-  //   if (!isSignedIn) {
-  //     router.replace('/(auth)/sign_in');
-  //   }
-  // }, [isSignedIn]);
-
   return (
     <Stack
       screenOptions={{

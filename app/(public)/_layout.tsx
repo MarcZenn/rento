@@ -8,20 +8,12 @@ const PublicLayout = () => {
   const inAuthGroup = segments[0] === '(auth)';
   const inProtectedGroup = segments[0] === '(protected)';
 
-  console.log(segments, 'segments');
-
   useEffect(() => {
     if ((isSignedIn && inAuthGroup) || isSignedIn) {
-      console.log('dick');
       router.replace('/feed');
     } else if (!isSignedIn && inProtectedGroup) {
-      console.log('ass');
       router.replace('/(auth)/welcome');
     }
-    // else if (isSignedIn) {
-    //   console.log('tits');
-    //   router.replace('/feed');
-    // }
   }, [isSignedIn]);
 
   return (
