@@ -12,6 +12,7 @@ type LineSSOStrategy = `oauth_line`;
 type Props = {
   strategy: GoogleSSOStrategy | LineSSOStrategy;
 };
+const redirectPath = '/(protected)/(tabs)/feed';
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -43,13 +44,14 @@ export const SignInWith = ({ children, strategy }: PropsWithChildren<Props>) => 
           // For web, defaults to current path
           // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
           // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
-          redirectUrl: AuthSession.makeRedirectUri({ path: '/feed)' }),
+          redirectUrl: AuthSession.makeRedirectUri(),
         }
       );
 
       // If sign in was successful, set the active session
       if (createdSessionId) {
-        setActive!({ session: createdSessionId });
+        await setActive!({ session: createdSessionId });
+        router.replace(redirectPath);
       } else {
         // If there is no `createdSessionId`,
         // there are missing requirements, such as MFA, username formatting, etc.
@@ -61,7 +63,7 @@ export const SignInWith = ({ children, strategy }: PropsWithChildren<Props>) => 
         });
         if (response?.status === 'complete') {
           await setActive!({ session: signUp!.createdSessionId });
-          router.push('/feed');
+          router.replace(redirectPath);
         }
       }
     } catch (err) {

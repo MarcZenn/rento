@@ -5,11 +5,11 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 export default function ProtectedLayout() {
   const { theme } = useUnistyles();
-  const { isSignedIn } = useAuth();
+  // const { isSignedIn } = useAuth();
 
-  if (!isSignedIn) {
-    return <Redirect href={'/public'} />;
-  }
+  // if (!isSignedIn) {
+  //   return <Redirect href={'/public'} />;
+  // }
 
   return (
     <Tabs

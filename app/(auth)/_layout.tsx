@@ -3,13 +3,13 @@ import { Stack, Redirect, router } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
 
 export default function AuthLayout() {
-  const { isSignedIn } = useAuth();
+  // const { isSignedIn } = useAuth();
 
-  useEffect(() => {
-    if (isSignedIn) {
-      router.replace('/(protected)/(tabs)/feed');
-    }
-  }, [isSignedIn]);
+  // useEffect(() => {
+  //   if (isSignedIn) {
+  //     router.replace('/(protected)/(tabs)/feed');
+  //   }
+  // }, [isSignedIn]);
 
   return (
     <Stack>

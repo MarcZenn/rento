@@ -1,15 +1,27 @@
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
-import { router } from 'expo-router';
 
 const PublicLayout = () => {
   const { isSignedIn } = useAuth();
+  const segments = useSegments();
+  const inAuthGroup = segments[0] === '(auth)';
+  const inProtectedGroup = segments[0] === '(protected)';
+
+  console.log(segments, 'segments');
 
   useEffect(() => {
-    if (isSignedIn) {
-      router.replace('/(protected)/(tabs)/feed');
+    if ((isSignedIn && inAuthGroup) || isSignedIn) {
+      console.log('dick');
+      router.replace('/feed');
+    } else if (!isSignedIn && inProtectedGroup) {
+      console.log('ass');
+      router.replace('/(auth)/welcome');
     }
+    // else if (isSignedIn) {
+    //   console.log('tits');
+    //   router.replace('/feed');
+    // }
   }, [isSignedIn]);
 
   return (

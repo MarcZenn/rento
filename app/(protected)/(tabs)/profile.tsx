@@ -11,8 +11,6 @@ const Profile = () => {
 
   const logOut = async () => {
     await signOut();
-
-    console.log('navigating back to auth page?');
     router.replace('/');
   };
 
