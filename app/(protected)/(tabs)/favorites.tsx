@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
-import { Header } from '@/src/components/Header';
+import { Header } from '@/components/Header';
 
 const Favorites = () => {
   return (

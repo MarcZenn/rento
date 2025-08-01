@@ -5,7 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useSSO } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 
-import { CustomButton } from '../../../components/custom/buttons/CustomButton';
+import { CustomButton } from './custom/buttons/CustomButton';
 
 type GoogleSSOStrategy = `oauth_google`;
 type LineSSOStrategy = `oauth_line`;

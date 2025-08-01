@@ -26,7 +26,7 @@ export const Header = ({ isSignedIn }: HeaderProps) => {
           <Pressable
             key={i}
             style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={() => changeLanguage(locale.code)}
+            onPress={() => changeLanguage(locale.ISO639_code)}
           >
             <Image style={styles.img} source={locale.flag} />
           </Pressable>

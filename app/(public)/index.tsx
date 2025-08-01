@@ -4,8 +4,8 @@ import { StyleSheet } from 'react-native-unistyles';
 import { useRouter } from 'expo-router';
 
 import { images } from '@/src/constants/images';
-import { Header } from '@/src/components/Header';
-import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
+import { Header } from '@/components/Header';
+import { CustomButton } from '@/components/custom/buttons/CustomButton';
 
 export default function Welcome() {
   const { t } = useTranslation();

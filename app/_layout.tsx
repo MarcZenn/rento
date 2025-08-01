@@ -37,7 +37,7 @@ const navigationIntegration = Sentry.reactNavigationIntegration();
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
-  // We recommend adjusting this value in production.
+  // Adjust this value in production.
   // Learn more at - https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
   tracesSampleRate: 1.0,
   attachScreenshot: true,
@@ -45,10 +45,9 @@ Sentry.init({
   replaysSessionSampleRate: 1.0,
   replaysOnErrorSampleRate: 1.0,
   integrations: [navigationIntegration, Sentry.mobileReplayIntegration()],
-  enableNativeFramesTracking: true, // since we are not using Expo Go.
+  enableNativeFramesTracking: true, // We are not using Expo Go.
 });
 
-// Keep the splash screen visible w/ animation while we fetch resources
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
   duration: 1000,

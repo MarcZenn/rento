@@ -1,7 +1,7 @@
 import { ImageSourcePropType } from 'react-native';
 
-type EN = 'en-US';
-type JP = 'ja-JP';
+type EN = 'en';
+type JP = 'ja';
 export type LANGUAGE_CODE = EN | JP;
 
 type US = 'USA';
@@ -15,9 +15,8 @@ type LANGUAGE = ENGLISH | JAPANESE;
 type SUPPORTED_LOCALE = {
   locale: LOCALE;
   lang: LANGUAGE;
-  code: LANGUAGE_CODE;
+  ISO639_code: LANGUAGE_CODE;
   resource: any;
-  short: string;
   flag: ImageSourcePropType;
 };
 

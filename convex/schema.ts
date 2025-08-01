@@ -1,6 +1,17 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
+// NOTE: Given that Rento deals with housing, legal rental agreements, and localized nuances
+// (like "no key money" or "foreigner-friendly"), it's risky to rely solely on automated
+// client-side translations. This is why the DB schema makes use of *_translations tables.
+// the major drawback to this is overhead as these tables will need to be retroactively updated
+// as support for new languages is added.
+
+// This allows for a hybrid approach to internalization:
+// - Use *_translations tables in the database for key UI content and high-visibility property metadata.
+// - Use AI-powered translations tools for dynamic, user-generated or low priority content such as chats.
+// - Use a background service (e.g., a Convex cron job + translation API) to fill in translations asynchronously.
+
 const user_types = {
   slug: v.union(
     v.literal('renter'),
@@ -50,10 +61,11 @@ const profiles = {
   rental_readiness_score: v.optional(v.int64()),
   saved_properties: v.optional(v.id('properties')), // one to many
   onboarding_completed: v.optional(v.boolean()),
+  about: v.optional(v.string()),
   updated_at: v.optional(v.string()), // ISO8601 format
 };
 const profiles_translations = {
-  profile_id: v.id('profles'), // one to many
+  profile_id: v.id('profiles'), // one to many
   language: v.id('languages'), // one to many
   about: v.optional(v.string()),
   updated_at: v.optional(v.string()), // ISO8601 format

@@ -1,10 +1,11 @@
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { useAuth } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
-import Ionicons from '@expo/vector-icons/Ionicons';
+// import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { Header } from '@/src/components/Header';
+import { Header } from '@/components/Header';
+import { ProfileHeader } from '@/components/ProfileHeader';
 
 const Profile = () => {
   const { signOut } = useAuth();
@@ -15,13 +16,17 @@ const Profile = () => {
   };
 
   return (
-    <View style={[styles.page]}>
+    <ScrollView style={[styles.page]}>
       <Header />
 
-      <TouchableOpacity onPress={logOut}>
+      <ProfileHeader />
+
+      <View></View>
+
+      {/* <TouchableOpacity onPress={logOut}>
         <Ionicons name="log-out" size={24} />
-      </TouchableOpacity>
-    </View>
+      </TouchableOpacity> */}
+    </ScrollView>
   );
 };
 
