@@ -3,7 +3,7 @@ import {
   useSignInSchema,
   useSignUpSchema,
   useVerifyEmailSchema,
-} from '@/src/utils/validation/schemas';
+} from '@/src/services/clerk/schemas';
 import { UseFormSetError } from 'react-hook-form';
 import { router } from 'expo-router';
 import { z } from 'zod';

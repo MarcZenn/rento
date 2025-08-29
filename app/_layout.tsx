@@ -1,27 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ClerkProvider, ClerkLoaded, useAuth } from '@clerk/clerk-expo';
+import { View } from 'react-native';
+import { Slot, useNavigationContainerRef } from 'expo-router';
+import { ClerkProvider, ClerkLoaded, useAuth, useUser } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
-import { Slot } from 'expo-router';
-import { View } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from '@/src/hooks/useFonts';
-import '@/src/i18n';
+import { useFonts } from '@/src/theme/useFonts';
+import '@/src/services/i18n';
 
 // TODO:: Test device default language selection - change simulator langauge to JP and see if app is in JP when initially opened
-// TODO:: Add logout functionality
 // TODO:: Add biometric auth
 
-// TODO:: test email login
-// - check form errors
+// TODO:: test email loginp
 // - check clerk errors
 // -- check wrong password errors
 // - check wrong email clerk errors
-// - check redirect after sign in works
-// - reload app make sure home page opens
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
@@ -34,15 +31,32 @@ if (!clerkPublishableKey) {
   );
 }
 
-// Keep the splash screen visible w/ animation while we fetch resources
+// Construct a new instrumentation instance. This is needed to communicate between the integration and React
+const navigationIntegration = Sentry.reactNavigationIntegration();
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
+  // Adjust this value in production.
+  // Learn more at - https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
+  tracesSampleRate: 1.0,
+  attachScreenshot: true,
+  debug: false, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production.
+  replaysSessionSampleRate: 1.0,
+  replaysOnErrorSampleRate: 1.0,
+  integrations: [navigationIntegration, Sentry.mobileReplayIntegration()],
+  enableNativeFramesTracking: true, // We are not using Expo Go.
+});
+
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
   duration: 1000,
   fade: true,
 });
 
-export default function RootLayout() {
+const InitialLayout = () => {
   const [appIsReady, setAppIsReady] = useState(false);
+  const user = useUser();
 
   useEffect(() => {
     const init = async () => {
@@ -57,6 +71,14 @@ export default function RootLayout() {
 
     init();
   }, []);
+
+  useEffect(() => {
+    if (user && user.user) {
+      Sentry.setUser({ email: user.user.emailAddresses[0].emailAddress, id: user.user.id });
+    } else {
+      Sentry.setUser(null);
+    }
+  }, [user]);
 
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
@@ -73,16 +95,32 @@ export default function RootLayout() {
   }
 
   return (
+    <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+      <Slot screenOptions={{ headerShown: false }} />
+    </View>
+  );
+};
+
+const RootLayout = () => {
+  const ref = useNavigationContainerRef();
+
+  useEffect(() => {
+    if (ref) {
+      navigationIntegration.registerNavigationContainer(ref);
+    }
+  }, [ref]);
+
+  return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
       <ClerkLoaded>
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
           <ThemeProvider>
-            <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-              <Slot screenOptions={{ headerShown: false }} />
-            </View>
+            <InitialLayout />
           </ThemeProvider>
         </ConvexProviderWithClerk>
       </ClerkLoaded>
     </ClerkProvider>
   );
-}
+};
+
+export default Sentry.wrap(RootLayout);

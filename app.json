@@ -45,7 +45,17 @@
             "backgroundColor": "#121212"
           },
           "imageWidth": 200
-        }]
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "note": "Use SENTRY_AUTH_TOKEN env to authenticate with Sentry.",
+          "project": "rento-mobile",
+          "organization": "rento"
+        }
+      ]
     ]
   }
 }

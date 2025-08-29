@@ -6,24 +6,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import translationEn from './locales/en-US/translations.json';
 import translationJa from './locales/ja-JP/translations.json';
 import { SUPPORTED_LOCALES, LANGUAGE_CODE } from './types';
-// import { useTranslate } from './useTranslate';
-import { images } from '../constants/images';
+import { images } from '../../constants/images';
 
 const supported_locales: SUPPORTED_LOCALES = [
   {
     locale: 'Japan',
     lang: 'japanese',
-    code: 'ja-JP',
+    ISO639_code: 'ja',
     resource: translationJa,
-    short: 'ja',
     flag: images.flags.japan,
   },
   {
     locale: 'USA',
     lang: 'english',
-    code: 'en-US',
+    ISO639_code: 'en',
     resource: translationEn,
-    short: 'en',
     flag: images.flags.uk,
   },
 ];
@@ -32,8 +29,7 @@ const getTranslationResources = () => {
   let resources: any = {};
 
   supported_locales.forEach(value => {
-    resources[value.code] = { translation: value.resource };
-    resources[value.short] = { translation: value.resource };
+    resources[value.ISO639_code] = { translation: value.resource };
   });
 
   return resources;
@@ -56,7 +52,7 @@ const getTranslationResources = () => {
 
 export const LANGUAGE_KEY = '@rento_language';
 
-const defaultLang = 'en-US';
+const defaultLang = 'en';
 
 const initI18n = async () => {
   const resources = getTranslationResources();
@@ -91,7 +87,8 @@ const initI18n = async () => {
       resources,
       lng: selectedLanguage,
       fallbackLng: {
-        'en-*': [defaultLang, 'en'],
+        en: [defaultLang, 'en'],
+        // 'en-*': [defaultLang, 'en'],
         // 'ja-*': [japanese.code, 'ja', defaultLang],
         default: [defaultLang],
       },

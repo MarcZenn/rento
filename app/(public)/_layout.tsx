@@ -1,13 +1,20 @@
-import { Stack } from 'expo-router';
+import { useEffect } from 'react';
+import { Stack, router, useSegments } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
-import { Redirect } from 'expo-router';
 
 const PublicLayout = () => {
   const { isSignedIn } = useAuth();
+  const segments = useSegments();
+  const inAuthGroup = segments[0] === '(auth)';
+  const inProtectedGroup = segments[0] === '(protected)';
 
-  if (isSignedIn) {
-    return <Redirect href="/(protected)/home" />;
-  }
+  useEffect(() => {
+    if ((isSignedIn && inAuthGroup) || isSignedIn) {
+      router.replace('/feed');
+    } else if (!isSignedIn && inProtectedGroup) {
+      router.replace('/(auth)/welcome');
+    }
+  }, [isSignedIn]);
 
   return (
     <Stack>

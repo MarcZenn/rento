@@ -1,16 +1,24 @@
 import { View, Pressable, Image, Text } from 'react-native';
-import { supported_locales, useTranslate } from '@/src/i18n';
+import { supported_locales, useTranslate } from '@/src/services/i18n';
 import { StyleSheet } from 'react-native-unistyles';
 import { useTranslation } from 'react-i18next';
 
-export const Header = () => {
+type HeaderProps = {
+  isSignedIn?: boolean;
+};
+
+export const Header = ({ isSignedIn }: HeaderProps) => {
   const { t } = useTranslation();
   const changeLanguage = useTranslate();
 
   return (
     <View style={[styles.container]}>
       <View style={[styles.logoContainer]}>
-        <Text style={[styles.logoText]}>{t('brand_text')}</Text>
+        {isSignedIn ? (
+          <Text>username</Text>
+        ) : (
+          <Text style={[styles.logoText]}>{t('brand_text')}</Text>
+        )}
       </View>
 
       <View style={[styles.languageSelector]}>
@@ -18,7 +26,7 @@ export const Header = () => {
           <Pressable
             key={i}
             style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={() => changeLanguage(locale.code)}
+            onPress={() => changeLanguage(locale.ISO639_code)}
           >
             <Image style={styles.img} source={locale.flag} />
           </Pressable>

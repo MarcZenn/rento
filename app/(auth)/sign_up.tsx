@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { Link } from 'expo-router';
 
-import { useSignUpSchema } from '@/src/utils/validation/schemas';
-import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
-import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
-import { useAuthActions } from '@/src/hooks/useAuthActions';
-import { HeroLogo } from '@/src/components/HeroLogo';
-import { Header } from '@/src/components/Header';
+import { useSignUpSchema } from '@/src/services/clerk/schemas';
+import { CustomInput } from '@/components/custom/inputs/CustomInput';
+import { CustomButton } from '@/components/custom/buttons/CustomButton';
+import { useAuthActions } from '@/src/services/clerk/useAuthActions';
+import { HeroLogo } from '@/components/HeroLogo';
+import { Header } from '@/components/Header';
 
 const SignUp = () => {
   const { t } = useTranslation();

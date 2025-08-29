@@ -11,20 +11,12 @@ export const createUser = httpAction(async (ctx, req) => {
   const { data, type } = await req.json();
 
   switch (type) {
-    case 'user.created':
-      const userId = await ctx.runMutation(internal.users.createUser, {
+    case 'user.created': // detect Clerk user created and insert new user in Convex DB
+      await ctx.runMutation(internal.users.createUser, {
         clerkId: data.id,
         email: data.email_addresses[0].email_address,
         username: data.username,
       });
-
-      // TODO:: wrap all of this try catch statements.
-      if (userId) {
-        await ctx.runMutation(internal.profiles.createUserProfile, {
-          user_id: userId,
-        });
-      }
-
       break;
     case 'user.updated':
       console.log('user updated');

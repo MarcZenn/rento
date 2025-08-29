@@ -1,13 +1,13 @@
-import { View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
-import { Header } from '@/src/components/Header';
+import { Header } from '@/components/Header';
 
-const Home = () => {
+const Page = () => {
   return (
-    <View style={[styles.page]}>
+    <ScrollView style={[styles.page]}>
       <Header />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -18,4 +18,4 @@ const styles = StyleSheet.create(theme => ({
   },
 }));
 
-export default Home;
+export default Page;

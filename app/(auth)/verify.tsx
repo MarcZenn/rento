@@ -4,11 +4,11 @@ import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { useVerifyEmailSchema } from '@/src/utils/validation/schemas';
-import { CustomInput } from '@/src/components/custom/inputs/CustomInput';
-import { CustomButton } from '@/src/components/custom/buttons/CustomButton';
-import { Header } from '@/src/components/Header';
-import { useAuthActions } from '@/src/hooks/useAuthActions';
+import { useVerifyEmailSchema } from '@/src/services/clerk/schemas';
+import { CustomInput } from '@/components/custom/inputs/CustomInput';
+import { CustomButton } from '@/components/custom/buttons/CustomButton';
+import { Header } from '@/components/Header';
+import { useAuthActions } from '@/src/services/clerk/useAuthActions';
 
 const VerifyEmail = () => {
   const { t } = useTranslation();
