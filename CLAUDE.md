@@ -155,3 +155,4 @@ The app models Japanese rental market specifics:
 - Weave Living - `https://www.weave-living.com/`
 - The Founder Institute - `https://fi.co/join`
 - E-Housing Japan - `https://e-housing.jp/`
+- Unistyles includes custom native code, which means it does not support Expo Go. Therefore the app cannot be run locally use Expo Go. Instead we must create a development build and run the development build.
