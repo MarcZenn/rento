@@ -89,6 +89,57 @@ const user_preferences = {
   updated_at: v.optional(v.string()), // ISO8601 format
 };
 
+// Primary consent tracking table
+const user_consent = {
+  user_id: v.id('users'),
+
+  // Granular consent flags
+  profile_data_consent: v.boolean(),
+  location_data_consent: v.boolean(),
+  communication_consent: v.boolean(),
+  analytics_consent: v.boolean(),
+  marketing_consent: v.optional(v.boolean()),
+
+  // Legal audit fields
+  consent_timestamp: v.string(), // ISO8601 format
+  consent_ip_address: v.string(),
+  consent_version: v.string(), // Privacy policy version
+  consent_user_agent: v.optional(v.string()),
+  consent_method: v.string(), // "registration", "profile_update", "policy_change"
+
+  // Modification tracking
+  withdrawal_timestamp: v.optional(v.string()),
+  last_updated: v.string(),
+
+  // Compliance verification
+  policy_version_accepted: v.string(),
+  legal_basis: v.string(), // "consent", "contract", "legitimate_interest"
+};
+
+// Consent history for audit trails
+const consent_history = {
+  user_id: v.id('users'),
+  consent_id: v.id('user_consent'),
+  action_type: v.string(), // "granted", "withdrawn", "modified"
+  consent_type: v.string(), // "profile_data", "location_data", etc.
+  previous_value: v.optional(v.boolean()),
+  new_value: v.boolean(),
+  timestamp: v.string(),
+  ip_address: v.string(),
+  user_agent: v.optional(v.string()),
+  reason: v.optional(v.string()), // "policy_update", "user_request", etc.
+};
+
+// Privacy policy versions for tracking
+const privacy_policy_versions = {
+  version: v.string(),
+  effective_date: v.string(),
+  en_content_hash: v.string(),
+  jp_content_hash: v.string(),
+  major_changes: v.array(v.string()),
+  requires_reconsent: v.boolean(),
+};
+
 const tags = {
   slug: v.string(), // unique
   icon: v.optional(v.string()), // (Optional) Icon name or URL (e.g. "🐾", "🏷️", or "tag-key.svg")
@@ -283,6 +334,9 @@ export default defineSchema({
     'profile_id',
     'language',
   ]),
+  user_consent: defineTable(user_consent),
+  consent_history: defineTable(consent_history),
+  privacy_policy_versions: defineTable(privacy_policy_versions),
   countries: defineTable(countries).index('country_code_index', ['country_code']),
   country_translations: defineTable(country_translations).index('country_translation_index', [
     'countries_id',
