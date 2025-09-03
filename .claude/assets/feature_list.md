@@ -38,7 +38,7 @@ To comply with Japanese data privacy laws (Act on Protection of Personal Informa
 
 ---
 
-## PHASE 0 - CRITICAL LEGAL COMPLIANCE
+## PHASE 0 - [ ] CRITICAL LEGAL COMPLIANCE
 
 ### User Consent Collection & Privacy Management System
 **Priority:** 🔴 Critical - Legal Compliance (Phase 0 - Infrastructure)
@@ -181,7 +181,7 @@ This consent system must be fully implemented and tested before any other data c
 
 ## MUST-HAVE FEATURES (MVP)
 
-### 1. User Profile Management System
+### 1.[ ] User Profile Management System
 **Priority:** 🔴 Critical - Foundational
 **Technical Dependency:** Authentication (✅ Implemented), User Consent Collection System
 
@@ -227,7 +227,7 @@ Comprehensive user profile system allowing users to create, edit, and manage the
 
 ---
 
-### 2. Property Search & Discovery System
+### 2. [ ] Property Search & Discovery System
 **Priority:** 🔴 Critical - Core Feature
 **Technical Dependency:** User Consent Collection System, Profile Management
 
@@ -292,7 +292,7 @@ Advanced property search system with Japan-specific filters, bilingual property 
 
 ---
 
-### 3. Property Details & Media System
+### 3. [ ] Property Details & Media System
 **Priority:** 🔴 Critical - User Decision Support
 **Technical Dependency:** Property Search System
 
@@ -336,7 +336,7 @@ Rich property detail pages with comprehensive information, photo galleries, and 
 
 ---
 
-### 4. Agent Dashboard & Agent Contact/Communication System
+### 4. [ ] Agent Dashboard & Agent Contact/Communication System
 **Priority:** 🔴 Critical - Core Transaction Flow & B2B Success
 **Technical Dependency:** User Consent Collection System, Property Management, Agent Contact System
 
@@ -402,7 +402,7 @@ Direct communication system between renters and real estate agents with built-in
 
 ---
 
-### 5. User Preferences & Rental Readiness System
+### 5. [ ] User Preferences & Rental Readiness System
 **Priority:** 🟡 High - Personalization & Education
 **Technical Dependency:** User Profiles
 
@@ -443,7 +443,7 @@ Intelligent system that captures detailed rental preferences and calculates a "R
 
 ---
 
-### 6. Favorites & Saved Properties System
+### 6. [ ] Favorites & Saved Properties System
 **Priority:** 🟡 High - User Retention
 **Technical Dependency:** Property Search, User Profiles
 
@@ -488,7 +488,7 @@ Comprehensive property bookmarking and organization system allowing users to sav
 
 ---
 
-### 7. Basic Interactive Map Integration
+### 7. [ ] Basic Interactive Map Integration
 **Priority:** 🟡 High - Visual Property Discovery
 **Technical Dependency:** Property Search System
 
@@ -528,7 +528,7 @@ Interactive map interface for property discovery with location-based search, nei
 
 ---
 
-### 8. Basic Notification System
+### 8. [ ] Basic Notification System
 **Priority:** 🟡 High - User Engagement
 **Technical Dependency:** All other core features
 
@@ -574,7 +574,7 @@ Comprehensive notification system to keep users informed about property updates,
 
 ---
 
-### 9. AI-Powered Translation Chat System
+### 9. [ ] AI-Powered Translation Chat System
 **Priority:** 🟢 Medium - Advanced Communication
 **Technical Dependency:** Agent Contact System
 
