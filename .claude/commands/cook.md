@@ -1,11 +1,11 @@
+--- 
+description: Update the codebase and add support a new application feature outlined in a Technical Design Document (TDD)
+---
+
 ## Task
 
-Review the recently drafted Technical Design Documents (TDDs) and implement them in the codebase and overall application.
-Run the following steps sequentially to accomplish this: 
+Implement a new feature following the implementation outlined in a new Technical Design Document (TDD). Run the following steps sequentially to accomplish this: 
 
-1. Look at the TDD file/s marked `ready for review` at the top of the file. 
-2. If there is frontend focused TDD, give that document to the senior-frontend-engineer to review and implement.
-3. If there is backend focused TDD, give that document to the senior-backend-engineer to review and implment.
-4. If there is a TDD that outlines changes to both the frontend and backend, give that document to both the senior-frontend-engineer and senior-backend-engineer to collaboratively review and implement.
-5. Wait for the engineers to complete their work. If the engineers come across issues or concerns during their implementation or if they come across any blockers, report those to me and I will help triage and resolve.
-6. Once all of the engineering work has been completed, mark the TDDs as `pending` at the top of each file. I will then review all of the code changes. 
+1. Invoke the senior-frontend-engineer and senior-backend-engineer to review the Technical Design Document in the `/.claude/assets/TDDs/review` directory.
+2. Next, Invoke the senior-backend-engineer and senior-frontend-engineer to begin implementing the TDD and updating the codebase. They should collaborate on any aspects of the Technical Design Document that require fullstack engineering input.
+3. Move the TDD in the `/.claude/assets/TDDs/review` directory to the `/.claude/assets/TDDs/pending` directory.

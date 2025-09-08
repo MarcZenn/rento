@@ -79,4 +79,7 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Claude
+.mcp.json
+
 # @end expo-cli

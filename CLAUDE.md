@@ -8,26 +8,11 @@ We will build a mobile application called Rento (with a web dashboard for proper
 
 Rento is a React Native rental platform targeting the Japanese market, specifically Tokyo. The app connects foreign residents with rental properties and agents who can provide bilingual support and foreigner-friendly rental options.
 
-Some of the features of this application could be: 
-
--Rental property search with filters such as “no-key-money”, “pet-friendly”, “foreigner-friendly” and more..
--Map integration to display search results and rental properties
--Ability for users to favorite properties and save searches.
--AI translated chats between renters and property agents (use something like DeepL for this)
--Feed showing users new properties that match saved search criteria as well as recent Japanese news regarding real-estate, economy, lifestyle etc.
--User profiles (update profile info, manage saved properties and saved searches, add a bio, add avatar image)
--A web based dashboard where rental property owners and agents can add/remove new properties, chat with potential renters, update property details etc.
--Android and iOS support
-
 ## Problem
 
 Japan’s property rental market is largely inaccessible for foreigners and notoriously complex in general. At the same time, Japan thrives on trust. Due to this and other factors, foreigners often face discrimination, excessive upfront costs (key money, deposits), and language barriers. Young Japanese renters also struggle with outdated processes, lack of transparency and trust, and overwhelming documentation.
 
 ## Proposed Solution
-
-Rento is a bilingual, mobile-first rental platform tailored for Tokyo’s real estate market. It bridges the gap between modern renters (especially foreigners) and Japanese property agencies and landlords through a beautifully designed, internalization enabled application.
-
-Rento offers a clean, high-quality and intuitive mobile interface that allows users to search for apartments with powerful filters such as “No Key Money”, “Pet Allowed” or “Foreigner Friendly”. All company and property information is shown upfront to the user in alignment with traditional Japanese apps and websites. Features include real-time AI-translated chat with agents, clearly listed fees, and a “Rental Readiness Score” to guide first-time renters as well as inform property owners of a renter’s Japanese rental market knowledge. Agents gain access to a tiered platform with exposure, tools, and customer insights.
 
 Rento simplifies the rental process, removes language and cultural barriers, and modernizes property discovery and communication — all in one unified platform.
 
@@ -93,11 +78,13 @@ This project does not currently have a test suite configured.
 
 ### Key Architecture Patterns
 
+
 **Backend Schema Design**:
 The Convex schema uses a hybrid internationalization approach:
 - Database translation tables for key UI content and property metadata
 - AI-powered translation for dynamic user-generated content
 - Comprehensive relational design for Japanese real estate (prefectures, wards, agencies, properties)
+- Must be self-hosted (not yet implemented)
 
 **Authentication Flow**:
 - Clerk handles authentication with token caching
@@ -156,3 +143,7 @@ The app models Japanese rental market specifics:
 - The Founder Institute - `https://fi.co/join`
 - E-Housing Japan - `https://e-housing.jp/`
 - Unistyles includes custom native code, which means it does not support Expo Go. Therefore the app cannot be run locally use Expo Go. Instead we must create a development build and run the development build.
+
+## Context Updates
+
+- Much research has been conducted and new information has come to light that affects how we will launch and develop this startups business as well as how the product itself should be architected and coded. Review the @.claude/assets/legal_compliance_analysis.md file, the @.claude/assets/tokyo_rental_market_analysis.md file, the @.claude/assets/bizdev_checklist.md file and the @.claude/assets/feature_list.md file and keep a summary of each as context.

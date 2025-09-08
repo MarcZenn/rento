@@ -1,8 +1,13 @@
+--- 
+description: Produce one or more Technical Design Documents (TDDs) for a new application feature outlined in a Product Requirement Document (PRD)
+---
+
 ## Task
 
-Choose a feature to build from the `feature_list.md` file. Create a Product Requirement Document (PRD) for that feature. Use the PRD to create a Technical Design Document (TDD).
-Run the following steps sequentially to accomplish this: 
+Reference a Product Requirement Document (PRD) to create a Technical Design Document (TDD). Run the following steps sequentially to accomplish this: 
 
-1. Review the `feature_list.md` check list and identify the next uncompleted feature. 
-2. Give this feature to the product-manager. Have the product-manager draft a product requirement document (PRD) for this feature. Save the PRD in the `.claude/assets/PRDs` directory.
-3. Take that PRD and give it to the technical-architect to analyze and review. The technical-architect should provide you with one or more technical design documents (TDD). Depending on the work required to satisfy the PRD there may be a backend TDD, a frontend TDD or both. Save all TDDs in the `.claude/assets/TDDs` directory. Once the TDDs are completed and drafted mark them as `ready for review` at the top of each TDD file. 
+1. Invoke the technical-architect to review the Product Requirement Document (PRD) in the `.claude/assets/PRDs/review` directory. 
+2. Next, invoke the technical-architect to draft a Technical Design Document (TDD). Depending on the work required to satisfy the PRD, the TDD should deliniate clearly between aspects that require frontend work, backend work or both.
+3. Save the new Techinical Design Document in the `/.claude/assets/TDDs/review` directory.
+4. Move the PRD in the `/.claude/assets/PRDs/review` directory to the `/.claude/assets/PRDs/pending` directory
+
