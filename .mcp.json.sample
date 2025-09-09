@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "env": {}
+    },
+    "convex": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "convex@latest",
+        "mcp",
+        "start"
+      ],
+      "env": {
+        "CONVEX_URL": "${EXPO_PUBLIC_CONVEX_URL}"
+      }
+    },
+    "Ref": {
+      "type": "http",
+      "url": "<Ref-api-key>"
+    },
+    "ElevenLabs": {
+      "command": "uvx",
+      "args": [
+        "elevenlabs-mcp"
+      ],
+      "env": {
+        "ELEVENLABS_API_KEY": "<sample-api-key>"
+      }
+    }
+  }
+}

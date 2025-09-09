@@ -41,16 +41,6 @@ Rento simplifies the rental process, removes language and cultural barriers, and
 - **State Management**: Convex queries/mutations
 - **Native Platforms**: iOS and Android
 
-## Development Commands
-
-### Essential Commands
-- **Start development server**: `npm start` or `yarn start`
-- **Run on iOS**: `npx expo run:ios` 
-- **Run on Android**: `npm run android`
-- **Lint code**: `npm run lint`
-- **Fix lint issues**: `npm run lint:fix`
-- **Format code**: `npm run format`
-
 ### No Test Suite
 This project does not currently have a test suite configured.
 
@@ -77,7 +67,6 @@ This project does not currently have a test suite configured.
 ```
 
 ### Key Architecture Patterns
-
 
 **Backend Schema Design**:
 The Convex schema uses a hybrid internationalization approach:
@@ -144,6 +133,6 @@ The app models Japanese rental market specifics:
 - E-Housing Japan - `https://e-housing.jp/`
 - Unistyles includes custom native code, which means it does not support Expo Go. Therefore the app cannot be run locally use Expo Go. Instead we must create a development build and run the development build.
 
-## Context Updates
+## Additional Context
 
-- Much research has been conducted and new information has come to light that affects how we will launch and develop this startups business as well as how the product itself should be architected and coded. Review the @.claude/assets/legal_compliance_analysis.md file, the @.claude/assets/tokyo_rental_market_analysis.md file, the @.claude/assets/bizdev_checklist.md file and the @.claude/assets/feature_list.md file and keep a summary of each as context.
+- Much research has been conducted and new information has come to light that affects how we will launch and develop this startups business as well as how the product itself should be architected and coded. Review the `@.claude/assets/legal_compliance_analysis.md` file, the `@.claude/assets/tokyo_rental_market_analysis.md` file, the `@.claude/assets/bizdev_checklist.md` file and `the @.claude/assets/feature_list.md` file and keep a summary of each as context.
