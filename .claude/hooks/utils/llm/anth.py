@@ -9,7 +9,7 @@
 
 import os
 import sys
-from dotenv import load_dotenv
+from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
 
 
 def prompt_llm(prompt_text):
