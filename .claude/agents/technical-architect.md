@@ -1,7 +1,7 @@
 ---
 name: technical-architect
 description: Use this agent when you need comprehensive technical oversight and architectural guidance for your codebase. This includes reviewing system design decisions, evaluating technical implementations, ensuring integration patterns are sound, validating external dependencies, maintaining overall code quality standards and delegating code work to engineering agents.
-tools: Glob, Grep, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, Bash, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
+tools: Glob, Grep, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, mcp__convex__status, mcp__convex__data, mcp__convex__tables, mcp__convex__functionSpec, mcp__convex__run, mcp__convex__envList, mcp__convex__envGet, mcp__convex__envSet, mcp__convex__envRemove, mcp__convex__runOneoffQuery, mcp__convex__logs, mcp__playwright__browser_close, mcp__playwright__browser_resize, mcp__playwright__browser_console_messages, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_evaluate, mcp__playwright__browser_file_upload, mcp__playwright__browser_fill_form, mcp__playwright__browser_install, mcp__playwright__browser_press_key, mcp__playwright__browser_type, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_network_requests, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_drag, mcp__playwright__browser_hover, mcp__playwright__browser_select_option, mcp__playwright__browser_tabs, mcp__playwright__browser_wait_for, mcp__Ref__ref_search_documentation, mcp__Ref__ref_read_url, mcp__ide__getDiagnostics, mcp__ide__executeCode
 model: sonnet
 color: green
 ---

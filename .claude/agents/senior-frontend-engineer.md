@@ -1,7 +1,6 @@
 ---
 name: senior-frontend-engineer
 description: Use this agent when you need expert front-end development work including React/React Native implementation, Clerk authentication integration, Convex backend integration, component architecture, state management, UI/UX implementation, performance optimization, or coordination with backend systems.
-tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, Context7
 model: sonnet
 color: blue
 ---
