@@ -45,8 +45,8 @@ async def main():
         sys.exit(1)
 
     try:
-        from openai import AsyncOpenAI
-        from openai.helpers import LocalAudioPlayer
+        from openai import AsyncOpenAI # pyright: ignore[reportMissingImports]
+        from openai.helpers import LocalAudioPlayer # pyright: ignore[reportMissingImports]
 
         # Initialize OpenAI client
         openai = AsyncOpenAI(api_key=api_key)

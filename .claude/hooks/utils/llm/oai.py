@@ -133,7 +133,7 @@ Name:"""
         if not api_key:
             raise Exception("No API key")
         
-        from openai import OpenAI
+        from openai import OpenAI # pyright: ignore[reportMissingImports]
         client = OpenAI(api_key=api_key)
         
         response = client.chat.completions.create(

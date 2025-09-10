@@ -27,7 +27,7 @@ def prompt_llm(prompt_text):
     load_dotenv()
 
     try:
-        from openai import OpenAI
+        from openai import OpenAI # pyright: ignore[reportMissingImports]
 
         # Ollama uses OpenAI-compatible API - exactly as shown in docs
         client = OpenAI(

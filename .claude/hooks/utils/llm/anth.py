@@ -133,7 +133,7 @@ Name:"""
         if not api_key:
             raise Exception("No API key")
         
-        import anthropic
+        import anthropic # pyright: ignore[reportMissingImports]
         client = anthropic.Anthropic(api_key=api_key)
         
         message = client.messages.create(
