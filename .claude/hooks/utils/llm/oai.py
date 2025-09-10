@@ -29,7 +29,7 @@ def prompt_llm(prompt_text):
         return None
 
     try:
-        from openai import OpenAI
+        from openai import OpenAI # pyright: ignore[reportMissingImports]
 
         client = OpenAI(api_key=api_key)
 

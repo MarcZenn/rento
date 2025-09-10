@@ -29,7 +29,7 @@ def prompt_llm(prompt_text):
         return None
 
     try:
-        import anthropic
+        import anthropic # pyright: ignore[reportMissingImports]
 
         client = anthropic.Anthropic(api_key=api_key)
 
