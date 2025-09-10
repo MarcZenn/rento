@@ -3,7 +3,19 @@
       "allow": [
         "WebSearch",
         "WebFetch(domain:docs.convex.dev)",
-        "WebFetch(domain:clerk.com)"
+        "WebFetch(domain:clerk.com)",
+        "Bash(mkdir:*)",
+        "Bash(uv:*)",
+        "Bash(find:*)",
+        "Bash(mv:*)",
+        "Bash(grep:*)",
+        "Bash(npm:*)",
+        "Bash(ls:*)",
+        "Bash(cp:*)",
+        "Write",
+        "Edit",
+        "Bash(chmod:*)",
+        "Bash(touch:*)"
       ]
     },
     "enableAllProjectMcpServers": true,

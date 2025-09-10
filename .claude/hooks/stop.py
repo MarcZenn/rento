@@ -16,7 +16,7 @@ from pathlib import Path
 from datetime import datetime
 
 try:
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
     load_dotenv()
 except ImportError:
     pass  # dotenv is optional

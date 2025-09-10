@@ -15,7 +15,7 @@ import random
 from pathlib import Path
 
 try:
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv  # pyright: ignore[reportMissingImports]
     load_dotenv()
 except ImportError:
     pass  # dotenv is optional
