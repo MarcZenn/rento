@@ -1,7 +1,7 @@
 ---
 name: japan-realestate-compliance-auditor
 description: Use this agent when you need comprehensive legal compliance analysis for Japanese real estate transactions, rental agreements, or proptech company operations in Japan's real estate sector.
-tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash
+tools: Glob, Grep, Read, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, mcp__playwright__browser_close, mcp__playwright__browser_resize, mcp__playwright__browser_console_messages, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_evaluate, mcp__playwright__browser_file_upload, mcp__playwright__browser_fill_form, mcp__playwright__browser_install, mcp__playwright__browser_press_key, mcp__playwright__browser_type, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_network_requests, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_drag, mcp__playwright__browser_hover, mcp__playwright__browser_select_option, mcp__playwright__browser_tabs, mcp__playwright__browser_wait_for
 model: sonnet
 color: red
 ---

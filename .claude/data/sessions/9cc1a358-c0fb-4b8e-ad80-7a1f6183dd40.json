@@ -1,0 +1,10 @@
+{
+  "session_id": "9cc1a358-c0fb-4b8e-ad80-7a1f6183dd40",
+  "prompts": [
+    "hello",
+    "The file we are currently in is warning me that Import \"dotenv\" could not be resolved. How can we fix this?",
+    "This script is using UV python project and package manager. Why does the python-dotenv package need to be installed? ",
+    "Ok. Why am I not hearing the text-to-speech sound that should be produced as a result of the stop hook script?  "
+  ],
+  "agent_name": "Nexus"
+}

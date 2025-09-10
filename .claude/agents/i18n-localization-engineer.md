@@ -1,6 +1,7 @@
 ---
 name: i18n-localization-engineer
 description: Use this agent when you need to implement, configure, or troubleshoot internationalization (i18n) in React or React Native applications. This includes setting up translation systems, managing locale files, implementing language switching, handling pluralization rules, formatting dates/numbers/currencies for different regions, or debugging localization issues.
+tools: Bash, Glob, Grep, Read, Edit, MultiEdit, Write, NotebookEdit, WebFetch, TodoWrite, WebSearch, BashOutput, KillBash, mcp__playwright__browser_close, mcp__playwright__browser_resize, mcp__playwright__browser_console_messages, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_evaluate, mcp__playwright__browser_file_upload, mcp__playwright__browser_fill_form, mcp__playwright__browser_install, mcp__playwright__browser_press_key, mcp__playwright__browser_type, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_network_requests, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_drag, mcp__playwright__browser_hover, mcp__playwright__browser_select_option, mcp__playwright__browser_tabs, mcp__playwright__browser_wait_for, mcp__Ref__ref_search_documentation, mcp__Ref__ref_read_url, mcp__ide__getDiagnostics, mcp__ide__executeCode
 model: sonnet
 color: pink
 ---
