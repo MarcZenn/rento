@@ -26,12 +26,6 @@
   - Budget: ¥800K for technical + legal implementation
   - Self-hosting solves location compliance but NOT consent requirements
 
-<!-- -   Cost Breakdown:
-  - Legal Drafting: ¥300K - Specialized Japanese privacy lawyer
-  - Translation & Review: ¥150K - Legal-grade English/Japanese translation
-  - Technical Implementation: ¥250K - Consent management system development
-  - Compliance Documentation: ¥100K - Audit trails and procedures -->
-
 ### 💻 Technical Infrastructure
 - [ ] **Self-Hosting Infrastructure Setup**
   - Deploy self-hosted Convex in Japanese data center (AWS Tokyo/GCP Asia-Northeast)
