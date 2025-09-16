@@ -1,0 +1,128 @@
+template:
+  id: frd-template-v2
+  name: Feature Requirements Document
+  version: 2.0
+  output:
+    format: markdown
+    filename: docs/{{feature_name}}-frd.md
+    title: "{{feature_name}} Feature Requirements Document (FRD)"
+
+workflow:
+  mode: interactive
+  elicitation: advanced-elicitation
+
+sections:
+  - id: status
+    title: Status
+    choices: [True, False]
+    Completed: "{True|False}"
+  - id: overview
+    title: Overview
+    overview: This document outlines all feature requirements for {{feature_name}}
+      It should serve as a technical feature requirements document for the feature 
+      provided and previously outlined in the Product Development Roadmap Document (PDRD).
+  - id: context
+    title: Background Context
+    instruction: |
+      Ensure you know which feature you will be preparing this document for. If you are unsure or no feature has been provided, 
+      ask the user which feature you are to draft this document for.
+    sections:
+      - id: goals
+        title: Goals
+        type: bullet-list
+        instruction: Bullet list of 1 line desired outcomes the FRD will deliver if successful
+      - id: background
+        title: Background Context
+        type: paragraphs
+        instruction: 1-2 short paragraphs summarizing the background context, such as what we learned in the PDRD regarding this feature, why it is needed and what will it accomplish.
+
+  - id: requirements
+    title: Requirements
+    instruction: Draft the list of functional and non functional requirements under the two child sections
+    elicit: true
+    sections:
+      - id: functional
+        title: Functional
+        type: numbered-list
+        prefix: FR
+        instruction: Each Requirement will be a bullet markdown and an identifier sequence starting with FR
+        examples:
+          - "FR6: The chat leverages DeepL AI to detect the language of each user in the chat and translate their messages so that they can communicate.
+      - id: non-functional
+        title: Non Functional
+        type: numbered-list
+        prefix: NFR
+        instruction: Each Requirement will be a bullet markdown and an identifier sequence starting with NFR
+        examples:
+          - "NFR1: AWS service usage must aim to stay within free-tier limits where feasible."
+
+  - id: ui-goals
+    title: User Interface Design Goals
+    condition: Feature has UX/UI requirements
+    instruction: |
+      Capture high-level UI/UX vision to guide Architect and to inform Technical Design Document creation. Steps:
+
+      1. Pre-fill all subsections with educated guesses based on project context
+      2. Present the complete rendered section to user
+      3. Clearly let the user know where assumptions were made
+      4. Ask targeted questions for unclear/missing elements or areas needing more specification
+      5. This is NOT a detailed UI/UX spec - but it should have enough context and information to formuate a detailed UI/UX spec.
+    choices:
+      platforms: [Web, Mobile]
+    sections:
+      - id: ux-vision
+        title: Overall UX Vision
+      - id: interaction-paradigms
+        title: Key Interaction Paradigms
+      - id: core-screens
+        title: Core Screens and Views
+        instruction: | 
+          From a feature development and product perspective, what are the most critical screens or views necessary to deliver 
+          the feature values and goals?
+        examples:
+          - "Login Screen"
+          - "Map Search"
+          - "Property Detail Page"
+          - "Profile Page"
+      - id: branding
+        title: Branding
+        instruction: Any known UI themes or style guides that must be incorporated?
+        examples:
+          - "Apply the option for dark and light color themes in adherence to the theme/styling setup"
+      - id: target-platforms
+        title: "Target Device and Platforms: {Web|Mobile Only}"
+        instruction: Deliniate if this feature is for the {{project_name}} mobile app and therefore {Mobile} or for the {{project_name}} web dashboard and therefore {Web}
+        examples:
+          - "Web Dashboard"
+          - "Mobile Only"
+
+  - id: technical-requirements
+    title: Technical Requirements
+    instruction: |
+      Gather technical decisions that will guide the Architect. Steps:
+
+      1. Check if .claude/docs/tac.md file exists - use it to pre-populate choices
+      2. Outline the languages, frameworks, libraries, APIs and design tradeoffs that will be needed to implement this feature
+      2. If anything technical is unclear, ask user for guidance.
+      3. For unknowns, offer guidance based on project goals and MVP scope
+      4. Document ALL technical choices with rationale (why this choice fits the project)
+      5. These become guidelines for the Architect - be specific, detailed and complete
+    choices:
+      testing: [Unit Only, Unit + Integration, Full Testing Pyramid]
+    sections:
+      - id: feature-architecture
+        title: Feature Architecture
+        instruction: "CRITICAL - Document the high-level architectural needs or changes required to implement this feature if there are any.
+      - id: testing-requirements
+        title: Testing Requirements
+        instruction: "Document the testing requirements, unit only, integration, e2e, manual, need for manual testing convenience methods)."
+      - id: additional-assumptions
+        title: Additional Technical Assumptions and Requests
+        instruction: Throughout the entire process of drafting this document, if any other technical assumptions are raised or discovered appropriate for the architect, add them here as additional bulleted items
+
+  - id: next-steps
+    title: Next Steps
+    sections:
+      - id: architect-prompt
+        title: Architect Prompt
+        instruction: This section will contain the prompt for the Architect, keep it short and to the point to initiate create architecture mode using this document as input.

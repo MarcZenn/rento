@@ -7,12 +7,14 @@ A mobile application named Rento. The purpose of this application is to allow fo
 Rento is real-estate mobile app that helps foreigners and native residents discover rental apartments in Japan.
 
 ## Core Requirements
-- The app must be fully compliant with Japanese Data Protection Laws and 
+- It must be a mobile app
+- The app must be supported on both iOS and Android
+- The app must be fully compliant with Japanese Data Protection laws, Privacy laws and user consent requirements
 - The app must be fully internationalized and bilingual (English and Japanese) with future multilingual support.
 - The app must be accompanied by a web dashboard for real-estate agent property entry & management.
+- The app must support chat between users and agents with real time translation capabilities.
 - The app must be intuitive and simple to use. It must appeal to both Japanese natives and foreigners.
 - The app must have map-based, apartment discovery and search with various filtering options relevant to the Japanese real-estate rental market.
-- App will be launched in Tokyo first.
 
 ## Market Problem
 
@@ -40,55 +42,3 @@ Rento simplifies the rental process, removes language and cultural barriers, and
 - The Founder Institute - `https://fi.co/join`
 - E-Housing Japan - `https://e-housing.jp/`
 - Unistyles includes custom native code, which means it does not support Expo Go. Therefore the app cannot be run locally use Expo Go. Instead we must create a development build and run the development build.
-
-## Existing Technical Context
-
-A good deal of code has already been written for this project. 
-
-### Current Tech Stack (may change)
-- **Frontend**: React Native with Expo (SDK 53)
-- **Routing**: Expo Router v5 (file-based routing)
-- **Backend**: Convex (real-time backend with TypeScript)
-- **Authentication**: Clerk
-- **Styling**: react-native-unistyles v3 with custom theme system
-- **Internationalization**: react-i18next with English/Japanese support
-- **Error Tracking**: Sentry
-- **State Management**: Convex queries/mutations
-- **Native Platforms**: iOS and Android
-
-### Key Architecture Patterns
-
-**Backend Schema Design**:
-The Convex schema uses a hybrid internationalization approach:
-- Database translation tables for key UI content and property metadata
-- AI-powered translation for dynamic user-generated content
-- Comprehensive relational design for Japanese real estate (prefectures, wards, agencies, properties)
-- Must be self-hosted (not yet implemented)
-
-**Authentication Flow**:
-- Clerk handles authentication with token caching
-- Convex integrates with Clerk for authenticated queries/mutations
-- User profiles stored in Convex with employment status and rental preferences
-
-**Styling System**:
-- Unistyles v3 for React Native styling with theme support
-- Custom theme system in `src/theme/` with colors, fonts, breakpoints
-- Inter and Noto Sans JP fonts for English/Japanese text
-
-**Internationalization**:
-- react-i18next with AsyncStorage persistence
-- Device locale detection with fallback to English
-- Japanese (ja) and English (en) supported
-- Translation files in `src/services/i18n/locales/`
-
-### Schema Considerations
-- Convex doesn't support unique constraints at schema level
-- Unique fields implemented via indexes + application logic
-- All timestamps stored as ISO8601 strings
-- Translations stored in separate `*_translations` tables
-
-### Routing
-- Uses Expo Router v5 file-based routing
-- Grouped routes with `(groupName)` folders
-- Authentication states managed through `(auth)`, `(protected)`, `(public)` groups
-- Tab navigation defined in `(tabs)/_layout.tsx`
