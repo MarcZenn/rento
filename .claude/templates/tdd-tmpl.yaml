@@ -5,7 +5,7 @@ template:
   output:
     format: markdown
     filename: docs/{{feature_name}}-tdd.md
-    title: "{{project_name}} Technical Design Document"
+    title: "Technical Design Document: {{feature_name}}"
 
 sections:
   - id: status
@@ -21,10 +21,10 @@ sections:
     name: "{{feature_name}} - Technical Design Document"
   - id: context
     title: Background Context
-    instruction: This is a Technical Design Document. It outlines the technnical requirements 
-      and implementation details for {{feature_name}}, It should serve as guiding document 
-      for a SCRUM master to reference as they craft tickets in Archon that devs and engineers can then
-      reference to implement {{feature_name}} from the provided FRD in the codebase.
+    instruction: This is a Technical Design Document for a single feature. It outlines the technnical requirements 
+      and implementation details for {{feature_name}}, It should serve as guiding document for a SCRUM master to 
+      reference as they craft tickets in Archon that devs and engineers can then reference to implement 
+      {{feature_name}} in the codebase.
       
       Before proceeding, use the provided Feature Requirements Document (FRD) as reference to draft this
       TDD. If you are unsure of which FRD to reference, or one has not been provided, ask the user to provide it.  

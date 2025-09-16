@@ -5,7 +5,7 @@ template:
   output:
     format: markdown
     filename: docs/{{feature_name}}-frd.md
-    title: "{{feature_name}} Feature Requirements Document (FRD)"
+    title: "Feature Requirements Document: {{feature_name}}"
 
 workflow:
   mode: interactive
@@ -18,14 +18,16 @@ sections:
     Completed: "{True|False}"
   - id: overview
     title: Overview
-    overview: This document outlines all feature requirements for {{feature_name}}
-      It should serve as a technical feature requirements document for the feature 
-      provided and previously outlined in the Product Development Roadmap Document (PDRD).
+    name: "{{feature_name}} - Feature Requirements Document"
   - id: context
     title: Background Context
     instruction: |
-      Ensure you know which feature you will be preparing this document for. If you are unsure or no feature has been provided, 
-      ask the user which feature you are to draft this document for.
+      This document outlines all feature requirements for {{feature_name}}.
+      It should serve as a technical Feature Requirements Document for the feature 
+      provided and previously outlined in the Product Development Roadmap Document (PDRD).
+
+      Before proceeding, ensure you know which feature from the PDRD you will be preparing this document for. 
+      If you are unsure or no feature has been provided, ask the user which feature you are to draft this document for.
     sections:
       - id: goals
         title: Goals

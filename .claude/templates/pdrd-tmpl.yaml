@@ -5,7 +5,7 @@ template:
   output:
     format: markdown
     filename: docs/pdrd.md
-    title: "{{project_name}} Product Development Roadmap Document (PDRD)"
+    title: "Product Development Roadmap Document: {{project_name}}"
 
 workflow:
   mode: interactive
