@@ -94,3 +94,4 @@ The Convex schema uses a hybrid internationalization approach:
 ### Themeing
 - Using Unistyles V3 for theme setup
 - Theme configuration, styles, fonts and setup can be found in `src/theme`
+- Unistyles includes custom native code, which means it does not support Expo Go. Therefore the app cannot be run locally use Expo Go. Instead we must create a development build and run the development build.

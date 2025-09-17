@@ -36,9 +36,102 @@ Rento simplifies the rental process, removes language and cultural barriers, and
 - Community - Giving back to Japanese communities we serve and promoting positive social impact and inclusion. 
 - Integrity - Exemplifying honesty, transparency and ethical behavior in all company actions and decisions.
 
-## Potential business partnerships:
+## ⚡ IMMEDIATE ACTIONS
 
-- Weave Living - `https://www.weave-living.com/`
-- The Founder Institute - `https://fi.co/join`
-- E-Housing Japan - `https://e-housing.jp/`
-- Unistyles includes custom native code, which means it does not support Expo Go. Therefore the app cannot be run locally use Expo Go. Instead we must create a development build and run the development build.
+- [ ] **Business Registration**
+  - Register Kabushiki-gaisha (株式会社) with Tokyo Legal Affairs Bureau
+  - Timeline: 2-3 weeks
+  - Cost: ¥200K-400K
+
+- [ ] **Data Privacy Compliance Setup**
+  - Implement emergency privacy policy (English/Japanese) - Legally Required Before Any Data Collection
+  - Set up user consent collection system
+  - Budget: ¥800K for technical + legal implementation
+  - Self-hosting solves location compliance but NOT consent requirements
+
+### 💻 Technical Infrastructure
+- [ ] **Self-Hosting Infrastructure Setup**
+  - Deploy self-hosted Convex in Japanese data center (AWS Tokyo/GCP Asia-Northeast)
+  - Deploy self-hosted Clerk for APPI compliance
+  - Set up Redis caching layer
+  - Budget: ¥300K-500K monthly infrastructure costs
+
+## 🤝 BUSINESS DEVELOPMENT
+
+### 🏢 Agent Partnership Program
+- [ ] **Identify Target Agencies**
+  - Research 15-20 progressive real estate agencies in priority Tokyo wards
+  - Focus: Agencies with existing foreign client experience
+  - Target areas: Shibuya, Minato, Shinjuku (high foreign resident density)
+
+- [ ] **Partnership Strategy**
+  - Develop tiered subscription model (Basic ¥15K/month, Professional ¥35K/month)
+  - Create agent onboarding and training materials
+
+- [ ] **Agent Recruitment**
+  - Schedule meetings with 10+ target agencies
+  - Present platform value proposition (slide deck presentation)
+  - Goal: 15 agency partnerships for launch
+
+### 📊 Market Validation
+- [ ] **User Research**
+  - Conduct 10+ interviews with foreign residents in Tokyo
+  - Survey 10+ real estate agents about platform interest
+  - Validate core value propositions and feature priorities
+
+- [ ] **Competitive Analysis**
+  - Analyze SUUMO, LIFULL HOME'S, AtHome feature gaps
+  - Identify unique positioning opportunities
+  - Document competitive advantages
+
+- [ ] **Contact Potential Business Partners**
+  - Weave Living - `https://www.weave-living.com/`
+  - The Founder Institute - `https://fi.co/join`
+  - E-Housing Japan - `https://e-housing.jp/`
+
+## 💰 FUNDING & FINANCIAL SETUP
+
+- [ ] **Payment Processing Setup**
+  - Implement Stripe/PayPal for agent subscription billing
+  - Set up Japanese business banking
+  - Configure tax compliance and accounting
+
+### 🎯 Revenue Model Implementation
+- [ ] **Agent Subscription System**
+  - Build tiered pricing structure
+  - Implement subscription management and billing
+  - Create agent analytics dashboard
+
+- [ ] **Financial Projections**
+  - Target: 50 agent partners by launch
+  - Year 1 Revenue Goal: ¥45-65M
+  - Break-even timeline: 18-24 months
+
+## 🎯 GO-TO-MARKET STRATEGY (Weeks 8-16)
+
+### 📢 Marketing & User Acquisition
+- [ ] **Digital Marketing Setup**
+  - Google Ads targeting foreign renters (¥500K monthly budget)
+  - Facebook/Instagram campaigns for international community
+  - SEO-optimized content marketing (rental guides, neighborhood content)
+
+- [ ] **Community Partnerships**
+  - Partner with international organizations (Chambers of Commerce, expat groups, what groups??)
+  - Establish referral program for early users
+  - Reach out to prominent Japan Youtubers - pay them if you have to.
+
+- [ ] **Brand Development**
+  - Create bilingual marketing materials (English/Japanese)
+  - Develop social media presence (LINE, Instagram, Facebook, TikTok)
+  - Design user onboarding and education content
+
+### 📈 Launch Metrics & KPIs
+- [ ] **Success Metrics Definition**
+  - Target: 1,000 registered users in first 3 months
+  - Goal: 500+ property inquiries monthly
+  - Objective: 50+ successful renter-agent connections monthly
+  - App store rating target: 4.2+ stars
+
+**CRITICAL SUCCESS FACTOR:** There are two core foundational needs that must be in place in order to enable all subsequent business development: 
+    1. MVP launch with working legal compliance systems in place. MVP must be a compliant, functional platform.
+    2. Real-estate agent partnerships must be in place prior to user growth. This means we need real-estate agents to upload properties onto the platform (for free at first) so that we can then go pursue an aggresive user signups campaign. 

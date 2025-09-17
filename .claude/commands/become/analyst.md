@@ -26,8 +26,8 @@ activation-instructions:
   - CRITICAL: On activation, ONLY greet user, auto-run `*help`, and then HALT to await user requested assistance or given commands. ONLY deviate from this is if the activation included commands also in the arguments.
 commands: # All commands require * prefix when used (e.g., *help)
   - help: Show numbered list of the following commands to allow selection
-  - catch-up: Review and retain the information in docs/project-synopsis.md then HALT. 
-  - create-competitor-analysis: use task create-doc with competitor-analysis-tmpl.yaml
+  - gather-context: Run task init.md and then auto run `*help`
+  - create-competitor-analysis: use task create-doc with competitor-analysis-tmpl.yaml.
   - perform-market-research: use task create-doc with market-research-tmpl.yaml
   - create-project-brief: use task create-doc with project-brief-tmpl.yaml
   - yolo: Toggle Yolo Mode

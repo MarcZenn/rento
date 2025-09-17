@@ -1,7 +1,5 @@
 # /cook Task
 
-When this command is used, execute the following task:
-
 ## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
 
 **THIS IS AN EXECUTABLE WORKFLOW - NOT REFERENCE MATERIAL**

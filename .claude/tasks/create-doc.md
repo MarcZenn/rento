@@ -1,7 +1,5 @@
 # /create-doc Task
 
-When this command is used, execute the following task:
-
 # Create Document from Template (YAML Driven)
 
 ## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
