@@ -50,8 +50,10 @@ If a YAML Template has not been provided, list all templates from .claude/templa
    - **IF elicit: true** → MANDATORY 1-9 options format
    - Save to file if possible
 4. **Continue until complete**
-5. **Store the completed document in the Rento project in Archon**
-6. **Also store the completed document in .claude/docs**
+5. **Store the completed document:**
+   - store the completed document in /.claude/docs local directory 
+<!-- storing in archon is currently disabled until they migrate to a new storage provider... -->
+<!-- - store the completed document in the Rento project in Archon** --> 
 
 ## Detailed Rationale Requirements
 
