@@ -1,0 +1,230 @@
+template:
+  id: tdd-template-v2
+  name: Technical Design Document
+  version: 2.0
+  output:
+    format: markdown
+    filename: docs/{{feature_name}}-tdd.md
+    title: "Technical Design Document: {{feature_name}}"
+
+sections:
+  - id: status
+    title: Status
+    choices: 
+      - priority: [Critical, High, Medium, Low]
+      - triaged: [True, False]
+    triaged: "{True|False}"
+    priority: "{Critical|High|Medium|Low}"
+    last_updated: "<YYYY-MM-DD>"
+  - id: overview
+    title: Overview
+    name: "{{feature_name}} - Technical Design Document"
+  - id: context
+    title: Background Context
+    instruction: This is a Technical Design Document for a single feature. It outlines the technnical requirements 
+      and implementation details for {{feature_name}}, It should serve as guiding document for a SCRUM master to 
+      reference as they craft tickets in Archon that devs and engineers can then reference to implement 
+      {{feature_name}} in the codebase.
+      
+      Before proceeding, use the provided Feature Requirements Document (FRD) as reference to draft this
+      TDD. If you are unsure of which FRD to reference, or one has not been provided, ask the user to provide it.  
+  - id: objective
+    title: Objective & Scope
+    sections: 
+      - id: summmary
+        title: Summary
+        type: paragraph
+        instructions: | 
+          Define what the objective of this feature is and what it would enable the app to do. Include a brief
+          description of what this feature is and does. Also, include a statement regarding why this feature is needed.
+      - id: success_metrics
+        title: Success Metrics
+        type: bullet-list
+        instruction: Bullet list of 1 line desired success metrics this feature will deliver if implemented.
+      - id: in_scope
+        title: In Scope
+        type: bullet-list
+        instruction: Bullet list of 1 line feature functionality and operations that are in scope
+      - id: out_of_scope
+        title: Out of Scope
+        type: bullet-list
+        instruction: Bullet list of 1 line feature functionality and operations that are out of scope
+  - id: compliance
+    title: Compliance Mapping
+    sections:
+      - id: map
+        title: Regulatory & Compliance Mapping
+        type: nested-list
+        instruction: | 
+          If there are any compliance and/or regulatory needs or concerns that can or should be addressed by this feature 
+          define them here in a nested list. Each regulatory requirement should be a list item with a sublist underneath outlining
+          the technical requirements of this feature that meet the regulatory requirement
+  - id: architecture
+    title: Architecture & Integrations
+    sections:
+      - id: context
+        title: Context Diagram
+        type: bullet-list
+        instruction: Bulleted list of the context behind this feature
+      - id: data_flow
+        title: Data Flow Overview
+        type: numbered-list
+        examples:
+          - "User logs in via Clerk → App checks consent gate → If incomplete, show consent modal"
+          - "On submit → Consent Service writes consent rows + audit log → Feature flags granted"
+          - "Downstream services query cached consent snapshot by userId + purpose"
+          - "Revoke → emit consent.revoked event → downstream purge/disable and stop processing"
+        instruction: Describe the new data flows of this feature in a sequential numbered list format.
+      - id: integrations
+        title: Integration Points
+        type: object
+        example: 
+          auth:
+            provider: "Clerk (self-hosted)"
+            hook: "Post-auth session check → consent gate"
+          convex:
+            provider: Convex (self-hosted)
+            hook: to store new user in convex
+        rule: "Emit events only if 'usage_analytics' consent = true"
+        instruction: Write out all of the integrations needed for this feature in a concise object format
+  - id: data_model
+    title: Data Model
+    instruction: | 
+      If this feature requires updates or changes to the application data model (Convex DB) outline them in the sections below.
+      Include new database table constraints and relationships as well. For each section, outline what aspect of {{feature_name}} 
+      the database changes are meant to support and how.
+    sections:
+      - id: schema
+        title: Schema Changes
+        instruction: Define any new schemas or changes to existing DB schemas here. 
+        sections:
+          - id: tables
+            title: Tables
+            instruction: Define new database tables or updates to existing tables here
+          - id: fields
+            title: Fields
+            instruction: Define new database table fields or updates to existing table fields here
+  - id: api
+    title: API Contract (Convex functions)
+    instruction: If this feature requires the creation of new Convex enpoints define them in the sections below.
+    sections:
+      - id: endpoints
+        title: Endpoints
+        type: list
+        section:
+          - id: name
+            title: name
+            example: GetUsersById
+            instruction: write out the name of the new fuction here.
+          - id: request
+            title: Request
+            choices: 
+              method: [GET, DELETE, POST, PUT]
+            sections:
+              - id: method
+                title: Method
+                method: "{GET|DELETE|POST|PUT}"
+              - id: request_headers
+                title: Request Headers
+                instruction: write out the request headers needed for this function here
+              - id: responses
+                title: Responses
+                instruction: outline the different response bodies for this endpoint including status codes.
+          - id: purpose
+            title: Purpose
+            instruction: One sentence description of what the purpose of this function is
+          - id: route
+            title: Route
+            example: /users/GetUsersById
+            instruction: Write the route for this function here
+  - id: frontend_spec
+    title: Frontend Spec (Mobile)
+    instruction: If this feature requires changes to the mobile app UI/UX outline them in the sections below.
+    sections:
+      - id: surfaces
+        title: Surfaces
+        type: bullet-list
+        instruction: Bullet list of 1 line surfaces or new pages or existing page updates that will be needed to implement this feature
+      - id: components
+        title: Compoments
+        example:
+          - consent_modal
+              sections:
+                - "Intro summary with link to policy (version pinned)"
+                - "Checkbox list per purpose with plain-language description"
+                - "Primary CTA: Save choices (disabled until explicit selections made)"
+                - "Locale switch (EN/JP)"
+        type: nested-list
+        instruction: Outline the frontend react/react-native components that will be needed to implement this feature in a nested list format
+      - id: state
+        title: State
+        type: nested list
+        instruction: Outline the frontend state management changes or updates that will be needed to implement this feature in a nested list format
+  - id: enforcement
+    title: Enforcement & Guardrails
+    instruction: Include any guardrails that may be needed here to support the function and purpose of this feature
+  - id: security
+    title: Security
+    instruction: CRITICAL - the protection of user data and application security is of utmost importance. Fill out the sections below to outline any security needs or concerns 
+    sections:
+      - id: touchpoints
+        title: Touchpoints
+        type: nested-list
+        instruction: | 
+          Add a list here of areas where implementation or functionality of this feature may expose or present security flaws or areas of exploit.
+          For each item, add a sublist outlining how the exploits or flaws work and how we can mitigate them. If there are none then leave this section empty.
+      - id: pii
+        title: PII Handling
+        type: nested-list
+        instruction: | 
+          If this feature involves handling of user PII in any way then outline those aspects here in a nested list. 
+          For each list item include a sublist of how we will protect that user PII.
+      - id: compliance
+        title: Secure Compliance
+        type: bullet-list
+        instruction: Outline any security requirements needed to keep the application legally compliant as a bulleted list.
+      - id: additional
+        title: Additional Concerns or Rquirements
+        instruction: Add any additonal security concerns, requirements or changes here such as data retention rules or needs, threat models, or points of access control
+  - id: localizations
+    title: Localizations
+    supported_locales: ["en", "ja"]
+    sections:
+      - id: frontend
+        title: Frontend Localizations
+        type: bullet-list
+        instruction: If this feature adds new areas of UI that need to be localized, outline those components or views here in a bulleted-list
+      - id: backend
+        title: Backend Localizations
+        instruction: | 
+          The datbase is structured in such a way that certain fields that should be localized are stored in the parent table in english and 
+          also in child translations table for the locales currently supported. If this feature requires the addition of any new such table fields, 
+          outline the tables affected here, as well as the fields and the child translations tables and fields affected as well.
+  - id: performance
+    title: Performance & Reliability
+    sections:
+      - id: reliability
+        title: Reliability
+        instruction: | 
+          If needed, outline how this feature will be kept reliable. If this features purpose is to improve reliability outline that here as well.
+          Be specific with the technical implementations or code/system changes needed to keep this feature reliable. Be reasonable with this and 
+          in scope for an MVP
+      - id: targets
+        title: Performance Targets
+        instruction: | 
+          What are the performance targets for this feature? Outline that here. Be specific with the technical implementations or 
+          code/system changes needed to keep peformance targets. Be reasonable with the targets and in scope for an MVP
+  - id: rollout
+    title: Rollout Plan
+    instruction: | 
+      How will this feature be deployed? are there any special considerations or aspects of this feature that will require a special deployment plan?
+      Outline this in the deploymennt plan subsection below.
+    deployment_plan:
+  - id: acceptance
+    title: Acceptance Criteria
+    type: bullet-list
+    instruction: Include a bulleted list of the acceptance criteria for implementation of this feature
+  - id: open_questions
+    title: Open Questions
+    type: bullet-list
+    instruction: Include a bulleted list of open questions regarding the purpose, functionality or implementation of this feature from a technical perspective

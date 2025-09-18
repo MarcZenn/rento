@@ -1,0 +1,143 @@
+template:
+  id: pdrd-template-v2
+  name: Product Development Roadmap Document
+  version: 2.0
+  output:
+    format: markdown
+    filename: docs/pdrd.md
+    title: "Product Development Roadmap Document: {{project_name}}"
+
+workflow:
+  mode: interactive
+  elicitation: advanced-elicitation
+
+sections:
+  - id: overview
+    title: Overview
+    overview: This document outlines all technical features and functionality for {{project_name}}. 
+      It should serve as a technical implementation roadmap for the {{project_name}} app and 
+      web dashboard, stemming from the Project Brief (brief.md).
+  - id: context
+    title: Background Context
+    instruction: |
+      Ask if Project Brief document is available. If NO Project Brief exists, STRONGLY recommend creating one first and HALT. 
+      If Project Brief exists, review and use it to populate Goals (bullet list of desired outcomes) and Background 
+      Context (1-2 paragraphs on what this solves and why) so we can determine what is and is not in scope for PDRD mvp. 
+      Either way this is critical to determine the requirements.
+    sections:
+      - id: goals
+        title: Goals
+        type: bullet-list
+        instruction: Bullet list of 1 line desired outcomes the PDRD will deliver if successful - user and project desires
+      - id: background
+        title: Background Context
+        type: paragraphs
+        instruction: | 
+          1-2 short paragraphs summarizing the background context, such as what we learned in the brief without being 
+          redundant with the goals, what and why this solves a problem, what the current landscape or need is
+
+  - id: phases
+    title: Development Phases
+    instruction: |
+      Use the Project Brief to think about and outline each of the phases of the product development 
+      cycle needed to produce a working and viable MVP for {{project_name}}.
+      
+      Each phase will consist of one or more features needed to fully implement the phase. These features are 
+      outlined in the mvp-features section of this document. Phases should be prioritized by legal and compliance 
+      needs, technical implementation dependencies, business value towards an MVP, and backend infrastructure 
+      requirements. Populate the phases child section with the phases outlined.
+    sections:
+      - id: phases
+        title: Implementation Phases
+        type: list
+        sections:
+          - id: name
+            title: Phase Name: {{phase_name}}
+          - id: objectives
+            title: Objectives: {{phase_name}}
+            type: bulleted list
+            instruction: create a bulleted list of technical and business objectives met by this phase
+          - id: requirements
+            title: Technical Requirements
+            type: bulleted list
+            instruction: create a bulleted list of the technical dependencies and requirements for this phase. Include a brief and concise description for each list item.
+          - id: why
+            title: Why Critical
+            type: paragraph
+            instruction: write a concise but comprehensive statement outlining why this phase is critical to the overall success of {{project_name}}
+
+  - id: mvp-features
+    title: MVP Features
+    instruction: |
+      For each phase outlined in the phases section of this document, Think about and outline each of 
+      the features needed to fully implement and meet all of the requirements of that phase.
+
+      Features should be prioritized by legal and compliance needs, technical dependencies and 
+      backend infrastructure requirements. Populate the features child section with the features you outline.
+      Each feature will have a check next to it denoting whether it has been selected for implementation or not.
+    sections:
+      - id: features
+        title: Feature List
+        type: checklist
+        choices:
+          priority: [Critical, High, Medium, Low]
+          implemented: [True|False]
+        sections:
+          - id: status
+            title: Status
+            Implemented: "{True|False}"
+          - id: name
+            title: Feature Name
+          - id: priority
+            title: Feature Priority
+            priority: "{Critical|High|Medium|Low}"
+          - id: dependencies
+            title: Technical Dependency
+            instruction: If this feature depends on other features or technical aspects, define them here.
+          - id: phase
+            title: Phase {{phase_name}}
+            instruction: Add the name of the phase that this feature belongs to in the title property above.
+          - id: description
+            title: Description
+            instruction: Write a detailed description of the feature.
+          - id: key-components
+            title: Key Components
+            type: nested-list
+            instruction: Create a nested list of the key components for this feature. Under each key component add another list further outlining aspects of the key component.
+            example: 
+              - Real-Time Translation
+                  - Bidirectional Japanese ↔ English translation
+                  - Context-aware translation for rental terminology
+                  - Conversation history with original and translated text
+                  - Translation confidence scoring and human verification flags
+          - id: reasoning
+            title: Why Essential
+            type: bullet-list
+            instruction: Write out a bulleted list of reasons why this feature is essential to {{project_name}} and its success
+          - id: implementation
+            title: Technical Implementation
+            type: nested-list
+            instruction: | 
+              Create a nested list of the technical requirements needed to fully implement this feature.
+              Keep it high-level and deliniate between frontend and backend requirements. Under each  
+              requirement write out another list of the specific requirements or dependencies neede to 
+              implement the parent requirement, if there are any.
+
+  - id: review
+    title: Review Report
+    instruction: | 
+      Have a deep think and ensure that no phases or features are dependent on completion of
+      other phases or feature. In other words, phases and features should be in seqential order of technical dependencies. For example, a
+      feature to update profile inforomation should not come before authentication features. Do this review and note down any revisions you
+      made to the document here along with why you made those revisions.
+
+   - id: checklist-results
+    title: Checklist Results Report
+    instruction: | 
+      Before running the checklist, offer to output the full updated PDRD. If outputting it, confirm with the user 
+      that you will be proceeding to run the checklist and produce the report. Once the user confirms, execute the pm-checklist and populate 
+      the results in this section.
+
+
+
+
