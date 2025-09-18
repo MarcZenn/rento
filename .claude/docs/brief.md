@@ -6,7 +6,7 @@ Rento is a bilingual mobile rental property platform designed to transform the r
 
 **Target Market:** 550,000+ foreign residents in Tokyo and tech-savvy Japanese professionals, representing a ¥65M annual revenue opportunity by Year 3.
 
-**Key Value Proposition:** The only platform providing comprehensive bilingual service with cultural navigation, certified agent training for international clients, and integrated real-time translation - going beyond basic translation to offer true cultural bridge technology.
+**Key Value Proposition:** The only bilingual Japanese apartment rental platform. Rento simplifies the rental process, removes language and cultural barriers, and modernizes property discovery and communication — all in one unified platform.
 
 **Business Model:** Dual revenue streams through agent subscription fees (¥15K-50K/month) and transaction fees (1-3% of annual rent), targeting 50 agent partnerships and 25,000 annual transactions by Year 3.
 
@@ -75,11 +75,11 @@ Japan's rental property market presents significant barriers for foreign residen
 
 ### Core Concept and Approach
 
-Rento creates the first comprehensive "Cultural Bridge Technology" platform that goes beyond translation to provide true cultural navigation for international real estate transactions. The solution combines three critical components:
+Rento creates the first comprehensive "Cultural Bridge Technology" platform that goes beyond translation to provide true cultural navigation and modernization for Japanese real-estate rental transactions. The solution combines three critical components:
 
-1. **Bilingual Service Excellence**: Native-level English and Japanese customer service with cultural context, not just language translation
-2. **Agent Cultural Competency**: Training and certification program for real estate agents serving international clients
-3. **Modern Technology Platform**: Mobile-first experience optimized for cross-cultural communication and transaction facilitation
+1. **Bilingual Service Excellence**: Native-level English and Japanese UI/UX with cultural context, not just language translation
+2. **Modernized Discovery**: Modern and intuitive rental apartment discovery in a single unified platform
+1. **Modern Technology Platform**: Mobile-first experience optimized for cross-cultural communication and transaction facilitation
 
 ### Key Differentiators from Existing Solutions
 
@@ -87,11 +87,6 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 - Real-time cultural context translation for property descriptions, legal requirements, and agent communication
 - Educational content about Japanese rental customs, expectations, and tenant rights
 - Personalized guidance based on customer's home country and cultural background
-
-**Agent Quality Assurance:**
-- Bilingual agent certification program with cultural competency requirements
-- Ongoing training for international client service excellence
-- Agent success metrics and customer satisfaction tracking
 
 **Complete Ecosystem Approach:**
 - Integrated platform spanning property search to move-in completion and ongoing support
@@ -101,14 +96,14 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 ### Why This Solution Will Succeed Where Others Haven't
 
 **Market Position Advantages:**
-- First comprehensive bilingual platform with modern technology and strong agent focus
+- First comprehensive bilingual mobile platform
 - Cultural expertise creates defensible competitive advantage beyond pure technology
-- Agent-first business model aligned with industry relationship dynamics
+- Foreigner-friendly rental apartment discovery with intutive filters
 
 **Execution Advantages:**
 - Purpose-built technology for cross-cultural real estate transactions vs. retrofitted existing platforms
 - Specialized team with bilingual and cultural expertise vs. general technology teams
-- Market timing during digital transformation window before major competitive responses
+- Market timing during digital transformation window before major competitor responses
 
 **Business Model Advantages:**
 - Multiple revenue streams reducing dependence on single model (subscriptions + transactions + partnerships)
@@ -118,9 +113,9 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 ### High-level Vision for the Product
 
 **Year 1 Vision: Market Foundation**
-- Comprehensive bilingual rental platform serving Tokyo foreign residents
-- 50 certified bilingual agent partnerships with cultural competency training
-- 1,000+ successful rental transactions with measurable customer satisfaction excellence
+- Comprehensive bilingual rental discovery platform serving Tokyo foreign residents and native residents
+- 25 certified bilingual agent partnerships
+- 500+ successful rental transactions with measurable customer satisfaction excellence
 
 **Year 2-3 Vision: Market Leadership**
 - Dominant position in bilingual rental services with defensive competitive moats
@@ -153,7 +148,7 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 
 **Specific Needs and Pain Points:**
 - Language barriers in agent communication and document understanding
-- Cultural navigation for Japanese rental customs (key money, guarantors, seasonal patterns)
+- Foreigner cultural navigation for Japanese rental customs (key money, guarantors, seasonal patterns)
 - Discrimination concerns and desire for respectful, professional treatment
 - Time constraints due to work demands requiring efficient, reliable service
 - Lack of credit history or rental references in Japanese context
@@ -164,6 +159,7 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 - Understand rights, responsibilities, and cultural expectations clearly
 - Build positive relationships with agents and landlords for future transactions
 - Integrate successfully into Japanese neighborhood and community
+- An overall easier experience
 
 ### Secondary User Segment: Digital-Native Japanese Professionals
 
@@ -213,7 +209,7 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 - **Transaction Success Rate**: Achieve 90%+ successful lease completion rate for customers who engage with platform
 - **Cultural Service Quality**: 95%+ customer satisfaction rating for bilingual service and cultural navigation
 - **Response Time**: Average agent response to customer inquiries within 2 hours during business hours
-- **Referral Rate**: 40%+ of new customers acquired through existing customer referrals
+- **Referral Rate**: 40%+ of new customers acquired through existing customer referrals or business partnerships
 - **Retention**: 80%+ customer retention for lease renewals and future rental needs
 
 ### Key Performance Indicators (KPIs)
@@ -227,31 +223,41 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 
 ## MVP Scope
 
-### Core Features (Must Have) TODO:: fix this - its wrong 
+### Core Features (Must Have)
 
-- **Bilingual Property Search Platform**: Comprehensive property database with native English and Japanese interfaces, cultural context for property descriptions, and neighborhood information tailored for international residents
+- **Map-Based Property Search Platform**: Comprehensive property database with advanced property search system with Japan-specific filters, native English and Japanese interfaces, bilingual property descriptions with cultural context, and intelligent matching based on user preferences. Interactive map interface for property discovery with location-based search, neighborhood exploration, and commute time visualization tailored for Tokyo's complex transportation system. 
 
-- **Certified Agent Matching System**: Database of bilingual-certified real estate agents with cultural competency training, agent profiles highlighting international client experience, and quality rating system based on customer feedback
+- **Property Details & Media System**: Rich, multilingual property detail pages with comprehensive information, photo galleries, and all necessary rental information presented in both English and Japanese.
 
-- **Real-time Translation and Communication**: Integrated messaging system with AI-powered translation, cultural context suggestions, and human bilingual support escalation for complex communications
+- **Separate Web Dashboard**: Direct communication system between renters and real estate agents with built-in translation capabilities, inquiry tracking, property listings management and professional relationship management enabled by a comprehensive web-based dashboard.
+
+- **User Preferences & Rental Readiness System**: Intelligent system that captures detailed rental preferences and calculates a "Rental Readiness Score" to help users understand their position in the Japanese rental market while enabling better property matching.
+
+- **Favorites & Saved Properties System**: Comprehensive property bookmarking and organization system allowing users to save, categorize, and track properties of interest with notifications about changes and availability.
+
+- **Basic Notification System**: Comprehensive notification system to keep users informed about property updates, agent communications, and platform activities while respecting user preferences and cultural communication norms.
+
+- **Real-time Translation and Communication**: Advanced real-time translation system enabling seamless communication between English-speaking renters and Japanese-speaking agents or vice-versa using AI translation with context awareness and rental terminology optimization.
 
 - **Cultural Navigation Dashboard**: Educational content about Japanese rental customs, step-by-step guidance for application processes, and personalized checklists based on customer's home country and visa status
 
-- **Agent Training and Certification Platform**: Online training modules for cultural competency, assessment and certification system for bilingual agent qualification, and ongoing education resources for international client service
+- **User Profile Management System**: Comprehensive user profile system allowing users to create, edit, and manage their personal information, rental preferences, and employment details. This forms the foundation for all other features and enables personalized property recommendations.
 
 - **Mobile-Optimized User Experience**: React Native mobile application with modern UX/UI design, offline capabilities for property information, and seamless integration between customer and agent interfaces
 
 ### Out of Scope for MVP
 
-- Property management and maintenance request systems
+- human bilingual support escalation for complex communications in messaging system
 - Short-term rental or Airbnb-style accommodations
 - Property investment consultation or sales transactions
 - Utility setup and relocation services integration
-- Community social features and foreign resident networking
+- Community social features and foreign resident networking & User Forums
 - Advanced AI property recommendation algorithms
 - Virtual reality property tours and 360° viewing
 - Integration with Japanese government systems for visa verification
 - Multi-city expansion beyond Tokyo Metropolitan Area
+- Intelligent content feed combining new property recommendations, Japanese real estate news, neighborhood updates, and rental market insights to keep users engaged and informed about Tokyo's rental landscape.
+- Advanced Analytics & Reporting System
 
 ### MVP Success Criteria
 
@@ -310,10 +316,60 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 
 ### Architecture Considerations
 
-- **Repository Structure**: Monorepo approach with separate packages for mobile app, web interface, shared components, and backend services for development efficiency and code sharing
-- **Service Architecture**: Microservices architecture with clear separation between user management, property data, translation services, and communication systems
-- **Integration Requirements**: Third-party translation APIs (DeepL, Google Translate), property data feeds from real estate agencies, payment processing (Stripe), push notification services
-- **Security/Compliance**: APPI compliance implementation for data privacy, end-to-end encryption for sensitive communications, audit logging for regulatory compliance, secure API authentication and authorization
+- **Repository Structure**: 
+  - Monorepo approach with separate packages for mobile app, web interface, shared components, and backend services for development efficiency and code sharing
+- **Service Architecture**: 
+  - Microservices architecture with clear separation between user management, property data, translation services, and communication systems
+- **Integration Requirements**: 
+  - Third-party translation APIs (DeepL, Google Translate), property data feeds from real estate agencies, payment processing (Stripe), push notification services
+- **Security/Compliance**: 
+  - APPI compliance implementation for data privacy, end-to-end encryption for sensitive communications, audit logging for regulatory compliance, secure API authentication and authorization
+- **Self-Hosted Infrastructure**:
+    - Self-hosted Convex on AWS Tokyo/Azure Japan/GCP Tokyo
+    - Self-hosted Clerk or migration to Japanese-compliant identity provider
+    - All personal data processing within Japanese boundaries
+    - APPI-compliant data handling and audit systems
+- **Performance & Scalability Infrastructure**:
+    - Redis for search results, translations, and session management
+    - CloudFlare R2 or AWS S3 with Japanese edge locations
+    - Geospatial indexing, full-text search, query optimization
+    - Queue system for translation, notifications, and analytics
+    - Real-time messaging and notification infrastructure
+
+### Existing Infrastructure Leverage
+
+- **Convex Schema:** Comprehensive database design supports most features (requires self-hosting migration)
+- **Authentication:** Clerk integration provides foundation (requires compliance migration)
+- **Internationalization:** i18n system enables bilingual implementation
+- **Styling System:** Unistyles provides consistent theming
+- **Mobile Platform:** Expo Router enables rapid deployment
+
+### Data Flow & Privacy Architecture
+
+- **Data Residency:** All data processing within Japanese infrastructure
+- **Encryption:** End-to-end encryption for sensitive user data
+- **Audit Trails:** Comprehensive logging for compliance and security
+- **API Management:** Rate limiting, authentication, and monitoring for all integrations
+- **Cross-Border Prevention:** Strict controls to prevent data leaving Japan
+
+### Authentication Flow
+
+- **Clerk:** Clerk handles authentication with token caching
+- **Convex:** Convex integrates with Clerk for authenticated queries/mutations
+
+### Internationalization
+
+- react-i18next with AsyncStorage persistence
+- Device locale detection with fallback to English
+- Japanese (ja) and English (en) supported
+- Translation files in `src/services/i18n/locales/`
+
+### Routing
+
+- Uses Expo Router v5 file-based routing
+- Grouped routes with `(groupName)` folders
+- Authentication states managed through `(auth)`, `(protected)`, `(public)` groups
+- Tab navigation defined in `(tabs)/_layout.tsx`
 
 ## Constraints & Assumptions
 
