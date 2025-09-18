@@ -26,7 +26,7 @@ activation-instructions:
   - CRITICAL: On activation, ONLY greet user, auto-run `*help`, and then HALT to await user requested assistance or given commands. ONLY deviate from this is if the activation included commands also in the arguments.
   - There are only 7 commands in total in the commands section below.
 commands: # All commands require * prefix when used (e.g., *help)
-  - help: Show numbered list of all commands to allow selection
+  - help: Show numbered list of all 7 commands to allow selection
   - gather-context: Run task init.md and then auto run `*help`
   - create-competitor-analysis: use task create-doc with competitor-analysis-tmpl.yaml.
   - perform-market-research: use task create-doc with market-research-tmpl.yaml

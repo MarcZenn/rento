@@ -475,19 +475,19 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 
 ### Immediate Actions
 
-1. **Technical Architecture Validation**: Conduct detailed technical feasibility study for real-time translation integration and APPI compliance implementation with specific cost and timeline estimates
+1. **Build MVP**: CRITICAL: Create detailed product development roadmap document (PDRD) and development timeline based on technical architecture decisions. BEFORE subsequent immediate actions can be taken, the application MVP MUST be fully built, tested, functional and compliant. 
 
-2. **Agent Partnership Pilot Program**: Initiate conversations with 10-15 target real estate agencies to validate subscription model interest and cultural training willingness
+2. **Technical Architecture Validation**: Conduct detailed technical feasibility study for real-time translation integration and APPI compliance implementation with specific cost and timeline estimates
 
-3. **Customer Development Interviews**: Conduct 20+ interviews with foreign residents about willingness to pay for cultural navigation services and pricing sensitivity research
+3. **Agent Partnership Pilot Program**: Initiate conversations with 10-15 target real estate agencies to validate subscription model interest and cultural training willingness
 
-4. **Regulatory Compliance Deep Dive**: Engage legal counsel for comprehensive APPI compliance requirements analysis and implementation roadmap development
+4. **Customer Development Interviews**: Conduct 20+ interviews with foreign residents about willingness to pay for cultural navigation services and pricing sensitivity research
 
-5. **Competitive Intelligence Monitoring**: Establish systematic monitoring of SUUMO and LIFULL HOME'S international service development and strategic announcements
+5. **Regulatory Compliance Deep Dive**: Engage legal counsel for comprehensive APPI compliance requirements analysis and implementation roadmap development
 
-6. **Team Building Strategy**: Develop hiring plan for bilingual customer service team and cultural competency specialists within budget constraints
+6. **Competitive Intelligence Monitoring**: Establish systematic monitoring of SUUMO and LIFULL HOME'S international service development and strategic announcements
 
-7. **MVP Development Planning**: Create detailed product development roadmap document (PDRD) and development timeline based on technical architecture decisions
+7. **Team Building Strategy**: Develop hiring plan for bilingual customer service team and cultural competency specialists within budget constraints
 
 ### PM Handoff
 
@@ -500,9 +500,8 @@ This Project Brief provides the full context for Rento, consolidating comprehens
 - APPI compliance requirements influence technology architecture decisions but create competitive moat once implemented
 
 **Product Manager should focus on:**
-1. Creating detailed Product Development Roadmap Document (PDRD) section by section based on this strategic foundation
+1. Creating a detailed Product Development Roadmap Document (PDRD) that outlines all MVP features, section by section based on this strategic foundation
 2. Validating technical architecture decisions with development team for feasibility and cost optimization
 3. Developing agent partnership strategy and pilot program for early market validation
-4. Establishing customer development interview program for continued market research and product-market fit validation
 
 Review this brief thoroughly to work with the development team and stakeholders to create detailed implementation plans, ensuring all strategic insights are translated into actionable product requirements and development priorities.
