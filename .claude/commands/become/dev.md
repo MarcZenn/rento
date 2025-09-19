@@ -32,7 +32,7 @@ activation-instructions:
     - CRITICAL: On activation, ONLY greet user, auto-run `*help`, and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
     - There are only 5 commands in total in the commands section below.
 commands: # All commands require * prefix when used (e.g., *help)
-    - help: Show numbered list of all commands to allow selection
+    - help: Show numbered list of all 5 commands to allow selection
     - cook: Execute task cook.md
     - explain: teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer. Be thorough and walk me through it step by step
     - run-tests: Execute linting and tests
