@@ -14,17 +14,20 @@ workflow:
 sections:
   - id: status
     title: Status
-    choices: [True, False]
-    Completed: "{True|False}"
+    choices: 
+      implemented: [True, False]
+      platform: [Web, Mobile]
+    implemented: "{True|False}"
+    platform: "{Web|Mobile}"
   - id: overview
     title: Overview
     name: "{{feature_name}} - Feature Requirements Document"
   - id: context
     title: Background Context
     instruction: |
-      This document outlines all feature requirements for {{feature_name}}.
-      It should serve as a technical Feature Requirements Document for the feature 
-      provided and previously outlined in the Product Development Roadmap Document (PDRD).
+      This document outlines all feature requirements for {{feature_name}}. It should serve as a technical 
+      Feature Requirements Document for the user-selected feature that is also outlined in the 
+      Product Development Roadmap Document (PDRD).
 
       Before proceeding, ensure you know which feature from the PDRD you will be preparing this document for. 
       If you are unsure or no feature has been provided, ask the user which feature you are to draft this document for.
@@ -69,8 +72,8 @@ sections:
       3. Clearly let the user know where assumptions were made
       4. Ask targeted questions for unclear/missing elements or areas needing more specification
       5. This is NOT a detailed UI/UX spec - but it should have enough context and information to formuate a detailed UI/UX spec.
-    choices:
-      platforms: [Web, Mobile]
+
+      If there is no frontend work needed to implement this feature then simply skip the ui-goals section.
     sections:
       - id: ux-vision
         title: Overall UX Vision
@@ -103,8 +106,7 @@ sections:
     instruction: |
       Gather technical decisions that will guide the Architect. Steps:
 
-      1. Check if .claude/docs/tac.md file exists - use it to pre-populate choices
-      2. Outline the languages, frameworks, libraries, APIs and design tradeoffs that will be needed to implement this feature
+      1. Outline the languages, frameworks, libraries, APIs and design tradeoffs that will be needed to implement this feature
       2. If anything technical is unclear, ask user for guidance.
       3. For unknowns, offer guidance based on project goals and MVP scope
       4. Document ALL technical choices with rationale (why this choice fits the project)
