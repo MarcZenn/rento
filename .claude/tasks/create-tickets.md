@@ -26,5 +26,6 @@ When creating the development tasks, Always:
 - Be thorough. Make sure the tasks you create capture the entirety of development/engineering work required to fully implement the feature outlined in the TDD.
 - Stay within the boundaries of the TDD. DO NOT create tasks in Archon that go beyond the scope of the feature outlined in the TDD.
 - Make sure each tasks is detailed, specific and technical. A dumb dev should be able to look at each ticket and implement in the codebase without confusion or need for self interpretation
+- If there are any aspects of the TDD that cannot be addressed by the dev agent such as creating a AWS account, create a separate task and assign it to the user.
 
 
