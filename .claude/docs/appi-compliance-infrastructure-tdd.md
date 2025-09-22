@@ -47,7 +47,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 • API gateway with request logging and essential security headers
 • Basic compliance dashboard for daily monitoring
 • User privacy settings interface for consent management
-• Integration with existing Clerk authentication (migration to JP-compliant provider)
+• Integration with existing Clerk authentication (migration to Auth0)
 • Essential documentation for Japanese regulatory reporting (manual process)
 
 ### Out of Scope
@@ -104,7 +104,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 
 • APPI compliance infrastructure sits as foundational layer beneath all Rento platform services
 • Current Convex cloud hosting must migrate to self-hosted AWS Tokyo deployment
-• Current Clerk authentication requires migration to Japanese-compliant identity provider
+• Current Clerk authentication requires migration to Auth0 by Okta which offers residency "cells" in Japan.
 • All user data processing must occur within Japanese infrastructure boundaries
 • Real estate agents and users interact through compliance-controlled data flows
 • Audit and monitoring systems provide regulatory reporting capability
@@ -112,7 +112,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 
 ### Data Flow Overview
 
-1. User authenticates via Japanese-compliant identity provider → System validates within JP boundaries
+1. User authenticates via Auth0 identity provider → System validates within JP boundaries
 2. User consent check performed against local consent database → Missing consent triggers consent modal
 3. On consent submission → Consent service writes records to encrypted JP storage + audit log created
 4. All user data operations validated against consent permissions → Unauthorized access blocked
@@ -124,7 +124,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 ### Integration Points
 
 **auth:**
-- provider: "Japanese-compliant identity provider (migration from Clerk required)"
+- provider: "Auth0 by Okta which offers residency "cells" in Japan - (migration from Clerk required)"
 - hook: "Post-auth session check → consent validation gate"
 - constraint: "All authentication data must remain within Japanese infrastructure"
 
@@ -166,7 +166,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 • **consent_history** (already exists, requires enhancement)
   - Add APPI incident tracking fields
   - Add regulatory reporting status fields
-  - Add compliance officer action tracking
+  - Add automated compliance status tracking
 
 • **privacy_policy_versions** (already exists, good foundation)
   - Minimal changes needed for APPI compliance tracking
@@ -212,7 +212,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 **Enhanced consent_history table fields:**
 - `appi_compliance_check` (boolean) - Whether change maintains APPI compliance
 - `regulatory_impact` (string) - Assessment of regulatory implications
-- `audit_officer_review` (string) - Compliance officer notes if applicable
+- `automated_compliance_status` (string) - Automated compliance validation result
 
 **New audit system index requirements:**
 - Compound index on (user_id, event_timestamp) for efficient user audit trails
@@ -275,12 +275,12 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 **Function Name:** generateComplianceReport
 **Request:**
 - Method: GET
-- Request Headers: Authorization: Bearer <compliance_officer_jwt_token>
+- Request Headers: Authorization: Bearer <admin_jwt_token>
 - Parameters: reportType (string), startDate (string), endDate (string)
 - Responses:
   - 200: { reportId: string, reportData: object, generatedAt: string }
   - 400: { error: "Invalid report parameters" }
-  - 403: { error: "Insufficient privileges for compliance reporting" }
+  - 403: { error: "Insufficient admin privileges for compliance reporting" }
 **Purpose:** Generates APPI compliance reports for regulatory documentation
 **Route:** /compliance/generateComplianceReport
 
@@ -324,7 +324,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
   - Data download request section with processing time estimates
   - Data deletion request section with irreversibility warnings
   - Consent history viewer showing past changes and policy versions
-  - Contact compliance officer section for complex requests
+  - Help and support section with automated guidance for common requests
 
 • **data_deletion_confirmation**
   - Multi-step confirmation flow with irreversibility warnings
@@ -365,7 +365,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
   - User privacy preferences with real-time sync status
   - Available consent options with current selection state
   - Policy version information and update availability
-  - Compliance officer contact information and request status
+  - Automated compliance status and guidance system
 
 ## Enforcement & Guardrails
 
@@ -385,7 +385,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 - Role-based permissions restricting compliance functions to authorized personnel
 - Multi-factor authentication requirements for sensitive compliance operations
 - Session timeout enforcement for administrative compliance interfaces
-- IP allowlisting for compliance officer access to sensitive audit functions
+- IP allowlisting for admin access to sensitive audit functions (Post-MVP feature)
 
 **Data Retention Guardrails:**
 - Automated 2-year audit log retention with secure deletion after expiration
@@ -408,7 +408,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
   - **Mitigation**: Geographic constraints at infrastructure level, automated boundary validation, regular compliance audits of all data flows
 
 • **Authentication Provider Migration Risk**
-  - **Exploit**: Clerk-to-Japanese-provider migration could expose user credentials or create access gaps
+  - **Exploit**: Clerk-to-Auth0-provider migration could expose user credentials or create access gaps
   - **Mitigation**: Staged migration with dual-provider validation, encrypted credential transfer, comprehensive testing with rollback procedures
 
 • **Audit Log Tampering Risk**
@@ -469,7 +469,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 
 **Third-Party Risk Management:** Establish security assessment procedures for any third-party services integrated with compliance infrastructure, ensuring all vendors meet Japanese data residency and security requirements.
 
-**Compliance Officer Security:** Implement additional security controls for compliance officer accounts including dedicated secure devices, VPN requirements, and enhanced monitoring of all compliance-related activities.
+**Administrative Security:** Implement additional security controls for admin accounts including multi-factor authentication, session management, and enhanced monitoring of all compliance-related activities.
 
 ## Localizations
 
@@ -568,7 +568,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 ## Rollout Plan
 
 **Deployment Strategy:**
-This feature requires a carefully orchestrated rollout due to the migration of existing infrastructure (Convex, Clerk) and the critical nature of compliance requirements. The deployment must maintain service availability while ensuring no compliance violations occur during the transition.
+This feature requires a carefully orchestrated rollout due to the migration of existing infrastructure (Convex, Clerk) and the critical nature of compliance requirements. The deployment must maintain service availability while ensuring no compliance violations occur during the transition. Luckily, there is no working MVP in production so there is little to no risk should service be interrupted. There are also no existing users so there is low risk of compliane violations.
 
 **Deployment Plan:**
 
@@ -582,7 +582,7 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 **Phase 2: Data Migration and Validation (Week 3-4)**
 - Migrate existing user data to Japanese infrastructure with encryption at rest
 - Transfer Convex database to self-hosted instance with data integrity verification
-- Migrate user authentication from Clerk to Japanese-compliant provider with staged rollout
+- Migrate user authentication from Clerk to Auth0 by Okta, which offers residency "cells" in Japan, with staged rollout
 - Implement consent collection system for existing users with granular APPI compliance options
 - Deploy compliance dashboard for monitoring migration progress and detecting violations
 
@@ -613,7 +613,7 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 • **Encryption Implementation:** AES-256 encryption deployed for all data at rest and in transit with Japanese banking-standard key management and quarterly rotation
 • **Audit Trail Completeness:** All data access events logged with 2-year retention, searchable audit interface, and compliance reporting capability
 • **Consent Management Functionality:** User consent collection, preference management, and withdrawal capabilities with 1-hour processing SLA for deletion requests
-• **Authentication Migration Success:** Complete migration from Clerk to Japanese-compliant identity provider with zero user credential loss and maintained session continuity
+• **Authentication Migration Success:** Complete migration from Clerk to Auth0 by Okta which offers residency "cells" in Japan.
 • **Infrastructure Self-Hosting:** Convex database successfully migrated to self-hosted AWS Tokyo deployment with verified data integrity and performance maintained
 • **Compliance Dashboard Operational:** Administrative interface providing daily compliance monitoring, violation detection, and regulatory reporting capability
 • **Mobile App Integration Complete:** Consent modals, privacy settings, and deletion request flows integrated with bilingual (EN/JP) support
@@ -624,13 +624,13 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 
 ## Open Questions
 
-• **Japanese Identity Provider Selection:** Which specific Japanese-compliant identity provider should replace Clerk, and what are the integration complexity and cost implications for the MVP timeline?
-• **Legal Counsel Integration:** What level of ongoing legal counsel involvement is required for compliance monitoring, and how should this be integrated into the technical monitoring systems?
+• **Japanese Identity Provider Selection:** Auth0 by Okta, which offers residency "cells" in Japan, will replace Clerk. What are the integration complexity and cost implications for the MVP timeline?
+• **Legal Counsel Integration:** What level of ongoing legal counsel involvement is required for compliance monitoring during post-MVP market entry phase?
 • **Regulatory Reporting Automation:** Should the MVP include automated regulatory reporting capabilities, or is manual reporting acceptable for the initial phase to reduce development complexity?
 • **Cross-Service Consent Validation:** How should consent validation be implemented across all existing Rento services (property search, agent communication, etc.) without breaking current functionality?
 • **Data Migration Risk Mitigation:** What additional safeguards are needed during the Convex and Clerk migration to ensure zero compliance violations occur during the transition period?
-• **Compliance Officer Training:** What technical training and access controls are required for compliance officers to effectively use the compliance dashboard and incident response systems?
+• **Administrative Training:** What technical training and access controls are required for admin users to effectively use the compliance dashboard and incident response systems?
 • **Third-Party Service APPI Compliance:** How should APPI compliance requirements be extended to third-party services (translation APIs, payment processing) used by the platform?
 • **Performance vs. Compliance Trade-offs:** If performance targets conflict with compliance requirements (e.g., additional validation causing latency), what is the priority hierarchy for MVP delivery?
-• **Compliance Testing Strategy:** What specific testing approaches are needed to validate APPI compliance beyond standard functional testing, and who should conduct compliance-specific testing?
+• **Compliance Testing Strategy:** What specific automated testing approaches are needed to validate APPI compliance beyond standard functional testing for MVP delivery?
 • **Incident Response Escalation:** What are the specific triggers and procedures for escalating compliance incidents to regulatory authorities, and how should these be automated vs. manual processes?

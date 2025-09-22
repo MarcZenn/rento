@@ -20,8 +20,9 @@ Wait for the user to tell you to either try to reconnect or to exit this task pr
 
 ## Detailed Task Requirements
 
-When creating the development tasks, Always:
+When creating the development tasks, ALWAYS:
 
+- Prioritze tasks by order of dependency. This means implementation of a task should not depend on implementatin of a later task.
 - Keep frontend development tasks separate from backend development tasks. Create separate tasks for instances where the backend and frontend need to integrate.
 - Be thorough. Make sure the tasks you create capture the entirety of development/engineering work required to fully implement the feature outlined in the TDD.
 - Stay within the boundaries of the TDD. DO NOT create tasks in Archon that go beyond the scope of the feature outlined in the TDD.
