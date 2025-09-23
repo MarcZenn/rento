@@ -4,7 +4,7 @@
 
 **Priority:** Critical
 **Triaged:** True
-**Last Updated:** 2025-09-20
+**Last Updated:** 2025-09-23
 
 ## Overview
 
@@ -33,7 +33,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 • Achieve 100% data residency compliance within Japanese infrastructure boundaries
 • Pass APPI compliance audit with zero critical violations
 • Reduce agent partnership acquisition friction by 40% through demonstrated privacy leadership
-• Maintain ¥200K-300K monthly operational costs during MVP phase
+• Maintain ¥200K-300K monthly operational costs during MVP phase (AWS Cognito reduces costs by 60-70% vs Auth0)
 • Enable legal platform operation with full audit trail capability
 • Establish 99% system availability with 8-hour disaster recovery capability
 
@@ -47,7 +47,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 • API gateway with request logging and essential security headers
 • Basic compliance dashboard for daily monitoring
 • User privacy settings interface for consent management
-• Integration with existing Clerk authentication (migration to Auth0)
+• Integration with existing Clerk authentication (migration to AWS Cognito)
 • Essential documentation for Japanese regulatory reporting (manual process)
 
 ### Out of Scope
@@ -104,7 +104,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 
 • APPI compliance infrastructure sits as foundational layer beneath all Rento platform services
 • Current Convex cloud hosting must migrate to self-hosted AWS Tokyo deployment
-• Current Clerk authentication requires migration to Auth0 by Okta which offers residency "cells" in Japan.
+• Current Clerk authentication requires migration to AWS Cognito deployed in Tokyo region (ap-northeast-1) for guaranteed data residency.
 • All user data processing must occur within Japanese infrastructure boundaries
 • Real estate agents and users interact through compliance-controlled data flows
 • Audit and monitoring systems provide regulatory reporting capability
@@ -112,7 +112,7 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 
 ### Data Flow Overview
 
-1. User authenticates via Auth0 identity provider → System validates within JP boundaries
+1. User authenticates via AWS Cognito user pool in Tokyo region → System validates within JP boundaries
 2. User consent check performed against local consent database → Missing consent triggers consent modal
 3. On consent submission → Consent service writes records to encrypted JP storage + audit log created
 4. All user data operations validated against consent permissions → Unauthorized access blocked
@@ -124,9 +124,9 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 ### Integration Points
 
 **auth:**
-- provider: "Auth0 by Okta which offers residency "cells" in Japan - (migration from Clerk required)"
+- provider: "AWS Cognito user pool in Tokyo region (ap-northeast-1) - (migration from Clerk required)"
 - hook: "Post-auth session check → consent validation gate"
-- constraint: "All authentication data must remain within Japanese infrastructure"
+- constraint: "All authentication data stored exclusively in Tokyo region infrastructure"
 
 **convex:**
 - provider: "Convex (self-hosted on AWS Tokyo)"
@@ -408,8 +408,8 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
   - **Mitigation**: Geographic constraints at infrastructure level, automated boundary validation, regular compliance audits of all data flows
 
 • **Authentication Provider Migration Risk**
-  - **Exploit**: Clerk-to-Auth0-provider migration could expose user credentials or create access gaps
-  - **Mitigation**: Staged migration with dual-provider validation, encrypted credential transfer, comprehensive testing with rollback procedures
+  - **Exploit**: Clerk-to-AWS Cognito migration could expose user credentials or create access gaps
+  - **Mitigation**: AWS Amplify integration with comprehensive testing, user migration via bulk import with password reset, rollback procedures
 
 • **Audit Log Tampering Risk**
   - **Exploit**: Compromised admin accounts could modify audit trails to hide compliance violations
@@ -568,7 +568,7 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 ## Rollout Plan
 
 **Deployment Strategy:**
-This feature requires a carefully orchestrated rollout due to the migration of existing infrastructure (Convex, Clerk) and the critical nature of compliance requirements. The deployment must maintain service availability while ensuring no compliance violations occur during the transition. Luckily, there is no working MVP in production so there is little to no risk should service be interrupted. There are also no existing users so there is low risk of compliane violations.
+This feature requires a carefully orchestrated rollout due to the migration of existing infrastructure (Convex, Clerk to AWS Cognito) and the critical nature of compliance requirements. The deployment must maintain service availability while ensuring no compliance violations occur during the transition. Luckily, there is no working MVP in production so there is little to no risk should service be interrupted. There are also no existing users so there is low risk of compliance violations.
 
 **Deployment Plan:**
 
@@ -582,7 +582,7 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 **Phase 2: Data Migration and Validation (Week 3-4)**
 - Migrate existing user data to Japanese infrastructure with encryption at rest
 - Transfer Convex database to self-hosted instance with data integrity verification
-- Migrate user authentication from Clerk to Auth0 by Okta, which offers residency "cells" in Japan, with staged rollout
+- Migrate user authentication from Clerk to AWS Cognito Tokyo region using AWS Amplify, with bulk user import and staged rollout
 - Implement consent collection system for existing users with granular APPI compliance options
 - Deploy compliance dashboard for monitoring migration progress and detecting violations
 
@@ -613,7 +613,7 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 • **Encryption Implementation:** AES-256 encryption deployed for all data at rest and in transit with Japanese banking-standard key management and quarterly rotation
 • **Audit Trail Completeness:** All data access events logged with 2-year retention, searchable audit interface, and compliance reporting capability
 • **Consent Management Functionality:** User consent collection, preference management, and withdrawal capabilities with 1-hour processing SLA for deletion requests
-• **Authentication Migration Success:** Complete migration from Clerk to Auth0 by Okta which offers residency "cells" in Japan.
+• **Authentication Migration Success:** Complete migration from Clerk to AWS Cognito Tokyo region (ap-northeast-1) with AWS Amplify integration.
 • **Infrastructure Self-Hosting:** Convex database successfully migrated to self-hosted AWS Tokyo deployment with verified data integrity and performance maintained
 • **Compliance Dashboard Operational:** Administrative interface providing daily compliance monitoring, violation detection, and regulatory reporting capability
 • **Mobile App Integration Complete:** Consent modals, privacy settings, and deletion request flows integrated with bilingual (EN/JP) support
@@ -622,15 +622,125 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 • **Incident Response Procedures:** Documented and tested procedures for security incident detection, response, and regulatory notification requirements
 • **Backup and Recovery Verified:** Disaster recovery capabilities tested with 8-hour RTO while maintaining compliance boundaries and data integrity
 
+## Authentication Provider Decision & Research
+
+### Selected Solution: AWS Cognito Tokyo Region
+
+**Decision Date:** 2025-09-23
+**Status:** Approved based on comprehensive research analysis
+
+Based on extensive research documented in `aws-cognito-appi-compliance-research.md`, **AWS Cognito in Tokyo region (ap-northeast-1)** has been selected as the optimal authentication provider for APPI compliance.
+
+### Decision Rationale
+
+**Primary Selection Criteria:**
+1. **APPI Compliance**: Full data residency guarantee in Tokyo region
+2. **Cost Effectiveness**: 60-70% cost reduction vs Auth0 Private Cloud
+3. **Technical Feasibility**: Moderate implementation complexity with AWS Amplify
+4. **Enterprise Readiness**: Production-grade AWS infrastructure with banking-standard security
+
+### Comparative Analysis Results
+
+| Solution | APPI Compliance | Monthly Cost | Implementation | Recommendation |
+|----------|----------------|--------------|----------------|----------------|
+| **AWS Cognito Tokyo** | ✅ Full | ¥10K-30K | 3 weeks | **SELECTED** |
+| Auth0 Private Cloud | ✅ Full | ¥500K-800K | 4 weeks | Too Expensive |
+| Convex Auth | ❌ None | ¥5K-15K | 2 weeks | Not Compliant |
+| Azure AD B2C Go-Local | ✅ Full | ¥50K-100K | 3-4 weeks | Enterprise Alternative |
+
+### Implementation Approach
+
+**Migration Strategy:**
+- **Week 1**: AWS Cognito setup in Tokyo region with compliance configuration
+- **Week 2**: AWS Amplify integration with React Native/Expo application
+- **Week 3**: User migration from Clerk using bulk import with password reset
+
+**Key Technical Changes:**
+```javascript
+// Current Clerk Implementation
+import { ClerkProvider } from '@clerk/clerk-expo';
+import { ConvexProviderWithClerk } from 'convex/react-clerk';
+
+// New AWS Cognito Implementation
+import { Amplify } from 'aws-amplify';
+import { withAuthenticator } from '@aws-amplify/ui-react-native';
+import { ConvexProvider } from 'convex/react';
+
+// Amplify configuration for Tokyo region
+Amplify.configure({
+  Auth: {
+    region: 'ap-northeast-1',
+    userPoolId: 'ap-northeast-1_xxxxxxxxx',
+    userPoolWebClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+  }
+});
+```
+
+### APPI Compliance Validation
+
+**Data Residency (Article 24):**
+- ✅ User pools store data exclusively in Tokyo region
+- ✅ Default configuration prevents cross-border data transfer
+- ✅ Geographic boundary controls enforced at infrastructure level
+
+**Security Management (Article 27):**
+- ✅ Enterprise-grade encryption and access controls
+- ✅ Multi-factor authentication support
+- ✅ Comprehensive audit logging via AWS CloudTrail
+
+**Audit and Monitoring:**
+- ✅ All API calls logged with detailed audit trails
+- ✅ 2+ year retention capability with S3 integration
+- ✅ Real-time monitoring and alerting capabilities
+
+### Cost Impact Analysis
+
+**Total First Month Cost Comparison:**
+- AWS Cognito Tokyo: ¥520K-700K (development + service)
+- Auth0 Private Cloud: ¥1,250K-1,820K (60-70% higher)
+- **Savings**: ¥730K-1,120K in first month
+
+**Ongoing Monthly Costs:**
+- AWS Cognito: ¥10K-30K for MVP scale
+- Auth0 Private Cloud: ¥500K-800K
+- **Monthly Savings**: ¥470K-770K
+
+### Risk Mitigation
+
+**Migration Risks:**
+- User password reset requirement (mitigated by clear communication)
+- Custom Convex integration complexity (mitigated by proven JWT libraries)
+- React Native compatibility (mitigated by AWS Amplify documentation)
+
+**Compliance Risks:**
+- Custom APPI consent implementation needed (addressed in development plan)
+- Monitoring setup requirements (leveraged AWS CloudTrail/CloudWatch)
+
+### Success Metrics
+
+**Technical Milestones:**
+- Week 1: AWS Cognito user pool operational in Tokyo region
+- Week 2: React Native app successfully authenticating via AWS Amplify
+- Week 3: All users migrated with functional authentication flows
+
+**Compliance Validation:**
+- 100% user data stored in Tokyo region (verified via AWS console)
+- Comprehensive audit trails operational (verified via CloudTrail)
+- User consent management system functional
+
 ## Open Questions
 
-• **Japanese Identity Provider Selection:** Auth0 by Okta, which offers residency "cells" in Japan, will replace Clerk. What are the integration complexity and cost implications for the MVP timeline?
+• **AWS Cognito Integration:** AWS Cognito in Tokyo region will replace Clerk. Integration complexity is moderate with AWS Amplify, and costs are 60-70% lower than Auth0 alternatives.
 • **Legal Counsel Integration:** What level of ongoing legal counsel involvement is required for compliance monitoring during post-MVP market entry phase?
 • **Regulatory Reporting Automation:** Should the MVP include automated regulatory reporting capabilities, or is manual reporting acceptable for the initial phase to reduce development complexity?
 • **Cross-Service Consent Validation:** How should consent validation be implemented across all existing Rento services (property search, agent communication, etc.) without breaking current functionality?
-• **Data Migration Risk Mitigation:** What additional safeguards are needed during the Convex and Clerk migration to ensure zero compliance violations occur during the transition period?
+• **Data Migration Risk Mitigation:** What additional safeguards are needed during the Convex and Clerk to AWS Cognito migration to ensure zero compliance violations occur during the transition period?
 • **Administrative Training:** What technical training and access controls are required for admin users to effectively use the compliance dashboard and incident response systems?
 • **Third-Party Service APPI Compliance:** How should APPI compliance requirements be extended to third-party services (translation APIs, payment processing) used by the platform?
 • **Performance vs. Compliance Trade-offs:** If performance targets conflict with compliance requirements (e.g., additional validation causing latency), what is the priority hierarchy for MVP delivery?
 • **Compliance Testing Strategy:** What specific automated testing approaches are needed to validate APPI compliance beyond standard functional testing for MVP delivery?
 • **Incident Response Escalation:** What are the specific triggers and procedures for escalating compliance incidents to regulatory authorities, and how should these be automated vs. manual processes?
+
+## Additional Resources
+
+- AWS Cognito + Tokyo Migration Research - `@.claude/docs/aws-cognito-appi-compliance-research.md`
