@@ -309,53 +309,60 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 
 ### Technology Preferences
 
-- **Frontend**: React Native for mobile applications (cross-platform efficiency), React.js for web interfaces, TypeScript for type safety and developer productivity
-- **Backend**: Node.js with Express framework, Convex for real-time database and API management, TypeScript throughout backend systems
+- **Frontend**: React Native for mobile applications (cross-platform efficiency), Apollo Client for GraphQL integration, TypeScript for type safety and developer productivity
+- **API Layer**: GraphQL with Apollo Server, Express middleware for security and rate limiting, automated type generation for frontend
+- **Backend**: Node.js with GraphQL resolvers, Convex for real-time database management, TypeScript throughout backend systems
+- **Authentication**: AWS Cognito Tokyo region for APPI compliance, JWT validation in GraphQL context
 - **Database**: Self-hosted Convex for APPI compliance, Redis for caching and session management, geospatial indexing for property location search
 - **Hosting/Infrastructure**: AWS Tokyo region for data residency compliance, CloudFlare for CDN and security, containerized deployment for scalability
 
 ### Architecture Considerations
 
-- **Repository Structure**: 
-  - Monorepo approach with separate packages for mobile app, web interface, shared components, and backend services for development efficiency and code sharing
-- **Service Architecture**: 
-  - Microservices architecture with clear separation between user management, property data, translation services, and communication systems
-- **Integration Requirements**: 
-  - Third-party translation APIs (DeepL, Google Translate), property data feeds from real estate agencies, payment processing (Stripe), push notification services
-- **Security/Compliance**: 
-  - APPI compliance implementation for data privacy, end-to-end encryption for sensitive communications, audit logging for regulatory compliance, secure API authentication and authorization
+- **Repository Structure**:
+  - Monorepo approach with separate packages for mobile app, GraphQL API, shared types/schema, and backend services for development efficiency and code sharing
+- **API Architecture**:
+  - Single GraphQL endpoint orchestrating all backend services, type-safe client-server communication, automated TypeScript code generation from GraphQL schema
+- **Service Architecture**:
+  - GraphQL gateway with Express middleware for security, resolvers calling Convex functions, clear separation between authentication, property data, translation services, and communication systems
+- **Integration Requirements**:
+  - GraphQL-wrapped third-party APIs (DeepL, Google Translate), property data feeds integrated through GraphQL resolvers, payment processing (Stripe) via GraphQL mutations, push notification services triggered by GraphQL subscriptions
+- **Security/Compliance**:
+  - APPI compliance implementation with GraphQL audit logging, JWT validation in GraphQL context, field-level access control, secure API authentication and authorization through Apollo Server plugins
 - **Self-Hosted Infrastructure**:
-    - Self-hosted Convex on AWS Tokyo/Azure Japan/GCP Tokyo
-    - Self-hosted Clerk or migration to Japanese-compliant identity provider
-    - All personal data processing within Japanese boundaries
-    - APPI-compliant data handling and audit systems
+    - Self-hosted Convex on AWS Tokyo accessed via GraphQL resolvers
+    - AWS Cognito Tokyo region for authentication with GraphQL JWT middleware
+    - All personal data processing within Japanese boundaries via GraphQL security layer
+    - APPI-compliant data handling and audit systems with GraphQL operation tracking
 - **Performance & Scalability Infrastructure**:
-    - Redis for search results, translations, and session management
+    - GraphQL query optimization and caching
+    - Redis for GraphQL response caching, search results, and session management
     - CloudFlare R2 or AWS S3 with Japanese edge locations
-    - Geospatial indexing, full-text search, query optimization
-    - Queue system for translation, notifications, and analytics
-    - Real-time messaging and notification infrastructure
+    - Geospatial indexing through GraphQL resolvers, full-text search optimization
+    - Queue system for background operations triggered by GraphQL mutations
+    - Real-time subscriptions via GraphQL WebSocket connections
 
 ### Existing Infrastructure Leverage
 
-- **Convex Schema:** Comprehensive database design supports most features (requires self-hosting migration)
-- **Authentication:** Clerk integration provides foundation (requires compliance migration)
-- **Internationalization:** i18n system enables bilingual implementation
-- **Styling System:** Unistyles provides consistent theming
-- **Mobile Platform:** Expo Router enables rapid deployment
+- **Convex Schema:** Comprehensive database design supports GraphQL integration (requires self-hosting migration)
+- **Authentication:** Migration from Clerk to AWS Cognito with GraphQL JWT validation
+- **Internationalization:** i18n system enables bilingual GraphQL responses
+- **Styling System:** Unistyles provides consistent theming for GraphQL-driven UI
+- **Mobile Platform:** Expo Router with Apollo Client integration for GraphQL
 
 ### Data Flow & Privacy Architecture
 
-- **Data Residency:** All data processing within Japanese infrastructure
-- **Encryption:** End-to-end encryption for sensitive user data
-- **Audit Trails:** Comprehensive logging for compliance and security
-- **API Management:** Rate limiting, authentication, and monitoring for all integrations
-- **Cross-Border Prevention:** Strict controls to prevent data leaving Japan
+- **Data Residency:** All data processing within Japanese infrastructure via GraphQL security layer
+- **Encryption:** End-to-end encryption for sensitive user data in GraphQL responses
+- **Audit Trails:** Comprehensive GraphQL operation logging for compliance and security
+- **API Management:** GraphQL schema-based rate limiting, authentication, and monitoring
+- **Cross-Border Prevention:** GraphQL resolver-level controls to prevent data leaving Japan
 
-### Authentication Flow
+### GraphQL Authentication Flow
 
-- **Clerk:** Clerk handles authentication with token caching
-- **Convex:** Convex integrates with Clerk for authenticated queries/mutations
+- **AWS Cognito:** Tokyo region JWT tokens validate GraphQL requests
+- **Apollo Server:** GraphQL context includes authenticated user and Convex client
+- **Convex Integration:** GraphQL resolvers call Convex functions with user context
+- **Type Safety:** Full TypeScript integration from GraphQL schema to React Native components
 
 ### Internationalization
 

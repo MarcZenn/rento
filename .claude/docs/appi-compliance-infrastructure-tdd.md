@@ -125,12 +125,17 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 
 **auth:**
 - provider: "AWS Cognito user pool in Tokyo region (ap-northeast-1) - (migration from Clerk required)"
-- hook: "Post-auth session check → consent validation gate"
+- hook: "GraphQL authentication middleware → JWT validation → consent validation gate"
 - constraint: "All authentication data stored exclusively in Tokyo region infrastructure"
+
+**graphql_api:**
+- provider: "Apollo Server with Express middleware"
+- hook: "All client requests → GraphQL schema validation → resolver execution"
+- constraint: "API layer orchestrates AWS Cognito authentication with Convex database operations"
 
 **convex:**
 - provider: "Convex (self-hosted on AWS Tokyo)"
-- hook: "All database operations → encrypted storage with audit logging"
+- hook: "GraphQL resolvers → Convex query/mutation functions → encrypted storage with audit logging"
 - constraint: "Migration from cloud Convex to self-hosted deployment required"
 
 **aws_tokyo:**
@@ -144,9 +149,9 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 - constraint: "Key management must comply with Japanese banking standards"
 
 **audit:**
-- provider: "Custom audit logging system"
-- hook: "All data access events → encrypted log storage with 2-year retention"
-- constraint: "Audit trails must support regulatory reporting requirements"
+- provider: "GraphQL audit plugin + custom logging system"
+- hook: "GraphQL operations → structured query logging → encrypted log storage with 2-year retention"
+- constraint: "Audit trails must support regulatory reporting requirements with GraphQL operation tracking"
 
 ## Data Model
 
@@ -220,81 +225,252 @@ APPI Compliance Infrastructure leverages and extends the existing Convex schema 
 - Index on retention_until for automated cleanup processes
 - Geographic constraint index ensuring all records remain in JP region
 
-## API Contract (Convex Functions)
+## API Contract (GraphQL Schema)
 
-### Endpoints
+### GraphQL Schema Definition
 
-**Function Name:** validateUserConsent
-**Request:**
-- Method: GET
-- Request Headers: Authorization: Bearer <jwt_token>
-- Parameters: userId (string), consentType (string), operation (string)
-- Responses:
-  - 200: { isValid: boolean, consentStatus: object, lastUpdated: string }
-  - 403: { error: "Insufficient consent for operation" }
-  - 404: { error: "User consent record not found" }
-**Purpose:** Validates user consent before data processing operations to ensure APPI compliance
-**Route:** /consent/validateUserConsent
+```graphql
+# APPI Compliance Types
+type ConsentStatus {
+  isValid: Boolean!
+  consentStatus: ConsentDetails!
+  lastUpdated: String!
+}
 
-**Function Name:** logAuditEvent
-**Request:**
-- Method: POST
-- Request Headers: Authorization: Bearer <jwt_token>, Content-Type: application/json
-- Request Body: { eventType: string, userId: string, dataAccessed: string, ipAddress: string }
-- Responses:
-  - 201: { eventId: string, timestamp: string, status: "logged" }
-  - 400: { error: "Invalid audit event data" }
-  - 500: { error: "Audit logging failed" }
-**Purpose:** Records all data access events for APPI compliance audit trails
-**Route:** /audit/logAuditEvent
+type ConsentDetails {
+  appiConsentGranularity: JSONObject
+  regulatoryBasis: String!
+  jpSpecificConsent: Boolean!
+  crossBorderConsent: Boolean!
+}
 
-**Function Name:** processDataDeletionRequest
-**Request:**
-- Method: DELETE
-- Request Headers: Authorization: Bearer <jwt_token>
-- Parameters: userId (string), deletionScope (string)
-- Responses:
-  - 202: { requestId: string, estimatedCompletion: string, status: "processing" }
-  - 400: { error: "Invalid deletion request parameters" }
-  - 409: { error: "Deletion request already in progress" }
-**Purpose:** Initiates APPI-compliant data deletion within 1-hour SLA requirement
-**Route:** /compliance/processDataDeletionRequest
+type AuditEvent {
+  eventId: ID!
+  timestamp: String!
+  status: String!
+  eventType: String!
+  userId: ID!
+  dataAccessed: String
+  complianceStatus: String!
+}
 
-**Function Name:** checkDataResidency
-**Request:**
-- Method: GET
-- Request Headers: Authorization: Bearer <admin_jwt_token>
-- Parameters: timeRange (string), serviceComponent (string)
-- Responses:
-  - 200: { residencyStatus: "compliant", violations: [], lastCheck: string }
-  - 200: { residencyStatus: "violations_found", violations: [array], lastCheck: string }
-  - 403: { error: "Insufficient privileges for residency check" }
-**Purpose:** Validates that all data operations remain within Japanese infrastructure boundaries
-**Route:** /compliance/checkDataResidency
+type DataDeletionRequest {
+  requestId: ID!
+  estimatedCompletion: String!
+  status: String!
+  deletionScope: String!
+}
 
-**Function Name:** generateComplianceReport
-**Request:**
-- Method: GET
-- Request Headers: Authorization: Bearer <admin_jwt_token>
-- Parameters: reportType (string), startDate (string), endDate (string)
-- Responses:
-  - 200: { reportId: string, reportData: object, generatedAt: string }
-  - 400: { error: "Invalid report parameters" }
-  - 403: { error: "Insufficient admin privileges for compliance reporting" }
-**Purpose:** Generates APPI compliance reports for regulatory documentation
-**Route:** /compliance/generateComplianceReport
+type ComplianceReport {
+  reportId: ID!
+  reportData: JSONObject!
+  generatedAt: String!
+  reportType: String!
+}
 
-**Function Name:** updateConsentPreferences
-**Request:**
-- Method: PUT
-- Request Headers: Authorization: Bearer <jwt_token>, Content-Type: application/json
-- Request Body: { consentUpdates: object, policyVersion: string, userAgent: string }
-- Responses:
-  - 200: { updated: true, effectiveDate: string, auditId: string }
-  - 400: { error: "Invalid consent preferences" }
-  - 409: { error: "Policy version mismatch" }
-**Purpose:** Updates user consent preferences with full audit trail for APPI compliance
-**Route:** /consent/updateConsentPreferences
+type ConsentUpdate {
+  updated: Boolean!
+  effectiveDate: String!
+  auditId: ID!
+}
+
+# Input Types
+input ConsentUpdatesInput {
+  appiConsentGranularity: JSONObject
+  policyVersion: String!
+  userAgent: String!
+}
+
+input AuditEventInput {
+  eventType: String!
+  userId: ID!
+  dataAccessed: String
+  ipAddress: String!
+}
+
+# Queries
+type Query {
+  validateUserConsent(
+    userId: ID!
+    consentType: String!
+    operation: String!
+  ): ConsentStatus
+
+  checkDataResidency(
+    timeRange: String!
+    serviceComponent: String
+  ): DataResidencyStatus
+
+  generateComplianceReport(
+    reportType: String!
+    startDate: String!
+    endDate: String!
+  ): ComplianceReport
+}
+
+# Mutations
+type Mutation {
+  logAuditEvent(input: AuditEventInput!): AuditEvent
+
+  processDataDeletionRequest(
+    userId: ID!
+    deletionScope: String!
+  ): DataDeletionRequest
+
+  updateConsentPreferences(
+    input: ConsentUpdatesInput!
+  ): ConsentUpdate
+}
+```
+
+### GraphQL Resolvers Implementation
+
+**Authentication Middleware:**
+```typescript
+// GraphQL Authentication Context
+const authContext = async ({ req }: { req: Request }) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  try {
+    // Validate JWT with AWS Cognito
+    const decoded = jwt.verify(token, await getCognitoPublicKey());
+    const cognitoUser = await cognito.getUser(decoded.sub);
+
+    return {
+      user: cognitoUser,
+      convex: convexClient,
+      isAuthenticated: true
+    };
+  } catch (error) {
+    throw new AuthenticationError('Invalid authentication token');
+  }
+};
+```
+
+**APPI Compliance Resolvers:**
+```typescript
+const resolvers = {
+  Query: {
+    validateUserConsent: async (_, { userId, consentType, operation }, { user, convex }) => {
+      // Validate user permissions
+      if (user.id !== userId) {
+        throw new ForbiddenError('Insufficient consent for operation');
+      }
+
+      // Query Convex for consent status
+      const consent = await convex.query(api.compliance.validateUserConsent, {
+        userId,
+        consentType,
+        operation
+      });
+
+      return {
+        isValid: consent.isValid,
+        consentStatus: consent.consentDetails,
+        lastUpdated: consent.lastUpdated
+      };
+    },
+
+    checkDataResidency: async (_, { timeRange, serviceComponent }, { user, convex }) => {
+      // Admin-only operation
+      if (!user.isAdmin) {
+        throw new ForbiddenError('Insufficient privileges for residency check');
+      }
+
+      return await convex.query(api.compliance.checkDataResidency, {
+        timeRange,
+        serviceComponent
+      });
+    }
+  },
+
+  Mutation: {
+    logAuditEvent: async (_, { input }, { user, convex }) => {
+      // Audit logging with user context
+      const auditEvent = await convex.mutation(api.audit.logAuditEvent, {
+        ...input,
+        authenticatedUserId: user.id,
+        timestamp: new Date().toISOString()
+      });
+
+      return {
+        eventId: auditEvent._id,
+        timestamp: auditEvent._creationTime,
+        status: 'logged'
+      };
+    },
+
+    processDataDeletionRequest: async (_, { userId, deletionScope }, { user, convex }) => {
+      // User can only delete their own data
+      if (user.id !== userId) {
+        throw new ForbiddenError('Can only delete own user data');
+      }
+
+      const deletionRequest = await convex.mutation(api.compliance.processDataDeletionRequest, {
+        userId,
+        deletionScope,
+        requestedBy: user.id
+      });
+
+      return {
+        requestId: deletionRequest._id,
+        estimatedCompletion: deletionRequest.estimatedCompletion,
+        status: 'processing'
+      };
+    }
+  }
+};
+```
+
+**Apollo Server Configuration:**
+```typescript
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import { auditPlugin } from './plugins/auditPlugin';
+
+const app = express();
+
+// APPI Compliance middleware
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Rate limit exceeded for APPI compliance'
+}));
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [
+    // APPI compliance audit plugin
+    auditPlugin({
+      enableQueryLogging: true,
+      enableFieldAccessLogging: true,
+      auditSensitiveFields: ['personalInfo', 'contactDetails']
+    }),
+  ],
+});
+
+// Mount GraphQL with APPI compliance context
+app.use('/graphql',
+  cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(','),
+    credentials: true
+  }),
+  express.json({ limit: '1mb' }),
+  expressMiddleware(server, {
+    context: authContext
+  })
+);
+```
+
+### GraphQL Endpoint Access
+
+**Base URL:** `https://api.rento.jp/graphql`
+**Authentication:** Bearer token in Authorization header (AWS Cognito JWT)
+**Request Format:** POST with JSON body containing GraphQL query/mutation
+**Response Format:** JSON with data/errors structure per GraphQL specification
 
 ## Frontend Spec (Mobile)
 
@@ -651,29 +827,187 @@ Based on extensive research documented in `aws-cognito-appi-compliance-research.
 ### Implementation Approach
 
 **Migration Strategy:**
-- **Week 1**: AWS Cognito setup in Tokyo region with compliance configuration
-- **Week 2**: AWS Amplify integration with React Native/Expo application
-- **Week 3**: User migration from Clerk using bulk import with password reset
+- **Week 1**: GraphQL API layer setup with Apollo Server + AWS Cognito integration
+- **Week 2**: AWS Cognito setup in Tokyo region with GraphQL authentication middleware
+- **Week 3**: React Native Apollo Client integration replacing REST API calls
+- **Week 4**: User migration from Clerk using bulk import with password reset
 
-**Key Technical Changes:**
-```javascript
-// Current Clerk Implementation
-import { ClerkProvider } from '@clerk/clerk-expo';
-import { ConvexProviderWithClerk } from 'convex/react-clerk';
+**GraphQL Architecture Implementation:**
 
-// New AWS Cognito Implementation
+```typescript
+// Apollo Server with APPI Compliance Configuration
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import express from 'express';
+import { ConvexHttpClient } from 'convex/browser';
+import { CognitoJwtVerifier } from 'aws-jwt-verify';
+
+const app = express();
+
+// AWS Cognito JWT Verifier for Tokyo region
+const verifier = CognitoJwtVerifier.create({
+  userPoolId: "ap-northeast-1_xxxxxxxxx",
+  tokenUse: "access",
+  clientId: "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+});
+
+// APPI Compliance Context
+const createContext = async ({ req }) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
+  if (!token) {
+    throw new AuthenticationError('No authentication token provided');
+  }
+
+  try {
+    // Verify JWT with AWS Cognito Tokyo region
+    const payload = await verifier.verify(token);
+
+    return {
+      user: {
+        id: payload.sub,
+        email: payload.email,
+        cognitoGroups: payload['cognito:groups'] || [],
+      },
+      convex: new ConvexHttpClient(process.env.CONVEX_URL),
+      isAuthenticated: true,
+    };
+  } catch (error) {
+    throw new AuthenticationError('Invalid token');
+  }
+};
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [
+    // APPI Compliance audit plugin
+    {
+      requestDidStart() {
+        return {
+          didResolveOperation(requestContext) {
+            // Log all GraphQL operations for APPI compliance
+            console.log('GraphQL Operation:', {
+              operation: requestContext.request.query,
+              variables: requestContext.request.variables,
+              user: requestContext.context.user?.id,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        };
+      }
+    }
+  ],
+});
+
+app.use('/graphql',
+  cors({ origin: process.env.ALLOWED_ORIGINS?.split(',') }),
+  express.json(),
+  expressMiddleware(server, { context: createContext })
+);
+```
+
+**React Native Apollo Client Setup:**
+```typescript
+// React Native GraphQL Client with AWS Cognito
+import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+
+// Configure AWS Amplify for Tokyo region
 import { Amplify } from 'aws-amplify';
-import { withAuthenticator } from '@aws-amplify/ui-react-native';
-import { ConvexProvider } from 'convex/react';
 
-// Amplify configuration for Tokyo region
 Amplify.configure({
   Auth: {
-    region: 'ap-northeast-1',
-    userPoolId: 'ap-northeast-1_xxxxxxxxx',
-    userPoolWebClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+    Cognito: {
+      region: 'ap-northeast-1',
+      userPoolId: 'ap-northeast-1_xxxxxxxxx',
+      userPoolClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+    }
   }
 });
+
+// Authentication link for GraphQL requests
+const authLink = setContext(async (_, { headers }) => {
+  try {
+    const session = await fetchAuthSession();
+    const token = session.tokens?.accessToken?.toString();
+
+    return {
+      headers: {
+        ...headers,
+        authorization: token ? `Bearer ${token}` : "",
+      }
+    };
+  } catch (error) {
+    console.error('Auth error:', error);
+    return { headers };
+  }
+});
+
+const httpLink = createHttpLink({
+  uri: 'https://api.rento.jp/graphql',
+});
+
+export const client = new ApolloClient({
+  link: from([authLink, httpLink]),
+  cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: 'all',
+    },
+  },
+});
+```
+
+**Convex Integration with GraphQL:**
+```typescript
+// GraphQL resolvers calling Convex functions
+const resolvers = {
+  Query: {
+    getUserProfile: async (_, { userId }, { user, convex }) => {
+      // APPI compliance check
+      if (user.id !== userId) {
+        throw new ForbiddenError('Unauthorized access to user data');
+      }
+
+      // Validate consent before data access
+      const consentValid = await convex.query(api.compliance.validateUserConsent, {
+        userId,
+        operation: 'profile_read'
+      });
+
+      if (!consentValid.isValid) {
+        throw new ForbiddenError('Insufficient consent for operation');
+      }
+
+      // Fetch user profile from Convex
+      const profile = await convex.query(api.users.getProfile, { userId });
+
+      // Log access for APPI audit
+      await convex.mutation(api.audit.logDataAccess, {
+        userId,
+        dataType: 'user_profile',
+        operation: 'read',
+        timestamp: new Date().toISOString(),
+      });
+
+      return profile;
+    },
+  },
+
+  Mutation: {
+    updateUserProfile: async (_, { input }, { user, convex }) => {
+      // Similar APPI compliance pattern for mutations
+      const updatedProfile = await convex.mutation(api.users.updateProfile, {
+        userId: user.id,
+        updates: input,
+      });
+
+      return updatedProfile;
+    },
+  },
+};
 ```
 
 ### APPI Compliance Validation

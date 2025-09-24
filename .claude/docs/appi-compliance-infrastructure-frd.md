@@ -93,13 +93,15 @@ Apply the standard Rento design system with emphasis on trust and security visua
 ## Technical Requirements
 
 ### Feature Architecture (MVP)
-The APPI Compliance Infrastructure requires a foundational security-first architecture built on Japanese cloud infrastructure with essential data residency controls. Key MVP architectural components include:
+The APPI Compliance Infrastructure requires a foundational security-first architecture built on Japanese cloud infrastructure with GraphQL API layer for type-safe, auditable data access. Key MVP architectural components include:
 
-- **Data Residency Layer:** AWS Tokyo deployment with basic geographic boundary controls
-- **Encryption Layer:** AES-256 encryption with standard Japanese key management
-- **Audit Layer:** Essential logging system with 2-year retention and daily monitoring
-- **Compliance Layer:** Basic policy enforcement with manual violation handling
-- **Integration Layer:** Simple API gateway with manual regulatory reporting
+- **GraphQL Security Layer:** Apollo Server with JWT validation, field-level access control, and operation auditing
+- **Authentication Layer:** AWS Cognito Tokyo region with GraphQL context integration
+- **Data Residency Layer:** Self-hosted Convex on AWS Tokyo accessed via GraphQL resolvers
+- **Encryption Layer:** AES-256 encryption with GraphQL response/request encryption
+- **Audit Layer:** GraphQL operation logging with structured query tracking and 2-year retention
+- **Compliance Layer:** GraphQL middleware for consent validation and policy enforcement
+- **Integration Layer:** GraphQL gateway orchestrating all backend services with unified audit trail
 
 ### Deferred Architecture (Post-MVP)
 - Advanced real-time monitoring and automated alerting
