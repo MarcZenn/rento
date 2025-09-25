@@ -20,6 +20,28 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 
 ## Objective & Scope
 
+### MVP Priority Matrix
+
+| Feature Category | MVP Status | Business Impact | Compliance Risk | Implementation Effort | Timeline |
+|-----------------|------------|-----------------|-----------------|---------------------|----------|
+| **Data Residency Controls** | ✅ MVP Essential | Critical | High | 2 weeks | Week 1-2 |
+| **AES-256 Encryption** | ✅ MVP Essential | Critical | High | 1 week | Week 1 |
+| **Basic Audit Logging** | ✅ MVP Essential | High | High | 1 week | Week 2 |
+| **User Consent System** | ✅ MVP Essential | Critical | High | 2 weeks | Week 3-4 |
+| **AWS Cognito Migration** | ✅ MVP Essential | Critical | Medium | 3 weeks | Week 2-4 |
+| **Basic Compliance Dashboard** | ✅ MVP Essential | Medium | Medium | 1 week | Week 5 |
+| **Automated Incident Detection** | 🟡 Month 2-3 | Medium | Low | 2 weeks | Post-MVP |
+| **Real-time Monitoring** | 🟡 Month 2-3 | Medium | Low | 1 week | Post-MVP |
+| **MFA for Admin** | 🟡 Month 2-3 | Low | Low | 1 week | Post-MVP |
+| **Advanced Analytics** | 🔴 Month 4-6 | Low | None | 3 weeks | Post-MVP |
+| **Automated Retention** | 🔴 Month 4-6 | Low | Low | 2 weeks | Post-MVP |
+| **Synthetic Test Data** | 🔴 Month 6-12 | Low | None | 2 weeks | Post-MVP |
+
+**Legend:**
+- ✅ MVP Essential: Required for legal market entry
+- 🟡 Early Post-MVP: High value, moderate effort
+- 🔴 Later Post-MVP: Nice-to-have, can wait for scale
+
 ### Summary
 
 **Objective:** Establish APPI-compliant infrastructure that enables Rento's legal operation in Japan while creating competitive barriers and building agent trust.
@@ -33,12 +55,13 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 • Achieve 100% data residency compliance within Japanese infrastructure boundaries
 • Pass APPI compliance audit with zero critical violations
 • Reduce agent partnership acquisition friction by 40% through demonstrated privacy leadership
-• Maintain ¥200K-300K monthly operational costs during MVP phase (AWS Cognito reduces costs by 60-70% vs Auth0)
+• Maintain ¥150K-250K monthly operational costs during MVP phase (reduced scope + AWS Cognito reduces costs by 60-70% vs Auth0)
 • Enable legal platform operation with full audit trail capability
 • Establish 99% system availability with 8-hour disaster recovery capability
 
-### In Scope
+### In Scope (MVP-Essential)
 
+**Core Compliance Requirements (Cannot be deferred):**
 • Self-hosted AWS Tokyo deployment with data residency controls
 • AES-256 encryption for data transmission and storage
 • Basic audit logging system with 2-year retention
@@ -47,22 +70,43 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 • API gateway with request logging and essential security headers
 • Basic compliance dashboard for daily monitoring
 • User privacy settings interface for consent management
-• Integration with existing Clerk authentication (migration to AWS Cognito)
+• Migrate away from Clerk authentication to AWS Cognito+Amplify
 • Essential documentation for Japanese regulatory reporting (manual process)
 
-### Out of Scope
+**Simplified MVP Implementations:**
+• Manual incident response procedures (automated detection deferred)
+• Basic password + IP allowlisting for admin access (MFA deferred)
+• Manual data lifecycle management (automated retention policies deferred)
+• Standard test data management (synthetic data environment deferred)
+• Basic audit log search/filter (advanced analytics deferred)
+• Manual monthly cost review (automated optimization deferred)
 
-• Advanced role-based access control with comprehensive audit trails
+### Out of Scope (Post-MVP Roadmap)
+
+**Deferred to Month 2-3:**
+• Automated security incident detection with regulatory notification workflows
 • Real-time compliance monitoring with automated alerting
+• Multi-factor authentication for administrative functions
+
+**Deferred to Month 4-6:**
+• Real-time compliance violation detection
+• Advanced audit analytics and reporting
 • Automated data retention policies and deletion workflows
+
+**Deferred to Month 6-12:**
+• Advanced role-based access control with comprehensive audit trails
 • Integration with Japanese regulatory reporting systems (automated)
 • Synthetic data testing environment
 • Automated cost optimization algorithms
-• 99.9% uptime SLA (targeting 99% for MVP)
 • Advanced disaster recovery with 4-hour RTO
-• Real-time compliance violation detection
-• Advanced audit analytics and reporting
 • Support for 10,000+ concurrent users (MVP targets 1,000)
+• 99.9% uptime SLA (targeting 99% for MVP)
+
+**MVP Scope Reduction Benefits:**
+• Development time savings: 3-4 weeks
+• Cost reduction: ¥200K-400K in first month
+• Risk mitigation: Lower complexity = faster, more reliable delivery
+• Maintains full APPI legal compliance while reducing time-to-market
 
 ## Compliance Mapping
 
@@ -584,8 +628,8 @@ app.use('/graphql',
   - **Mitigation**: Geographic constraints at infrastructure level, automated boundary validation, regular compliance audits of all data flows
 
 • **Authentication Provider Migration Risk**
-  - **Exploit**: Clerk-to-AWS Cognito migration could expose user credentials or create access gaps
-  - **Mitigation**: AWS Amplify integration with comprehensive testing, user migration via bulk import with password reset, rollback procedures
+  - **Exploit**: Clerk-to-AWS Cognito migration could expose user credentials or create access gaps 
+  - **Mitigation**: AWS Amplify integration with comprehensive testing. No real risk of leak since there is currenlty no stored user credentials
 
 • **Audit Log Tampering Risk**
   - **Exploit**: Compromised admin accounts could modify audit trails to hide compliance violations
@@ -629,10 +673,10 @@ app.use('/graphql',
 
 • Implement end-to-end encryption meeting Japanese banking security standards for all sensitive data
 • Establish multi-factor authentication requirements for all administrative compliance functions
-• Deploy automated vulnerability scanning and penetration testing within Japanese infrastructure
+• Deploy automated vulnerability scanning and penetration testing within Japanese infrastructure (out of scope for MVP)
 • Maintain air-gapped backup systems within Japanese boundaries for regulatory compliance
-• Implement automated security incident detection with regulatory notification workflows
-• Establish secure communication channels with Japanese regulatory authorities
+• Implement automated security incident detection with regulatory notification workflows (out of scope for MVP)
+• Establish secure communication channels with Japanese regulatory authorities (out of scope for MVP)
 • Deploy automated compliance monitoring with real-time violation detection and alerting
 
 ### Additional Concerns or Requirements
@@ -748,33 +792,43 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 
 **Deployment Plan:**
 
-**Phase 1: Infrastructure Foundation (Week 1-2)**
+**Phase 1: Core Infrastructure (Week 1-2) - Simplified MVP**
 - Set up AWS Tokyo region infrastructure with geographic boundary controls
-- Deploy self-hosted Convex instance with encrypted storage and backup systems
-- Establish Japanese-compliant identity provider and configure authentication flows
+- Deploy self-hosted Convex instance with encrypted storage and basic backup systems
+- Establish AWS Cognito authentication in Tokyo region (ap-northeast-1)
 - Implement basic audit logging infrastructure with 2-year retention capability
-- Deploy monitoring and alerting systems for compliance violation detection
+- Deploy basic monitoring dashboard (manual alerting initially)
 
-**Phase 2: Data Migration and Validation (Week 3-4)**
+**Phase 2: Authentication Migration (Week 3-4) - Streamlined**
 - Migrate existing user data to Japanese infrastructure with encryption at rest
 - Transfer Convex database to self-hosted instance with data integrity verification
-- Migrate user authentication from Clerk to AWS Cognito Tokyo region using AWS Amplify, with bulk user import and staged rollout
-- Implement consent collection system for existing users with granular APPI compliance options
-- Deploy compliance dashboard for monitoring migration progress and detecting violations
+- Complete user authentication migration from Clerk to AWS Cognito using AWS Amplify
+- Implement consent collection system for existing users with APPI compliance options
+- Deploy basic compliance dashboard for daily manual monitoring
 
-**Phase 3: Application Integration (Week 5-6)**
+**Phase 3: Application Integration (Week 5) - Essential Features Only**
 - Integrate mobile app with new APPI compliance APIs and consent validation systems
 - Deploy frontend consent management interfaces with EN/JP localization
-- Implement data deletion request workflows with 1-hour SLA capability
-- Deploy compliance notification systems for policy updates and incident communications
-- Conduct comprehensive testing of all compliance workflows with representative user data
+- Implement basic data deletion request workflows (manual processing initially)
+- Conduct focused testing of core compliance workflows with test data
 
-**Phase 4: Compliance Validation and Go-Live (Week 7-8)**
-- Conduct APPI compliance audit with external legal counsel verification
-- Perform load testing with 1,000 concurrent users to validate performance targets
-- Execute disaster recovery testing ensuring compliance maintained during outages
-- Deploy production monitoring and alerting with 24/7 compliance team coverage
-- Complete regulatory documentation and incident response procedure training
+**Phase 4: MVP Launch (Week 6) - Reduced Scope**
+- Conduct focused APPI compliance review with legal counsel (documentation-based)
+- Perform basic load testing with 500 concurrent users to validate MVP targets
+- Deploy production monitoring with manual incident response procedures
+- Complete essential regulatory documentation and admin training
+- **Go-live with simplified but fully compliant MVP**
+
+**Post-MVP Development Roadmap:**
+- **Month 2-3**: Automated incident detection, real-time monitoring, MFA for admin
+- **Month 4-6**: Advanced analytics, automated retention policies, real-time alerts
+- **Month 6-12**: Synthetic testing, advanced disaster recovery, automated optimization
+
+**MVP Scope Benefits:**
+- **Time Reduction**: 8 weeks → 6 weeks (25% faster time-to-market)
+- **Resource Efficiency**: Focus on compliance-critical features only
+- **Risk Mitigation**: Simpler system = fewer integration points = lower failure risk
+- **Cost Optimization**: ¥200K-400K development savings while maintaining full legal compliance
 
 **Special Considerations:**
 - **Zero-Downtime Migration:** Use blue-green deployment strategy to maintain service availability during infrastructure transition
@@ -1029,15 +1083,16 @@ const resolvers = {
 
 ### Cost Impact Analysis
 
-**Total First Month Cost Comparison:**
-- AWS Cognito Tokyo: ¥520K-700K (development + service)
-- Auth0 Private Cloud: ¥1,250K-1,820K (60-70% higher)
-- **Savings**: ¥730K-1,120K in first month
+**Total First Month Cost Comparison (Revised with Scope Reduction):**
+- AWS Cognito Tokyo (Simplified MVP): ¥420K-600K (development + service)
+- Auth0 Private Cloud (Full Scope): ¥1,250K-1,820K (60-70% higher)
+- **Savings from Auth0**: ¥830K-1,220K in first month
+- **Savings from Scope Reduction**: ¥100K-200K additional savings
 
 **Ongoing Monthly Costs:**
-- AWS Cognito: ¥10K-30K for MVP scale
+- AWS Cognito (MVP Scope): ¥8K-25K for MVP scale
 - Auth0 Private Cloud: ¥500K-800K
-- **Monthly Savings**: ¥470K-770K
+- **Monthly Savings**: ¥475K-792K
 
 ### Risk Mitigation
 
