@@ -22,6 +22,7 @@ Wait for the user to tell you to either try to reconnect or to exit this task pr
 
 When implementing the feature oultined in the TDD, ALWAYS:
 
+- Analyze and understand the entire codebase
 - Ensure coding standards, design patterns, and architectural principles
 - Stay within the scope of an MVP.
 - If there are aspects of the codebase or TDD that are unclear or ambigous for your purposes ask the user to clarify.

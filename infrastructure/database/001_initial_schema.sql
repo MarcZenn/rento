@@ -1,35 +1,63 @@
--- APPI Compliant PostgreSQL Schema Migration
--- Converted from Convex schema for Rento application
--- Tokyo Region deployment with encryption and audit compliance
+-- ================================================================
+-- RENTO POSTGRESQL INITIAL SCHEMA - APPI COMPLIANT DATABASE
+-- ================================================================
+-- CONTEXT: This is a migration away from Convex BaaS.
+-- 
+-- Converted from Convex schema for Rento Japanese rental application
+-- Tokyo Region (ap-northeast-1) deployment with full APPI compliance
+--
+-- FEATURES:
+-- • UUID primary keys
+-- • APPI (Act on Protection of Personal Information) compliance
+-- • Field-level encryption for PII data
+-- • Comprehensive audit logging with 2-year retention
+-- • Row Level Security (RLS) for data isolation
+-- • Geographic data residency validation
+-- • Automated consent tracking and management
+-- • Performance-optimized indices for Japanese market queries
+-- • Bilingual support (English/Japanese) with translation tables
+-- ================================================================
 
--- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+-- ================================================================
+-- EXTENSIONS AND GLOBAL SETTINGS
+-- ================================================================
 
--- Enable Row Level Security globally
-SET row_security = on;
+-- Core extensions for UUID generation, encryption, and query monitoring
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";        -- UUID generation
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";         -- PII encryption
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements"; -- Query monitoring
+CREATE EXTENSION IF NOT EXISTS "btree_gin";        -- Array indexing
 
--- ============================================================================
--- CORE USER AND PROFILE TABLES
--- ============================================================================
+-- Security and regional settings
+SET row_security = on;                             -- Enable RLS globally
+SET timezone = 'Asia/Tokyo';                       -- APPI compliance timezone
+SET client_encoding = 'UTF8';                      -- Japanese character support
 
--- Languages table
+-- ================================================================
+-- SECTION 1: INTERNATIONALIZATION AND LOOKUP TABLES
+-- ================================================================
+-- Core reference tables supporting bilingual Japanese rental market
+-- All lookup tables include translation support for EN/JP languages
+
+-- Languages table - Supported languages for the application
+-- CONVEX MAPPING: languages table (direct conversion)
 CREATE TABLE languages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    language_code VARCHAR(10) UNIQUE NOT NULL,
-    language_name VARCHAR(100) NOT NULL,
-    endonym VARCHAR(100) NOT NULL,
-    is_supported BOOLEAN NOT NULL DEFAULT true,
-    rtl BOOLEAN NOT NULL DEFAULT false,
+    language_code VARCHAR(10) UNIQUE NOT NULL,        -- ISO 639-1 codes (en, ja, etc.)
+    language_name VARCHAR(100) NOT NULL,              -- Name in English
+    endonym VARCHAR(100) NOT NULL,                    -- Name in native language (日本語)
+    is_supported BOOLEAN NOT NULL DEFAULT true,       -- Active language flag
+    rtl BOOLEAN NOT NULL DEFAULT false,               -- Right-to-left language support
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Performance indices for language lookups
 CREATE INDEX idx_languages_code ON languages(language_code);
-CREATE INDEX idx_languages_supported ON languages(is_supported);
+CREATE INDEX idx_languages_supported ON languages(is_supported) WHERE is_supported = true;
 
--- User types lookup
+-- User types lookup - Defines roles within the Rento platform
+-- CONVEX MAPPING: user_types table (direct conversion with CHECK constraints)
 CREATE TABLE user_types (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     slug VARCHAR(50) UNIQUE NOT NULL CHECK (slug IN ('renter', 'agent', 'admin', 'partner', 'advertiser')),
@@ -37,7 +65,8 @@ CREATE TABLE user_types (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Employment statuses
+-- Employment statuses - For tenant qualification assessment
+-- CONVEX MAPPING: employment_statuses table (enhanced with CHECK constraints)
 CREATE TABLE employment_statuses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     status VARCHAR(50) UNIQUE NOT NULL CHECK (status IN ('student', 'unemployed', 'freelance', 'part-time', 'salary', 'hourly')),
@@ -55,26 +84,42 @@ CREATE TABLE employment_statuses_translations (
     UNIQUE(employment_statuses_id, language_id)
 );
 
--- Main users table (PII encrypted)
+-- Main users table (PII encrypted for APPI compliance)
+-- CONVEX MAPPING: users table (enhanced with APPI compliance fields)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    clerk_id VARCHAR(255) UNIQUE NOT NULL, -- Will be removed in Task 13
-    email TEXT NOT NULL, -- Encrypted with pgcrypto
+    clerk_id VARCHAR(255) UNIQUE,                     -- Legacy: Will be removed in Task 13
+    cognito_id VARCHAR(255) UNIQUE,                   -- AWS Cognito user ID (APPI compliant)
+    email TEXT NOT NULL,                              -- Encrypted with pgcrypto for PII protection
     username VARCHAR(100) UNIQUE NOT NULL,
+    -- APPI compliance fields
+    data_residency_confirmed BOOLEAN DEFAULT false,   -- Geographic data compliance confirmation
+    last_consent_review TIMESTAMPTZ,                  -- Last time user reviewed consent
+    account_status VARCHAR(50) DEFAULT 'active'       -- active, suspended, deleted
+        CHECK (account_status IN ('active', 'suspended', 'deleted')),
+    deletion_requested_at TIMESTAMPTZ,                -- APPI deletion request timestamp
+    deletion_scheduled_at TIMESTAMPTZ,                -- Automated deletion schedule (30-day rule)
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Encrypt email field for PII protection
-CREATE INDEX idx_users_email ON users USING HASH (email);
-CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_clerk_id ON users(clerk_id);
+-- Performance and compliance indices for user management
+CREATE INDEX idx_users_email ON users USING HASH (email);               -- Encrypted email lookup
+CREATE INDEX idx_users_username ON users(username);                     -- Username lookup
+CREATE INDEX idx_users_clerk_id ON users(clerk_id) WHERE clerk_id IS NOT NULL; -- Legacy auth
+CREATE INDEX idx_users_cognito_id ON users(cognito_id) WHERE cognito_id IS NOT NULL; -- APPI auth
+CREATE INDEX idx_users_account_status ON users(account_status);         -- Status filtering
+CREATE INDEX idx_users_deletion_scheduled ON users(deletion_scheduled_at)
+    WHERE deletion_scheduled_at IS NOT NULL;                            -- APPI deletion processing
 
--- ============================================================================
--- PRIVACY AND CONSENT TABLES (APPI COMPLIANCE)
--- ============================================================================
+-- ================================================================
+-- SECTION 2: APPI COMPLIANCE AND PRIVACY MANAGEMENT
+-- ================================================================
+-- Tables implementing Japan's Act on Protection of Personal Information (APPI)
+-- Includes consent tracking, audit logging, and data residency validation
 
--- Privacy policy versions for tracking
+-- Privacy policy versions for legal compliance tracking
+-- CONVEX MAPPING: privacy_policy_versions table (enhanced with hash validation)
 CREATE TABLE privacy_policy_versions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     version VARCHAR(50) UNIQUE NOT NULL,
@@ -141,7 +186,7 @@ CREATE INDEX idx_consent_history_timestamp ON consent_history(timestamp);
 CREATE INDEX idx_consent_history_action ON consent_history(action_type);
 
 -- ============================================================================
--- GEOGRAPHIC AND LOCATION TABLES
+-- SECTION 3: GEOGRAPHIC AND LOCATION TABLES
 -- ============================================================================
 
 -- Countries table
@@ -193,7 +238,7 @@ CREATE TABLE wards_translations (
 );
 
 -- ============================================================================
--- USER PROFILES AND PREFERENCES
+-- SECTION 4: USER PROFILES AND PREFERENCES
 -- ============================================================================
 
 -- User profiles (contains PII - encrypted fields)
@@ -273,7 +318,7 @@ CREATE TABLE user_preferences (
 );
 
 -- ============================================================================
--- PROPERTY AND AGENCY TABLES
+-- SECTION 5: PROPERTY AND AGENCY TABLES
 -- ============================================================================
 
 -- Tags for properties
@@ -397,7 +442,7 @@ CREATE TABLE properties_translations (
 );
 
 -- ============================================================================
--- MESSAGING AND CHAT TABLES
+-- SECTION 6: MESSAGING AND CHAT TABLES
 -- ============================================================================
 
 -- Chat statuses
@@ -448,7 +493,7 @@ CREATE INDEX idx_messages_sender ON messages(sender_id);
 CREATE INDEX idx_messages_created ON messages(created_at);
 
 -- ============================================================================
--- APPI COMPLIANCE AUDIT TABLES (NEW)
+-- SECTION 7: APPI COMPLIANCE AUDIT TABLES (NEW)
 -- ============================================================================
 
 -- APPI audit events for compliance tracking
@@ -554,14 +599,96 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- ============================================================================
--- INDEXES FOR PERFORMANCE
--- ============================================================================
+-- ================================================================
+-- SECTION 8: PERFORMANCE OPTIMIZATION INDICES
+-- ================================================================
+-- Comprehensive indices optimized for Japanese rental market queries and APPI compliance
 
--- Additional indexes for common queries
+-- ================================================================
+-- CORE USER AND AUTHENTICATION INDICES
+-- ================================================================
+-- Enhanced user lookup patterns for authentication and profile access
+CREATE INDEX CONCURRENTLY idx_users_basic_info ON users(id, email, username, account_status);
+CREATE INDEX CONCURRENTLY idx_profiles_user_lookup ON profiles(user_id, user_type_id, employment_status_id);
+CREATE INDEX CONCURRENTLY idx_user_preferences_search ON user_preferences(min_rent, max_rent, language_preference_id);
+
+-- ================================================================
+-- PROPERTY SEARCH OPTIMIZATION INDICES
+-- ================================================================
+-- High-frequency property search patterns for Japanese rental market
 CREATE INDEX CONCURRENTLY idx_properties_location ON properties(prefecture_id, ward_id);
 CREATE INDEX CONCURRENTLY idx_properties_price_range ON properties(rent_amount) WHERE is_available = true;
+CREATE INDEX CONCURRENTLY idx_properties_search_basics ON properties(rent_amount, area_m2, ward_id, is_available);
+CREATE INDEX CONCURRENTLY idx_properties_rent_area ON properties(rent_amount, area_m2);
+CREATE INDEX CONCURRENTLY idx_properties_ward_rent ON properties(ward_id, rent_amount);
+CREATE INDEX CONCURRENTLY idx_properties_available_verified ON properties(id)
+    WHERE is_available = true AND is_verified = true;
+
+-- Boolean property filters for Japanese market
+CREATE INDEX CONCURRENTLY idx_properties_furnished ON properties(furnished) WHERE furnished = true;
+CREATE INDEX CONCURRENTLY idx_properties_guarantor_required ON properties(guarantor_required);
+CREATE INDEX CONCURRENTLY idx_properties_utilities_covered ON properties(utilities_covered) WHERE utilities_covered = true;
+
+-- Geographic and location indices
+CREATE INDEX CONCURRENTLY idx_properties_coordinates ON properties(lat, lng)
+    WHERE lat IS NOT NULL AND lng IS NOT NULL;
+
+-- ================================================================
+-- APPI COMPLIANCE PERFORMANCE INDICES
+-- ================================================================
+-- Critical for <100ms compliance query response times
+CREATE INDEX CONCURRENTLY idx_user_consent_compliance ON user_consent(user_id, consent_timestamp, policy_version_accepted);
+CREATE INDEX CONCURRENTLY idx_user_consent_withdrawal ON user_consent(withdrawal_timestamp)
+    WHERE withdrawal_timestamp IS NOT NULL;
+CREATE INDEX CONCURRENTLY idx_consent_history_audit ON consent_history(user_id, timestamp, action_type);
+
+-- APPI audit events for compliance monitoring
+CREATE INDEX CONCURRENTLY idx_appi_audit_user_type_time ON appi_audit_events(user_id, event_type, event_timestamp);
+CREATE INDEX CONCURRENTLY idx_appi_audit_compliance_violations ON appi_audit_events(compliance_status)
+    WHERE compliance_status = 'violation';
+CREATE INDEX CONCURRENTLY idx_appi_audit_session_tracking ON appi_audit_events(event_timestamp, ip_address);
+
+-- Data residency and geographic compliance
+CREATE INDEX CONCURRENTLY idx_appi_residency_location_time ON appi_data_residency_log(geographic_location, compliance_check_timestamp);
+CREATE INDEX CONCURRENTLY idx_appi_residency_violations ON appi_data_residency_log(compliance_status)
+    WHERE compliance_status = 'violation';
+
+-- Incident tracking for regulatory reporting
+CREATE INDEX CONCURRENTLY idx_appi_incident_severity_time ON appi_incident_tracking(severity, incident_timestamp);
+CREATE INDEX CONCURRENTLY idx_appi_incident_regulatory ON appi_incident_tracking(regulatory_notification_sent)
+    WHERE regulatory_notification_sent = true;
+
+-- ================================================================
+-- COMMUNICATION AND CHAT OPTIMIZATION
+-- ================================================================
+-- Chat and messaging performance for real-time communication
 CREATE INDEX CONCURRENTLY idx_chats_active ON chats(status_id, last_message_at) WHERE last_message_at IS NOT NULL;
+CREATE INDEX CONCURRENTLY idx_chats_user_agent_active ON chats(user_id, agent_id, status_id);
+CREATE INDEX CONCURRENTLY idx_messages_chat_timeline ON messages(chat_id, created_at);
+CREATE INDEX CONCURRENTLY idx_messages_unread ON messages(chat_id, read) WHERE read = false;
+
+-- ================================================================
+-- AGENCY AND AGENT BUSINESS LOGIC INDICES
+-- ================================================================
+-- Real estate business operation optimization
+CREATE INDEX CONCURRENTLY idx_agencies_ward_verified ON agencies(ward_id, verified) WHERE verified = true;
+CREATE INDEX CONCURRENTLY idx_agencies_bilingual ON agencies(bilingual_support) WHERE bilingual_support = true;
+CREATE INDEX CONCURRENTLY idx_agents_agency_user ON agents(agency_id, user_id);
+
+-- ================================================================
+-- ARRAY AND MULTILINGUAL CONTENT INDICES (GIN)
+-- ================================================================
+-- Specialized indices for array operations and translation lookups
+CREATE INDEX CONCURRENTLY idx_user_preferences_layouts_gin ON user_preferences USING GIN(preferred_layouts);
+CREATE INDEX CONCURRENTLY idx_user_preferences_wards_gin ON user_preferences USING GIN(preferred_wards);
+CREATE INDEX CONCURRENTLY idx_properties_tags_gin ON properties USING GIN(tags_ids);
+CREATE INDEX CONCURRENTLY idx_properties_photos_gin ON properties USING GIN(photos);
+CREATE INDEX CONCURRENTLY idx_agents_languages_gin ON agents USING GIN(languages_spoken);
+
+-- Translation table optimization for bilingual support
+CREATE INDEX CONCURRENTLY idx_all_translations_lookup ON employment_statuses_translations(employment_statuses_id, language_id);
+CREATE INDEX CONCURRENTLY idx_country_translations_lookup ON country_translations(countries_id, language_id);
+CREATE INDEX CONCURRENTLY idx_property_translations_lookup ON properties_translations(properties_id, language_id);
 
 -- ============================================================================
 -- INITIAL DATA
@@ -602,7 +729,7 @@ INSERT INTO chat_statuses (status) VALUES
 ON CONFLICT (status) DO NOTHING;
 
 -- ============================================================================
--- AUDIT TRIGGERS
+-- SECTION 9: AUDIT TRIGGERS
 -- ============================================================================
 
 -- Function to update updated_at timestamp
@@ -622,25 +749,168 @@ CREATE TRIGGER update_properties_updated_at BEFORE UPDATE ON properties FOR EACH
 CREATE TRIGGER update_agencies_updated_at BEFORE UPDATE ON agencies FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_agents_updated_at BEFORE UPDATE ON agents FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- ============================================================================
--- GRANTS AND PERMISSIONS
--- ============================================================================
+-- ================================================================
+-- SECTION 10: DATABASE SECURITY AND ROLE-BASED ACCESS CONTROL
+-- ================================================================
+-- Comprehensive security model with least-privilege access for APPI compliance
 
--- Create application user role
-CREATE ROLE application_user;
-GRANT CONNECT ON DATABASE rento_appi_db TO application_user;
-GRANT USAGE ON SCHEMA public TO application_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO application_user;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO application_user;
+-- Drop existing roles if they exist (for clean setup)
+DROP ROLE IF EXISTS application_user;
+DROP ROLE IF EXISTS read_only_user;
+DROP ROLE IF EXISTS rento_app_service;
+DROP ROLE IF EXISTS rento_compliance_officer;
+DROP ROLE IF EXISTS rento_admin;
+DROP ROLE IF EXISTS rento_agent;
+DROP ROLE IF EXISTS rento_data_processor;
 
--- Grant permissions for future tables
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO application_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO application_user;
+-- APPLICATION SERVICE ROLE - Main application database access
+CREATE ROLE rento_app_service WITH
+    LOGIN
+    PASSWORD 'CHANGE_ME_IN_PRODUCTION'
+    NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION
+    CONNECTION LIMIT 100;
 
--- Create read-only role for reporting
-CREATE ROLE read_only_user;
-GRANT CONNECT ON DATABASE rento_appi_db TO read_only_user;
-GRANT USAGE ON SCHEMA public TO read_only_user;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_only_user;
+-- COMPLIANCE OFFICER ROLE - APPI compliance management and audit access
+CREATE ROLE rento_compliance_officer WITH
+    LOGIN
+    PASSWORD 'CHANGE_ME_IN_PRODUCTION'
+    NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION
+    CONNECTION LIMIT 5;
+
+-- ADMIN ROLE - Full database management
+CREATE ROLE rento_admin WITH
+    LOGIN
+    PASSWORD 'CHANGE_ME_IN_PRODUCTION'
+    SUPERUSER CREATEDB CREATEROLE REPLICATION
+    CONNECTION LIMIT 3;
+
+-- AGENT ROLE - Limited property and chat access for real estate agents
+CREATE ROLE rento_agent WITH
+    LOGIN
+    PASSWORD 'CHANGE_ME_IN_PRODUCTION'
+    NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION
+    CONNECTION LIMIT 20;
+
+-- READ-ONLY ROLE - Analytics and reporting access
+CREATE ROLE rento_read_only WITH
+    LOGIN
+    PASSWORD 'CHANGE_ME_IN_PRODUCTION'
+    NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION
+    CONNECTION LIMIT 10;
+
+-- DATA PROCESSOR ROLE - Migration and batch operations
+CREATE ROLE rento_data_processor WITH
+    LOGIN
+    PASSWORD 'CHANGE_ME_IN_PRODUCTION'
+    NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION
+    CONNECTION LIMIT 5;
+
+-- ================================================================
+-- APPLICATION SERVICE PERMISSIONS
+-- ================================================================
+GRANT CONNECT ON DATABASE rento_appi_db TO rento_app_service;
+GRANT USAGE ON SCHEMA public TO rento_app_service;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO rento_app_service;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO rento_app_service;
+
+-- Restrict deletion from audit tables (APPI compliance requirement)
+REVOKE DELETE ON appi_audit_events FROM rento_app_service;
+REVOKE DELETE ON consent_history FROM rento_app_service;
+REVOKE DELETE ON appi_data_residency_log FROM rento_app_service;
+
+-- ================================================================
+-- COMPLIANCE OFFICER PERMISSIONS
+-- ================================================================
+GRANT CONNECT ON DATABASE rento_appi_db TO rento_compliance_officer;
+GRANT USAGE ON SCHEMA public TO rento_compliance_officer;
+
+-- Full access to compliance and audit tables
+GRANT ALL PRIVILEGES ON appi_audit_events TO rento_compliance_officer;
+GRANT ALL PRIVILEGES ON consent_history TO rento_compliance_officer;
+GRANT ALL PRIVILEGES ON appi_data_residency_log TO rento_compliance_officer;
+GRANT ALL PRIVILEGES ON appi_incident_tracking TO rento_compliance_officer;
+GRANT ALL PRIVILEGES ON privacy_policy_versions TO rento_compliance_officer;
+GRANT ALL PRIVILEGES ON user_consent TO rento_compliance_officer;
+
+-- Read access to user data for compliance review
+GRANT SELECT ON users, profiles, user_preferences TO rento_compliance_officer;
+
+-- ================================================================
+-- AGENT ROLE PERMISSIONS (LIMITED ACCESS)
+-- ================================================================
+GRANT CONNECT ON DATABASE rento_appi_db TO rento_agent;
+GRANT USAGE ON SCHEMA public TO rento_agent;
+
+-- Property and chat management access
+GRANT SELECT, INSERT, UPDATE ON properties, properties_translations TO rento_agent;
+GRANT SELECT, INSERT, UPDATE ON chats, messages TO rento_agent;
+GRANT SELECT ON agencies, agents, agents_translations TO rento_agent;
+
+-- Read-only access to reference tables
+GRANT SELECT ON languages, countries, country_translations, prefectures, wards,
+    wards_translations, floor_plans, floor_plans_translations, tags,
+    tags_translations, chat_statuses, user_types TO rento_agent;
+
+-- ================================================================
+-- READ-ONLY PERMISSIONS
+-- ================================================================
+GRANT CONNECT ON DATABASE rento_appi_db TO rento_read_only;
+GRANT USAGE ON SCHEMA public TO rento_read_only;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO rento_read_only;
+
+-- Revoke access to sensitive audit information
+REVOKE SELECT ON appi_audit_events, user_consent, consent_history FROM rento_read_only;
+
+-- ================================================================
+-- FUTURE OBJECTS PERMISSIONS
+-- ================================================================
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO rento_app_service;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT USAGE, SELECT ON SEQUENCES TO rento_app_service;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT ON TABLES TO rento_read_only;
+
+-- ================================================================
+-- SECTION 11: DATABASE VALIDATION AND FINAL SETUP
+-- ================================================================
+
+-- Set connection and performance limits for production
+ALTER ROLE rento_app_service SET statement_timeout = '30s';
+ALTER ROLE rento_agent SET statement_timeout = '15s';
+ALTER ROLE rento_read_only SET statement_timeout = '60s';
+ALTER ROLE rento_compliance_officer SET statement_timeout = '120s';
+
+-- ================================================================
+-- CRITICAL PRODUCTION CHECKLIST
+-- ================================================================
+-- 🚨 SECURITY WARNINGS - MUST BE ADDRESSED BEFORE PRODUCTION:
+--
+-- 1. CHANGE ALL ROLE PASSWORDS from 'CHANGE_ME_IN_PRODUCTION'
+-- 2. UPDATE ENCRYPTION KEYS in app.encryption_key setting
+-- 3. CONFIGURE SSL CERTIFICATES (server.crt, server.key)
+-- 4. UPDATE pg_hba.conf for proper authentication methods
+-- 5. SET UP BACKUP PROCEDURES with encryption
+-- 6. CONFIGURE MONITORING and alerting for APPI compliance
+-- 7. VALIDATE geographic data residency in Tokyo region
+-- 8. TEST all APPI compliance workflows
+-- 9. SETUP automated audit log retention (2-year APPI requirement)
+-- 10. VERIFY Row Level Security policies are working correctly
+--
+-- SCHEMA STATISTICS:
+-- • 25+ tables with full referential integrity
+-- • 60+ performance-optimized indices
+-- • 6 database roles with least-privilege access
+-- • 10+ APPI compliance tables and triggers
+-- • Complete bilingual support (EN/JP)
+-- ================================================================
 
 COMMIT;
+
+-- Final validation query - run to verify setup
+SELECT
+    'Schema Setup Complete' AS status,
+    COUNT(*) FILTER (WHERE table_schema = 'public') AS tables_created,
+    (SELECT COUNT(*) FROM pg_roles WHERE rolname LIKE 'rento_%') AS roles_created,
+    (SELECT COUNT(*) FROM pg_indexes WHERE schemaname = 'public') AS indices_created
+FROM information_schema.tables;
