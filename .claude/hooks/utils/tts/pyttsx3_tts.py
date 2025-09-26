@@ -28,7 +28,7 @@ def main():
     """
     
     try:
-        import pyttsx3
+        import pyttsx3 # pyright: ignore[reportMissingImports]
         
         # Initialize TTS engine
         engine = pyttsx3.init()

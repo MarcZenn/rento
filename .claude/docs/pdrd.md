@@ -37,9 +37,9 @@ The solution leverages Japan's digital transformation momentum and government im
 • Create basic bilingual UI framework and i18n internationalization system
 
 **Technical Requirements:**
-• Self-hosted Convex database on AWS Tokyo (ap-northeast-1) with Redis caching layer for performance optimization
+• Self-hosted PostgresSQL database on AWS Tokyo (ap-northeast-1) with Redis caching layer for performance optimization
 • AWS Cognito+Amplify authentication system in Tokyo region for APPI-compliant identity management
-• GraphQL+Apollo Server API layer providing unified interface between React Native/web clients and Convex backend
+• GraphQL+Apollo Server API layer providing unified interface between React Native/web clients and PostgresSQL/Amplify backend
 • End-to-end encryption implementation for sensitive user data and communications
 • Comprehensive audit logging system for regulatory compliance and data access tracking
 • React Native mobile app foundation with Apollo Client for GraphQL operations and AWS Amplify SDK
@@ -47,7 +47,7 @@ The solution leverages Japan's digital transformation momentum and government im
 
 **GraphQL API Architecture:**
 • Apollo Server middleware handling AWS Cognito JWT verification and user context creation
-• GraphQL resolvers calling Convex functions for database operations with APPI compliance validation
+• GraphQL resolvers calling functions for database operations with APPI compliance validation
 • Real-time subscriptions for agent-customer messaging and property updates
 • GraphQL schema supporting bilingual content with cultural context fields
 
@@ -134,10 +134,10 @@ Comprehensive data privacy and residency system ensuring all personal data proce
 • Enables premium pricing justification through demonstrated regulatory leadership and data security excellence
 
 **Technical Implementation:**
-- Backend Infrastructure (Self-Hosted Convex + GraphQL)
-  - Self-hosted Convex database deployment on AWS Tokyo (ap-northeast-1) with Redis caching layer
-  - Apollo Server GraphQL API deployed alongside Convex for unified data access
-  - Kubernetes orchestration for scalable, compliant container management of both Convex and Apollo Server
+- Backend Infrastructure (Self Hosted PostgresSQL + GraphQL)
+  - Self-hosted PostgresSQL database deployment on AWS Tokyo (ap-northeast-1) with Redis caching layer
+  - Apollo Server GraphQL API deployed alongside PostgresSQL+Redis for unified data access
+  - Kubernetes orchestration for scalable, compliant container management of both PostgresSQL and Apollo Server
   - Load balancing and failover systems within Japanese data centers serving GraphQL endpoints
   - API gateway with rate limiting and comprehensive GraphQL operation logging
 - Security and Compliance
@@ -197,7 +197,7 @@ Comprehensive user authentication and profile management system supporting both 
   - Session management through Cognito refresh token rotation for security
   - Integration with APPI compliance audit logging for all authentication events
   - Apollo Server authentication directives for secure GraphQL operations
-  - Convex `user_preferences` table operations through authenticated GraphQL resolvers
+  - PostgresSQL `user_preferences` table operations through authenticated GraphQL resolvers
   - User scoring algorithm development via GraphQL mutations and queries
 
 #### [ ] 3. **Property Search and Discovery Engine**
@@ -229,10 +229,10 @@ Advanced property search platform with Japan-specific filters, interactive mappi
 • Competitive advantage through Tokyo-specific transportation and cultural integration unavailable elsewhere
 
 **Technical Implementation:**
-- Search and Database Systems (Self-Hosted Convex + GraphQL)
-  - Self-hosted Convex database with text search capabilities for Japanese and English content
+- Search and Database Systems (Self-Hosted PostgresSQL + GraphQL)
+  - Self-hosted PostgresSQL database with text search capabilities for Japanese and English content
   - GraphQL resolvers providing property search API with geospatial filtering
-  - Geospatial indexing within Convex for location-based queries and proximity calculations
+  - Geospatial indexing within PostgresSQL for location-based queries and proximity calculations
   - Real-time property data synchronization via GraphQL mutations from agent feeds
   - Redis caching layer for frequently accessed GraphQL query results and map data
 - Frontend Discovery Interface (Apollo Client + GraphQL)
@@ -278,8 +278,8 @@ Comprehensive property bookmarking and organization system allowing users to sav
 • Sharing capabilities drive organic user acquisition through personal networks
 
 **Technical Implementation:**
-- Database Design (Self-Hosted Convex via GraphQL)
-  - Self-hosted Convex `user_favorites` table with property relationships and metadata
+- Database Design (Self-Hosted PostgresSQL via GraphQL)
+  - Self-hosted PostgresSQL `user_favorites` table with property relationships and metadata
   - GraphQL resolvers managing favorite operations with real-time subscriptions for updates
   - User preference learning algorithm based on favoriting patterns via GraphQL queries
   - Real-time synchronization across devices through GraphQL subscriptions with conflict resolution
@@ -322,7 +322,7 @@ Advanced bilingual communication system with context-aware translation optimized
 **Technical Implementation:**
 - Translation and Language Services (GraphQL Integration)
   - Translation API integration accessed through GraphQL resolvers with fallback systems
-  - Custom terminology dictionary stored in self-hosted Convex with GraphQL query access
+  - Custom terminology dictionary stored in self-hosted PostgresSQL with GraphQL query access
   - Message preprocessing via GraphQL mutations for context detection and cultural communication patterns
   - Translation caching through Apollo Server cache and Redis for frequently used phrases
 - Real-Time Communication Infrastructure (GraphQL Subscriptions)
@@ -330,7 +330,7 @@ Advanced bilingual communication system with context-aware translation optimized
   - Message delivery through GraphQL mutations with optimistic UI updates and offline support
   - Push notification integration via Apollo Client with cultural timing preferences
   - End-to-end encryption for sensitive property and financial information discussions
-  - Convex real-time reactivity powering GraphQL subscriptions for message updates
+  - PostgresSQL real-time reactivity powering GraphQL subscriptions for message updates
 
 #### [ ] 6. **Agent Dashboard and Property Management**
 **Status:** Not Implemented
@@ -374,10 +374,10 @@ Comprehensive web-based dashboard enabling real estate agents to manage property
   - Tiered access controls implemented through GraphQL resolvers for Basic vs Cultural Expert agent features
 - Backend Management Systems (GraphQL API)
   - GraphQL mutations and queries supporting bulk property operations through Apollo Server
-  - Customer interaction tracking via GraphQL resolvers with Convex audit trails for relationship management
+  - Customer interaction tracking via GraphQL resolvers with PostgresSQL audit trails for relationship management
   - Automated workflow systems through GraphQL subscriptions for inquiry routing and follow-up scheduling
   - GraphQL API enabling integration with existing agent CRM systems and property management software
-  - Convex real-time database operations providing immediate data synchronization across all interfaces
+  - PostgresSQL real-time database operations providing immediate data synchronization across all interfaces
 
 #### [ ] 7. **Cultural Navigation and Education System**
 **Status:** Not Implemented

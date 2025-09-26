@@ -147,12 +147,12 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 ### Context Diagram
 
 • APPI compliance infrastructure sits as foundational layer beneath all Rento platform services
-• Current Convex cloud hosting must migrate to self-hosted AWS Tokyo deployment
-• Current Clerk authentication requires migration to AWS Cognito deployed in Tokyo region (ap-northeast-1) for guaranteed data residency.
-• All user data processing must occur within Japanese infrastructure boundaries
-• Real estate agents and users interact through compliance-controlled data flows
-• Audit and monitoring systems provide regulatory reporting capability
-• Backup and disaster recovery systems maintain compliance while ensuring availability
+• **CRITICAL CHANGE: Complete migration from Convex to self-hosted PostgreSQL + Redis deployment on AWS Tokyo**
+• Current Clerk authentication requires migration to AWS Cognito deployed in Tokyo region (ap-northeast-1) for guaranteed data residency
+• All user data processing must occur within Japanese infrastructure boundaries using self-hosted database infrastructure
+• Real estate agents and users interact through compliance-controlled data flows via self-hosted backend
+• Audit and monitoring systems provide regulatory reporting capability through dedicated logging infrastructure
+• Backup and disaster recovery systems maintain compliance while ensuring availability with full control over data residency
 
 ### Data Flow Overview
 
@@ -177,10 +177,10 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 - hook: "All client requests → GraphQL schema validation → resolver execution"
 - constraint: "API layer orchestrates AWS Cognito authentication with Convex database operations"
 
-**convex:**
-- provider: "Convex (self-hosted on AWS Tokyo)"
-- hook: "GraphQL resolvers → Convex query/mutation functions → encrypted storage with audit logging"
-- constraint: "Migration from cloud Convex to self-hosted deployment required"
+**database:**
+- provider: "PostgreSQL with Redis caching (self-hosted on AWS Tokyo RDS + ElastiCache)"
+- hook: "GraphQL resolvers → Database queries/mutations → encrypted PostgreSQL storage with audit logging"
+- constraint: "Complete migration from Convex to PostgreSQL required for full data residency control"
 
 **aws_tokyo:**
 - provider: "AWS Tokyo region services"
@@ -193,13 +193,37 @@ This TDD is based on the APPI Compliance Infrastructure Feature Requirements Doc
 - constraint: "Key management must comply with Japanese banking standards"
 
 **audit:**
-- provider: "GraphQL audit plugin + custom logging system"
-- hook: "GraphQL operations → structured query logging → encrypted log storage with 2-year retention"
-- constraint: "Audit trails must support regulatory reporting requirements with GraphQL operation tracking"
+- provider: "GraphQL audit plugin + PostgreSQL audit tables + AWS CloudTrail"
+- hook: "GraphQL operations → structured query logging → encrypted PostgreSQL audit tables with 2-year retention"
+- constraint: "Audit trails must support regulatory reporting requirements with full query tracking in self-hosted infrastructure"
 
 ## Data Model
 
-APPI Compliance Infrastructure leverages and extends the existing Convex schema foundation to support comprehensive compliance requirements. The current schema provides a good starting point but requires specific enhancements for APPI compliance tracking and audit capabilities.
+**CRITICAL ARCHITECTURE CHANGE: PostgreSQL Migration**
+
+APPI Compliance Infrastructure requires complete migration from Convex to PostgreSQL for full data residency control. The existing Convex schema provides the foundation but must be converted to PostgreSQL with additional APPI compliance enhancements.
+
+### PostgreSQL Architecture
+
+**Infrastructure Components:**
+- **PostgreSQL 15+**: Primary database with transparent data encryption (TDE)
+- **Redis 7+**: Caching layer for session management and query optimization
+- **AWS RDS PostgreSQL**: Managed database service in Tokyo region (ap-northeast-1)
+- **AWS ElastiCache Redis**: Managed Redis cluster for caching
+- **AWS KMS**: Key management service for encryption keys
+- **pgcrypto Extension**: Additional encryption functions for sensitive data fields
+
+**Data Residency Implementation:**
+- RDS instance deployed exclusively in ap-northeast-1 availability zones
+- Multi-AZ deployment within Tokyo region for high availability
+- Automated backups stored within Japanese boundaries
+- Read replicas (if needed) constrained to Tokyo region
+
+**Encryption Strategy:**
+- Database-level encryption at rest using AWS RDS encryption
+- Application-level encryption for PII using pgcrypto extension
+- TLS 1.3 for all client-database connections
+- Separate encryption keys for different data sensitivity levels
 
 ### Schema Changes
 
@@ -788,47 +812,52 @@ app.use('/graphql',
 ## Rollout Plan
 
 **Deployment Strategy:**
-This feature requires a carefully orchestrated rollout due to the migration of existing infrastructure (Convex, Clerk to AWS Cognito) and the critical nature of compliance requirements. The deployment must maintain service availability while ensuring no compliance violations occur during the transition. Luckily, there is no working MVP in production so there is little to no risk should service be interrupted. There are also no existing users so there is low risk of compliance violations.
+This feature requires a carefully orchestrated rollout due to the **complete migration from Convex to PostgreSQL** plus Clerk to AWS Cognito migration and the critical nature of compliance requirements. The deployment must maintain service availability while ensuring no compliance violations occur during the transition. Luckily, there is no working MVP in production so there is little to no risk should service be interrupted. There are also no existing users so there is low risk of compliance violations.
 
-**Deployment Plan:**
+**REVISED Deployment Plan:**
 
-**Phase 1: Core Infrastructure (Week 1-2) - Simplified MVP**
+**Phase 1: Core Infrastructure + Database Setup (Week 1-3) - PostgreSQL Migration**
 - Set up AWS Tokyo region infrastructure with geographic boundary controls
-- Deploy self-hosted Convex instance with encrypted storage and basic backup systems
+- Deploy PostgreSQL 15+ on AWS RDS in Tokyo region with Multi-AZ
+- Deploy Redis 7+ on AWS ElastiCache for caching and session management
+- Configure AES-256 encryption at rest and TLS 1.3 for connections
+- Convert existing Convex schema to PostgreSQL DDL with APPI compliance tables
 - Establish AWS Cognito authentication in Tokyo region (ap-northeast-1)
-- Implement basic audit logging infrastructure with 2-year retention capability
-- Deploy basic monitoring dashboard (manual alerting initially)
+- Set up AWS KMS for key management meeting Japanese banking standards
 
-**Phase 2: Authentication Migration (Week 3-4) - Streamlined**
-- Migrate existing user data to Japanese infrastructure with encryption at rest
-- Transfer Convex database to self-hosted instance with data integrity verification
+**Phase 2: Data Migration + API Layer (Week 4-5) - Critical Migration**
+- Create and test data migration scripts from Convex to PostgreSQL
+- Execute data migration with integrity validation and rollback procedures
+- Update all GraphQL resolvers to use PostgreSQL with connection pooling
+- Integrate Redis caching layer for performance optimization
 - Complete user authentication migration from Clerk to AWS Cognito using AWS Amplify
-- Implement consent collection system for existing users with APPI compliance options
-- Deploy basic compliance dashboard for daily manual monitoring
+- Implement basic audit logging infrastructure with PostgreSQL audit tables
 
-**Phase 3: Application Integration (Week 5) - Essential Features Only**
-- Integrate mobile app with new APPI compliance APIs and consent validation systems
+**Phase 3: Application Integration (Week 6-7) - Essential Features Only**
+- Integrate mobile app with new PostgreSQL-backed APPI compliance APIs
 - Deploy frontend consent management interfaces with EN/JP localization
-- Implement basic data deletion request workflows (manual processing initially)
-- Conduct focused testing of core compliance workflows with test data
+- Implement consent collection system with PostgreSQL consent validation
+- Deploy basic compliance dashboard reading from PostgreSQL audit tables
+- Conduct focused testing of core compliance workflows with migrated data
 
-**Phase 4: MVP Launch (Week 6) - Reduced Scope**
+**Phase 4: MVP Launch (Week 8) - PostgreSQL Production Ready**
 - Conduct focused APPI compliance review with legal counsel (documentation-based)
-- Perform basic load testing with 500 concurrent users to validate MVP targets
-- Deploy production monitoring with manual incident response procedures
+- Perform load testing with 500 concurrent users on PostgreSQL infrastructure
+- Deploy production monitoring with PostgreSQL performance dashboards
 - Complete essential regulatory documentation and admin training
-- **Go-live with simplified but fully compliant MVP**
+- **Go-live with PostgreSQL-based, fully compliant MVP**
 
 **Post-MVP Development Roadmap:**
 - **Month 2-3**: Automated incident detection, real-time monitoring, MFA for admin
 - **Month 4-6**: Advanced analytics, automated retention policies, real-time alerts
 - **Month 6-12**: Synthetic testing, advanced disaster recovery, automated optimization
 
-**MVP Scope Benefits:**
-- **Time Reduction**: 8 weeks → 6 weeks (25% faster time-to-market)
-- **Resource Efficiency**: Focus on compliance-critical features only
-- **Risk Mitigation**: Simpler system = fewer integration points = lower failure risk
-- **Cost Optimization**: ¥200K-400K development savings while maintaining full legal compliance
+**PostgreSQL Migration Impact:**
+- **Extended Timeline**: 6 weeks → 8 weeks (due to database migration complexity)
+- **Enhanced Control**: Full data residency control vs. Convex cloud dependency
+- **Risk Mitigation**: Self-hosted infrastructure = complete APPI compliance guarantee
+- **Long-term Benefits**: No vendor lock-in, full encryption control, unlimited scaling capability
+- **Cost Trade-off**: Higher initial development cost but lower long-term operational costs
 
 **Special Considerations:**
 - **Zero-Downtime Migration:** Use blue-green deployment strategy to maintain service availability during infrastructure transition
@@ -844,7 +873,7 @@ This feature requires a carefully orchestrated rollout due to the migration of e
 • **Audit Trail Completeness:** All data access events logged with 2-year retention, searchable audit interface, and compliance reporting capability
 • **Consent Management Functionality:** User consent collection, preference management, and withdrawal capabilities with 1-hour processing SLA for deletion requests
 • **Authentication Migration Success:** Complete migration from Clerk to AWS Cognito Tokyo region (ap-northeast-1) with AWS Amplify integration.
-• **Infrastructure Self-Hosting:** Convex database successfully migrated to self-hosted AWS Tokyo deployment with verified data integrity and performance maintained
+• **Infrastructure Self-Hosting:** PostgreSQL database successfully deployed and migrated from Convex to self-hosted AWS RDS Tokyo with verified data integrity and performance maintained
 • **Compliance Dashboard Operational:** Administrative interface providing daily compliance monitoring, violation detection, and regulatory reporting capability
 • **Mobile App Integration Complete:** Consent modals, privacy settings, and deletion request flows integrated with bilingual (EN/JP) support
 • **Performance Targets Met:** Sub-500ms response times for 1,000 concurrent users with 99% system availability during MVP phase

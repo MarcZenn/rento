@@ -10,7 +10,7 @@
 import os
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
 
 def main():
     """
@@ -42,8 +42,8 @@ def main():
         sys.exit(1)
     
     try:
-        from elevenlabs.client import ElevenLabs
-        from elevenlabs import play
+        from elevenlabs.client import ElevenLabs #pyright: ignore[reportMissingImports]
+        from elevenlabs import play #pyright: ignore[reportMissingImports]
         
         # Initialize client
         elevenlabs = ElevenLabs(api_key=api_key)
