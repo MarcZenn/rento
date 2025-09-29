@@ -1,4 +1,8 @@
-# Document an Existing Project
+#/document-project Task
+
+## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
+
+**THIS IS AN EXECUTABLE WORKFLOW - NOT REFERENCE MATERIAL**
 
 ## Purpose
 
@@ -8,7 +12,7 @@ Generate comprehensive documentation for existing projects optimized for AI deve
 
 ### 1. Initial Project Analysis
 
-**CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
+**CRITICAL:** First, check if a PDRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
 
 ## Critical: Archon Access
 
@@ -17,7 +21,7 @@ Wait for the user to tell you to either try to reconnect or to exit this task pr
 
 **IF PDRD EXISTS**:
 
-- Review the PDRD in Archon to understand the overall product development roadmap
+- Review all `**pdrd.md` files in Archon (if there are no such files in Archon check `.claude/docs` directory) to understand the overall product development roadmap
 - Identify which modules, services, or areas will be affected
 - Skip unrelated parts of the codebase to keep docs lean
 
@@ -26,11 +30,9 @@ Ask the user:
 
 "I notice you haven't provided a PDRD or development roadmap document. To create more focused and useful documentation, I recommend one of these options:
 
-1. **Create a PDRD first** - Would you like me to help create a PDRD before documenting? This helps focus documentation on relevant areas.
+1. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can share?
 
-2. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can share?
-
-3. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note: This may create excessive documentation for large projects)
+2. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note: This may create excessive documentation for large projects)
 
 Please let me know your preference, or I can proceed with full documentation if you prefer."
 
@@ -47,7 +49,7 @@ Begin by conducting analysis of the existing project. Use available tools to:
 4. **Existing Documentation Review**: Check for README files, docs folders, and any existing documentation
 5. **Code Pattern Analysis**: Sample key files to understand coding patterns, naming conventions, and architectural approaches
 
-Ask the user these elicitation questions to better understand their needs:
+Only ask the user these elicitation questions, to better understand their needs, if they are left unanswered by the PDRD or tac.md or breif.md
 
 - What is the primary purpose of this project?
 - Are there any specific areas of the codebase that are particularly complex or important for agents to understand?
@@ -80,8 +82,6 @@ CRITICAL: Before generating documentation, conduct extensive analysis of the exi
    - Locate integration points and external dependencies
    - Document workarounds and technical debt
    - Note areas that differ from standard patterns
-
-**IF PDRD PROVIDED**: Also analyze what would need to change for the roadmap
 
 ### 3. Core Documentation Generation
 
@@ -293,13 +293,9 @@ npm run seed        # Seed test data
 
 ### 4. Document Delivery
 
-1. **In Web UI (Gemini, ChatGPT, Claude)**:
-   - Present the entire document in one response (or multiple if too long)
-   - Tell user to copy and save as `docs/brownfield-architecture.md` or `docs/project-architecture.md`
-   - Mention it can be sharded later in IDE if needed
-
-2. **In IDE Environment**:
-   - Create the document as `docs/brownfield-architecture.md`
+1. **In IDE Environment**:
+   - Create the document as `.claude/docs/brownfield-architecture.md`. If it already exists, then update it with new findings
+   - Datestamp the document to track changes
    - Inform user this single document contains all architectural information
    - Can be sharded later using PO agent if desired
 
@@ -309,7 +305,6 @@ The document should be comprehensive enough that future agents can understand:
 - Where to find key files and logic
 - What technical debt exists
 - What constraints must be respected
-- If PRD provided: What needs to change for the enhancement]]
 
 ### 5. Quality Assurance
 

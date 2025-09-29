@@ -37,12 +37,19 @@ The solution leverages Japan's digital transformation momentum and government im
 • Create basic bilingual UI framework and i18n internationalization system
 
 **Technical Requirements:**
-• Self-hosted Convex database on AWS Tokyo with Redis caching layer for performance optimization
-• Clerk authentication migration to Japanese-compliant identity provider with token management
+• Self-hosted PostgresSQL database on AWS Tokyo (ap-northeast-1) with Redis caching layer for performance optimization
+• AWS Cognito+Amplify authentication system in Tokyo region for APPI-compliant identity management
+• GraphQL+Apollo Server API layer providing unified interface between React Native/web clients and PostgresSQL/Amplify backend
 • End-to-end encryption implementation for sensitive user data and communications
 • Comprehensive audit logging system for regulatory compliance and data access tracking
-• React Native mobile app foundation with Expo Router and TypeScript configuration
-• Web dashboard framework using React.js with responsive design for agent tools interfaces
+• React Native mobile app foundation with Apollo Client for GraphQL operations and AWS Amplify SDK
+• Agent web dashboard using React.js with Apollo Client for real-time GraphQL subscriptions
+
+**GraphQL API Architecture:**
+• Apollo Server middleware handling AWS Cognito JWT verification and user context creation
+• GraphQL resolvers calling functions for database operations with APPI compliance validation
+• Real-time subscriptions for agent-customer messaging and property updates
+• GraphQL schema supporting bilingual content with cultural context fields
 
 **Why Critical:**
 This phase establishes the fundamental technical and regulatory foundation required for all subsequent features. Without APPI compliance and secure infrastructure, the platform cannot legally operate in Japan or build trust with privacy-conscious real estate agents. The bilingual framework created here enables all user-facing features while the authentication system supports both customer and agent workflows essential for marketplace functionality.
@@ -110,7 +117,7 @@ Comprehensive data privacy and residency system ensuring all personal data proce
 
 **Key Components:**
 - Self-Hosted Infrastructure Management
-  - AWS Tokyo/Azure Japan deployment with full data residency controls
+  - AWS Tokyo region (ap-northeast-1) deployment with full data residency controls
   - Automated backup and disaster recovery within Japanese boundaries
   - Infrastructure monitoring and compliance alerting systems
   - Cost optimization for ¥300K-500K monthly operational targets
@@ -127,11 +134,12 @@ Comprehensive data privacy and residency system ensuring all personal data proce
 • Enables premium pricing justification through demonstrated regulatory leadership and data security excellence
 
 **Technical Implementation:**
-- Backend Infrastructure
-  - Self-hosted Convex database migration with Redis caching layer
-  - Kubernetes orchestration for scalable, compliant container management
-  - Load balancing and failover systems within Japanese data centers
-  - API gateway with rate limiting and comprehensive request logging
+- Backend Infrastructure (Self Hosted PostgresSQL + GraphQL)
+  - Self-hosted PostgresSQL database deployment on AWS Tokyo (ap-northeast-1) with Redis caching layer
+  - Apollo Server GraphQL API deployed alongside PostgresSQL+Redis for unified data access
+  - Kubernetes orchestration for scalable, compliant container management of both PostgresSQL and Apollo Server
+  - Load balancing and failover systems within Japanese data centers serving GraphQL endpoints
+  - API gateway with rate limiting and comprehensive GraphQL operation logging
 - Security and Compliance
   - End-to-end encryption for all sensitive data transmission and storage
   - Role-based access control with audit trails for all administrative actions
@@ -148,11 +156,12 @@ Comprehensive data privacy and residency system ensuring all personal data proce
 Comprehensive user authentication and profile management system supporting both foreign residents and Japanese users with bilingual interfaces, cultural preferences, and APPI-compliant identity verification. Enables secure access to all platform features while maintaining regulatory compliance.
 
 **Key Components:**
-- User Registration and Authentication
-  - Email/password, biometric and social login options (Google, Apple, LINE for Japanese users)
+- User Registration and Authentication (AWS Cognito+Amplify)
+  - Email/password authentication via AWS Cognito User Pools in Tokyo region (ap-northeast-1)
+  - Social login integration (Google, Apple, LINE for Japanese users) through Cognito Identity Providers
   - Identity verification with Japanese address and visa status validation
-  - Password security meeting Japanese banking standards
-  - Multi-factor authentication with SMS and app-based options
+  - Password security meeting Japanese banking standards with Cognito password policies
+  - Multi-factor authentication with SMS and TOTP through Cognito MFA capabilities
 - Profile Management System
   - Comprehensive user profiles with rental preferences and employment information
   - Cultural background settings affecting UI and recommendation algorithms
@@ -177,18 +186,19 @@ Comprehensive user authentication and profile management system supporting both 
 • Corporate account features essential for B2B customer acquisition strategy targeting 30-40% of users
 
 **Technical Implementation:**
-- Frontend Systems
-  - React Native authentication flows with biometric login support
-  - Responsive web authentication for agent dashboard access
+- Frontend Systems (React Native + Web with Apollo Client)
+  - React Native with AWS Amplify SDK and Apollo Client for GraphQL operations
+  - Responsive web authentication for agent dashboard using Apollo Client GraphQL queries
   - i18n integration with cultural context for form labels and error messages
-  - Offline authentication state management for mobile reliability
-- Backend Authentication
-  - JWT token management with refresh token rotation for security
-  - Session management with configurable timeout and concurrent session limits
+  - Offline authentication state management through Apollo Client cache and AWS Amplify offline capabilities
+- Backend Authentication (GraphQL+Apollo Server Integration)
+  - AWS Cognito JWT token validation in GraphQL authentication middleware
+  - GraphQL context creation with verified user identity for all operations
+  - Session management through Cognito refresh token rotation for security
   - Integration with APPI compliance audit logging for all authentication events
-  - API authentication for agent dashboard and mobile app synchronization
-  - Convex `user_preferences` table utilization
-  - Scoring algorithm development
+  - Apollo Server authentication directives for secure GraphQL operations
+  - PostgresSQL `user_preferences` table operations through authenticated GraphQL resolvers
+  - User scoring algorithm development via GraphQL mutations and queries
 
 #### [ ] 3. **Property Search and Discovery Engine**
 **Status:** Not Implemented
@@ -219,16 +229,17 @@ Advanced property search platform with Japan-specific filters, interactive mappi
 • Competitive advantage through Tokyo-specific transportation and cultural integration unavailable elsewhere
 
 **Technical Implementation:**
-- Search and Database Systems
-  - Elasticsearch integration for fast full-text search with Japanese and English language support
-  - Geospatial indexing for location-based queries and proximity calculations
-  - Real-time property data synchronization with agent feeds and manual update workflows
-  - Caching layer for frequently accessed search results and map data
-- Frontend Discovery Interface
-  - Interactive map component with clustering and zoom-level optimization
-  - Advanced filtering UI with progressive disclosure for complex Japanese rental criteria
-  - Search result presentation with cultural context and translation integration
-  - Mobile-optimized map interface with touch gesture support and offline map caching
+- Search and Database Systems (Self-Hosted PostgresSQL + GraphQL)
+  - Self-hosted PostgresSQL database with text search capabilities for Japanese and English content
+  - GraphQL resolvers providing property search API with geospatial filtering
+  - Geospatial indexing within PostgresSQL for location-based queries and proximity calculations
+  - Real-time property data synchronization via GraphQL mutations from agent feeds
+  - Redis caching layer for frequently accessed GraphQL query results and map data
+- Frontend Discovery Interface (Apollo Client + GraphQL)
+  - Interactive map component with clustering via GraphQL queries for property locations
+  - Advanced filtering UI calling GraphQL resolvers with complex Japanese rental criteria
+  - Search result presentation through GraphQL queries with cultural context and translation
+  - Mobile-optimized map interface with Apollo Client caching and offline GraphQL operation support
 
 #### [ ] 4. **Favorites & Saved Properties System**
 **Status:** Not Implemented
@@ -267,10 +278,11 @@ Comprehensive property bookmarking and organization system allowing users to sav
 • Sharing capabilities drive organic user acquisition through personal networks
 
 **Technical Implementation:**
-- Database Design
-  - Convex `user_favorites` table with property relationships and metadata
-  - User preference learning algorithm based on favoriting patterns
-  - Real-time synchronization across devices with conflict resolution
+- Database Design (Self-Hosted PostgresSQL via GraphQL)
+  - Self-hosted PostgresSQL `user_favorites` table with property relationships and metadata
+  - GraphQL resolvers managing favorite operations with real-time subscriptions for updates
+  - User preference learning algorithm based on favoriting patterns via GraphQL queries
+  - Real-time synchronization across devices through GraphQL subscriptions with conflict resolution
 - Notification Infrastructure
   - Push notification system respecting cultural timing preferences and business hours
   - Email digest functionality with bilingual templates
@@ -308,16 +320,17 @@ Advanced bilingual communication system with context-aware translation optimized
 • Creates network effects as more bilingual conversations improve translation accuracy and cultural context
 
 **Technical Implementation:**
-- Translation and Language Services
-  - API integration with fallback systems for high availability translation services
-  - Custom terminology dictionary for Japanese real estate and legal terms
-  - Message preprocessing for context detection and cultural communication pattern recognition
-  - Translation caching and optimization for frequently used phrases and property descriptions
-- Real-Time Communication Infrastructure
-  - WebSocket server with horizontal scaling for concurrent conversation management
-  - Message queue system for reliable delivery and offline user synchronization
-  - Push notification integration with cultural timing preferences and business hour awareness
+- Translation and Language Services (GraphQL Integration)
+  - Translation API integration accessed through GraphQL resolvers with fallback systems
+  - Custom terminology dictionary stored in self-hosted PostgresSQL with GraphQL query access
+  - Message preprocessing via GraphQL mutations for context detection and cultural communication patterns
+  - Translation caching through Apollo Server cache and Redis for frequently used phrases
+- Real-Time Communication Infrastructure (GraphQL Subscriptions)
+  - GraphQL subscriptions via Apollo Server for real-time messaging without separate WebSocket infrastructure
+  - Message delivery through GraphQL mutations with optimistic UI updates and offline support
+  - Push notification integration via Apollo Client with cultural timing preferences
   - End-to-end encryption for sensitive property and financial information discussions
+  - PostgresSQL real-time reactivity powering GraphQL subscriptions for message updates
 
 #### [ ] 6. **Agent Dashboard and Property Management**
 **Status:** Not Implemented
@@ -353,17 +366,18 @@ Comprehensive web-based dashboard enabling real estate agents to manage property
 • Network effects as agent success stories drive additional agent partnerships essential for marketplace growth
 
 **Technical Implementation:**
-- Web Dashboard Frontend
-  - React.js responsive interface optimized for desktop property management workflows
-  - Real-time data synchronization with mobile customer interactions and property updates
-  - Optional cultural competency training modules with progress tracking and certification management
-  - Analytics dashboards with configurable reporting for agent performance and business insights
-  - Tiered access controls for Basic vs Cultural Expert agent features
-- Backend Management Systems
-  - RESTful API supporting bulk operations for property data import and synchronization
-  - Customer interaction tracking with comprehensive audit trails for relationship management
-  - Automated workflow systems for inquiry routing, follow-up scheduling, and performance monitoring
-  - Integration capabilities with existing agent CRM systems and property management software
+- Web Dashboard Frontend (React.js + Apollo Client)
+  - React.js responsive interface with Apollo Client for GraphQL-powered property management workflows
+  - Real-time data synchronization via GraphQL subscriptions for mobile customer interactions and property updates
+  - Optional cultural competency training modules with GraphQL mutations for progress tracking and certification management
+  - Analytics dashboards with GraphQL queries providing configurable reporting for agent performance and business insights
+  - Tiered access controls implemented through GraphQL resolvers for Basic vs Cultural Expert agent features
+- Backend Management Systems (GraphQL API)
+  - GraphQL mutations and queries supporting bulk property operations through Apollo Server
+  - Customer interaction tracking via GraphQL resolvers with PostgresSQL audit trails for relationship management
+  - Automated workflow systems through GraphQL subscriptions for inquiry routing and follow-up scheduling
+  - GraphQL API enabling integration with existing agent CRM systems and property management software
+  - PostgresSQL real-time database operations providing immediate data synchronization across all interfaces
 
 #### [ ] 7. **Cultural Navigation and Education System**
 **Status:** Not Implemented

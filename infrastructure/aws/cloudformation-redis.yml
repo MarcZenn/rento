@@ -1,0 +1,211 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'APPI Compliant Redis ElastiCache deployment in Tokyo region with encryption'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: 'production'
+    AllowedValues: ['development', 'staging', 'production']
+  RedisNodeType:
+    Type: String
+    Default: 'cache.t3.micro'
+    Description: 'Redis node instance type'
+  VPCId:
+    Type: String
+    Description: 'VPC ID from RDS stack'
+  AppSecurityGroupId:
+    Type: String
+    Description: 'Application Security Group ID from RDS stack'
+
+Resources:
+  # Subnet Group for Redis (using existing VPC subnets)
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: 'Subnet group for Redis cluster'
+      SubnetIds:
+        # These should match the private subnets from RDS template
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  # Private subnets for Redis (matching RDS setup)
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCId
+      CidrBlock: '10.0.3.0/24'
+      AvailabilityZone: 'ap-northeast-1a'
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-redis-subnet-1'
+        - Key: Environment
+          Value: !Ref Environment
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCId
+      CidrBlock: '10.0.4.0/24'
+      AvailabilityZone: 'ap-northeast-1c'
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-redis-subnet-2'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Security Group for Redis
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'Security group for Redis ElastiCache'
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref AppSecurityGroupId
+          Description: 'Redis access from application servers'
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-redis-sg'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # KMS Key for Redis encryption
+  RedisKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: 'KMS Key for Redis ElastiCache encryption - APPI compliant'
+      KeyPolicy:
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow ElastiCache Service
+            Effect: Allow
+            Principal:
+              Service: elasticache.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey'
+            Resource: '*'
+      KeyRotationStatus: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-redis-kms-key'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: APPICompliant
+          Value: 'true'
+
+  # KMS Key Alias for Redis
+  RedisKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${Environment}-rento-redis-key'
+      TargetKeyId: !Ref RedisKMSKey
+
+  # Parameter Group for Redis configuration
+  RedisParameterGroup:
+    Type: AWS::ElastiCache::ParameterGroup
+    Properties:
+      CacheParameterGroupFamily: 'redis7.x'
+      Description: 'Redis parameter group with APPI compliance settings'
+      Properties:
+        # Enable SSL/TLS for encryption in transit
+        tls-port: '6379'
+        # Disable non-TLS port for security
+        port: '0'
+        # Memory optimization
+        maxmemory-policy: 'allkeys-lru'
+
+  # Redis Replication Group (Cluster Mode Disabled for session storage)
+  RedisReplicationGroup:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      ReplicationGroupId: !Sub '${Environment}-rento-redis'
+      Description: 'Redis cluster for session management and caching'
+
+      # Node configuration
+      CacheNodeType: !Ref RedisNodeType
+      Engine: redis
+      EngineVersion: '7.0'
+
+      # Cluster configuration
+      NumCacheClusters: 2  # Primary + 1 replica for HA
+      MultiAZEnabled: true
+
+      # Network configuration
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      SecurityGroupIds:
+        - !Ref RedisSecurityGroup
+
+      # Encryption configuration
+      AtRestEncryptionEnabled: true
+      KmsKeyId: !Ref RedisKMSKey
+      TransitEncryptionEnabled: true
+
+      # Parameter group
+      CacheParameterGroupName: !Ref RedisParameterGroup
+
+      # Backup configuration
+      SnapshotRetentionLimit: 7
+      PreferredCacheClusterAZs:
+        - 'ap-northeast-1a'
+        - 'ap-northeast-1c'
+
+      # Maintenance
+      PreferredMaintenanceWindow: 'sun:05:00-sun:06:00'
+
+      # Notifications (optional - can be configured later)
+      # NotificationTopicArn: !Ref SNSTopic
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-redis'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: APPICompliant
+          Value: 'true'
+        - Key: DataLocation
+          Value: 'Japan-Tokyo'
+
+  # CloudWatch Log Group for Redis logs
+  RedisLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/elasticache/${Environment}-rento-redis'
+      RetentionInDays: 30
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-redis-logs'
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  RedisEndpoint:
+    Description: 'Redis primary endpoint'
+    Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Address
+    Export:
+      Name: !Sub '${Environment}-rento-redis-endpoint'
+
+  RedisPort:
+    Description: 'Redis port'
+    Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Port
+    Export:
+      Name: !Sub '${Environment}-rento-redis-port'
+
+  RedisReaderEndpoint:
+    Description: 'Redis reader endpoint'
+    Value: !GetAtt RedisReplicationGroup.ReaderEndPoint.Address
+    Export:
+      Name: !Sub '${Environment}-rento-redis-reader-endpoint'
+
+  RedisKMSKeyId:
+    Description: 'KMS Key ID for Redis encryption'
+    Value: !Ref RedisKMSKey
+    Export:
+      Name: !Sub '${Environment}-rento-redis-kms-key-id'
