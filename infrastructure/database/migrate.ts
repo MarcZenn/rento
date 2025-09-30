@@ -1,7 +1,36 @@
 #!/usr/bin/env node
 /**
- * Database Migration Script
+// ============================================================================
+// DEV NOTES
+// ============================================================================
+ * Database Migration Handler - Applies New Migrations & Tracks Migrations
  * Applies PostgreSQL schema and runs initial data setup
+ *
+ * This is a database migration management script that handles schema
+ * versioning for your PostgreSQL database. Here's what it does:
+ *
+ * Core Functions:
+ *
+ * 1. Version Control for Database Schema (like Git for your database)
+ *    - Tracks which schema changes have been applied via
+ *      schema_migrations table
+ *    - Prevents duplicate migrations
+ *    - Detects if migration files change after being applied (checksum
+ *      validation)
+ * 2. Applies SQL Migration Files
+ *    - Executes migrations in transactions for safety
+ *    - Can add more migrations as numbered files
+ * 3. APPI Compliance Initialization
+ *    - Seeds initial privacy policy data
+ *    - Creates audit logs for compliance tracking
+ *
+ * Adding New Migrations:
+ *
+ * 1. Create new migration file with example format: 002_feature_name_date.sql
+ * 2. Add to getMigrationFiles()
+ * 3. Run npm run db:migrate to apply migration
+ * 4. Run npm run db:status to see applied migrations vs pending migrations
+ *
  */
 
 import { readFileSync } from 'fs';
@@ -25,7 +54,7 @@ class DatabaseMigrator {
         filename: '001_initial_schema.sql',
         version: '001',
         description: 'Initial APPI compliant schema with encrypted PII fields',
-        path: join(__dirname, '001_initial_schema.sql')
+        path: join(__dirname, '001_initial_schema.sql'),
       },
       // Add more migration files here as needed
     ];
@@ -62,7 +91,9 @@ class DatabaseMigrator {
   /**
    * Check if migration has already been applied
    */
-  private async isMigrationApplied(version: string): Promise<{ applied: boolean; checksum?: string }> {
+  private async isMigrationApplied(
+    version: string
+  ): Promise<{ applied: boolean; checksum?: string }> {
     const result = await postgresql.query(
       'SELECT checksum FROM schema_migrations WHERE version = $1',
       [version]
@@ -86,7 +117,9 @@ class DatabaseMigrator {
     const checksum = this.generateChecksum(sqlContent);
 
     // Check if already applied
-    const { applied, checksum: existingChecksum } = await this.isMigrationApplied(migration.version);
+    const { applied, checksum: existingChecksum } = await this.isMigrationApplied(
+      migration.version
+    );
 
     if (applied) {
       if (existingChecksum === checksum) {
@@ -95,14 +128,14 @@ class DatabaseMigrator {
       } else {
         throw new Error(
           `Migration ${migration.version} checksum mismatch! ` +
-          `Database has ${existingChecksum}, file has ${checksum}. ` +
-          `This indicates the migration file was modified after being applied.`
+            `Database has ${existingChecksum}, file has ${checksum}. ` +
+            `This indicates the migration file was modified after being applied.`
         );
       }
     }
 
     // Apply migration in transaction
-    await postgresql.transaction(async (client) => {
+    await postgresql.transaction(async client => {
       try {
         // Execute migration SQL
         await client.query(sqlContent);
@@ -148,7 +181,6 @@ class DatabaseMigrator {
       }
 
       console.log('✅ All migrations completed successfully!');
-
     } catch (error) {
       console.error('❌ Migration failed:', error);
       process.exit(1);
@@ -191,7 +223,6 @@ class DatabaseMigrator {
           console.log(`  ⏳ ${pending.version}: ${pending.description}`);
         }
       }
-
     } catch (error) {
       console.error('❌ Failed to check migration status:', error);
       process.exit(1);
@@ -226,7 +257,7 @@ class DatabaseMigrator {
           user_agent, data_accessed, compliance_status, event_details
         ) VALUES (
           'init_' || extract(epoch from now()) || '_appi',
-          'system_initialization',
+          'data_access',
           NOW(),
           '127.0.0.1',
           'migration_script',
@@ -237,7 +268,6 @@ class DatabaseMigrator {
       `);
 
       console.log('✅ APPI compliance data initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize APPI data:', error);
       throw error;
