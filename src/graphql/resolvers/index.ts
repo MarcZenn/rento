@@ -6,6 +6,7 @@
 import { userQueries, userMutations, userFieldResolvers } from './userResolvers';
 import { profileQueries, profileMutations, profileFieldResolvers } from './profileResolvers';
 import { consentQueries, consentMutations } from './consentResolvers';
+import { adminComplianceQueries } from './adminComplianceResolvers';
 import { GraphQLScalarType, Kind } from 'graphql';
 
 // ============================================================================
@@ -63,6 +64,7 @@ export const resolvers = {
     ...userQueries,
     ...profileQueries,
     ...consentQueries,
+    ...adminComplianceQueries,
   },
 
   // Mutations
