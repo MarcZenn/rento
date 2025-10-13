@@ -30,6 +30,7 @@
 
 import { Pool, PoolClient } from 'pg';
 import Redis from 'ioredis';
+import 'dotenv/config';
 
 // ============================================================================
 // CONFIGURATION INTERFACES
@@ -41,7 +42,7 @@ interface DatabaseConfig {
   database: string;
   user: string;
   password: string;
-  ssl: {
+  ssl?: {
     rejectUnauthorized: boolean;
   };
   max: number; // Connection pool size
@@ -83,13 +84,17 @@ class PostgreSQLManager {
       database: process.env.POSTGRES_DB || 'rento_appi_db',
       user: process.env.POSTGRES_USER || 'rento_admin',
       password: process.env.POSTGRES_PASSWORD || '',
-      ssl: {
-        rejectUnauthorized: process.env.NODE_ENV === 'production',
-      },
       max: parseInt(process.env.POSTGRES_MAX_CONNECTIONS || '20'),
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 10000,
-    };
+    } as DatabaseConfig;
+
+    // Only add SSL for production or when explicitly enabled
+    if (process.env.NODE_ENV === 'production' || process.env.POSTGRES_SSL === 'true') {
+      this.config.ssl = {
+        rejectUnauthorized: process.env.NODE_ENV === 'production',
+      };
+    }
 
     // Validate required environment variables
     if (!this.config.password) {
@@ -127,7 +132,7 @@ class PostgreSQLManager {
 
       this.pool.on('error', (err: Error) => {
         console.error('PostgreSQL pool error:', err);
-        this.logAuditEvent('database_error', err.message);
+        // Don't log audit event for pool errors to avoid circular issues
       });
 
       this.pool.on('remove', () => {
@@ -152,12 +157,12 @@ class PostgreSQLManager {
       const client = await this.pool.connect();
 
       // Log database access for APPI compliance
-      await this.logAuditEvent('database_access', 'Connection acquired');
+      await this.logAuditEvent('data_access', 'Connection acquired');
 
       return client;
     } catch (error) {
       console.error('Failed to get PostgreSQL connection:', error);
-      await this.logAuditEvent('database_error', `Connection failed: ${error}`);
+      // Don't log errors to avoid circular issues during initialization
       throw error;
     }
   }
@@ -171,7 +176,7 @@ class PostgreSQLManager {
 
     try {
       // Log query execution for audit compliance
-      await this.logAuditEvent('query_execution', `Query: ${text.substring(0, 100)}...`);
+      await this.logAuditEvent('data_access', `Query: ${text.substring(0, 100)}...`);
 
       const start = Date.now();
       const result = await client.query(text, params);
@@ -188,7 +193,7 @@ class PostgreSQLManager {
       };
     } catch (error) {
       console.error('Query execution error:', error);
-      await this.logAuditEvent('query_error', `Query failed: ${text} - Error: ${error}`);
+      // Don't log query errors to avoid circular issues
       throw error;
     } finally {
       client.release();
@@ -204,18 +209,18 @@ class PostgreSQLManager {
 
     try {
       await client.query('BEGIN');
-      await this.logAuditEvent('transaction_start', 'Transaction started');
+      await this.logAuditEvent('data_access', 'Transaction started');
 
       const result = await callback(client);
 
       await client.query('COMMIT');
-      await this.logAuditEvent('transaction_commit', 'Transaction committed');
+      await this.logAuditEvent('data_access', 'Transaction committed');
 
       return result;
     } catch (error) {
       await client.query('ROLLBACK');
-      await this.logAuditEvent('transaction_rollback', `Transaction rolled back: ${error}`);
       console.error('Transaction error:', error);
+      // Don't log rollback errors to avoid circular issues
       throw error;
     } finally {
       client.release();
@@ -231,6 +236,19 @@ class PostgreSQLManager {
   private async logAuditEvent(eventType: string, details: string): Promise<void> {
     try {
       if (this.pool) {
+        // Check if audit table exists before attempting to log
+        const tableCheck = await this.pool.query(
+          `SELECT EXISTS (
+            SELECT FROM information_schema.tables
+            WHERE table_schema = 'public'
+            AND table_name = 'appi_audit_events'
+          )`
+        );
+
+        if (!tableCheck.rows[0]?.exists) {
+          return; // Silently skip if table doesn't exist (e.g., during initial migration)
+        }
+
         await this.pool.query(
           `
           INSERT INTO appi_audit_events (

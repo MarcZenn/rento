@@ -1,12 +1,12 @@
 # Rento PostgreSQL Database Schema
 
-This directory contains the complete APPI-compliant PostgreSQL database schema for the Rento Japanese rental application, migrated and enhanced from the original Convex schema.
+This directory contains the complete APPI-compliant PostgreSQL database schema for the Rento Japanese rental application.
 
 **CRITICAL**: This schema contains production-ready APPI compliance features but requires proper security configuration before deployment. Always test in a development environment first.
 
 ## File Overview
 
-- `001_initial_schema.sql` - **Complete consolidated schema** with all tables, indices, security, and APPI compliance features
+- `001_initial_schema.sql` - **Initial Schema Setup** with all tables, indices, security, and APPI compliance features
 - `README.md` - This documentation file
 
 
