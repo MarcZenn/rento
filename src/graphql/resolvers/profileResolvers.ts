@@ -3,7 +3,8 @@
  */
 
 import { GraphQLError } from 'graphql';
-import { postgresql, redis } from '../../lib/database/connection';
+import { postgresql, redis } from '@/src/lib/database/connection';
+import { AUDIT_EVENT_TYPES } from '@/src/lib/database/auditEventTypes';
 import type { PoolClient } from 'pg';
 
 // ============================================================================
@@ -79,7 +80,7 @@ async function logProfileAccess(
       [
         `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         userId,
-        'profile_data_access',
+        AUDIT_EVENT_TYPES.PROFILE_DATA_ACCESS,
         context.req?.ip || '127.0.0.1',
         context.req?.headers?.['user-agent'] || 'server',
         operation,
@@ -221,7 +222,7 @@ export const profileMutations = {
         [
           `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
           input.userId,
-          'profile_created',
+          AUDIT_EVENT_TYPES.PROFILE_CREATED,
           context.req?.ip || '127.0.0.1',
           context.req?.headers?.['user-agent'] || 'server',
           'User profile created',
