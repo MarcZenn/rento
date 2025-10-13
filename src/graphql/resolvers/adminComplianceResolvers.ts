@@ -57,16 +57,16 @@ interface ComplianceMetrics {
 // ============================================================================
 
 /**
- * Calculate compliance score based on metrics
- *
- * provides a single metric that summarizes overall compliance
- * health.
- * 
- *  Weights:
-  - Consent compliance: 40% (most important - APPI requirement)
-  - Data residency: 30% (critical legal requirement)
-  - Active incidents: 30% (security/operational health)
- */
+   * Calculate compliance score based on metrics
+   *
+   * provides a single metric that summarizes overall compliance
+   * health.
+   * 
+   *  Weights:
+    - Consent compliance: 40% (most important - APPI requirement)
+    - Data residency: 30% (critical legal requirement)
+    - Active incidents: 30% (security/operational health)
+   */
 function calculateComplianceScore(metrics: {
   totalUsers: number;
   consentCompliant: number;
@@ -97,19 +97,19 @@ function calculateComplianceScore(metrics: {
 
 export const adminComplianceQueries = {
   /**
-   * Get compliance metrics for dashboard overview
-   * Admin-only endpoint
-   *
-   * generates dashboard overview w/ 13 key metrics in a single API
-   * call
-   * 
-   * Why these metrics:
-      - totalUsers/consentCompliant: APPI Article 17 compliance rate
-      - auditEvents: System usage and data access transparency
-      - dataResidency: APPI Article 24 geographic compliance
-      - incidents: Security posture and incident response effectiveness
-      - complianceScore: Executive summary metric
-   */
+     * Get compliance metrics for dashboard overview
+     * Admin-only endpoint
+     *
+     * generates dashboard overview w/ 13 key metrics in a single API
+     * call
+     * 
+     * Why these metrics:
+        - totalUsers/consentCompliant: APPI Article 17 compliance rate
+        - auditEvents: System usage and data access transparency
+        - dataResidency: APPI Article 24 geographic compliance
+        - incidents: Security posture and incident response effectiveness
+        - complianceScore: Executive summary metric
+     */
   getComplianceMetrics: async (
     _: any,
     { timeRange: _timeRange }: { timeRange: string },
@@ -127,54 +127,54 @@ export const adminComplianceQueries = {
 
       // Get consent compliant users (users with valid consent)
       const consentResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM user_consent
-        WHERE withdrawal_timestamp IS NULL
-          AND profile_data_consent = true
-          AND location_data_consent = true
-          AND communication_consent = true
-      `);
+          SELECT COUNT(*) as count
+          FROM user_consent
+          WHERE withdrawal_timestamp IS NULL
+            AND profile_data_consent = true
+            AND location_data_consent = true
+            AND communication_consent = true
+        `);
       const consentCompliant = parseInt(consentResult.rows[0]?.count || '0', 10);
       const consentPending = totalUsers - consentCompliant;
 
       // Get audit events counts
       const auditTodayResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM appi_audit_events
-        WHERE event_timestamp >= NOW() - INTERVAL '24 hours'
-      `);
+          SELECT COUNT(*) as count
+          FROM appi_audit_events
+          WHERE event_timestamp >= NOW() - INTERVAL '24 hours'
+        `);
       const auditEventsToday = parseInt(auditTodayResult.rows[0]?.count || '0', 10);
 
       const auditWeekResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM appi_audit_events
-        WHERE event_timestamp >= NOW() - INTERVAL '7 days'
-      `);
+          SELECT COUNT(*) as count
+          FROM appi_audit_events
+          WHERE event_timestamp >= NOW() - INTERVAL '7 days'
+        `);
       const auditEventsThisWeek = parseInt(auditWeekResult.rows[0]?.count || '0', 10);
 
       const auditMonthResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM appi_audit_events
-        WHERE event_timestamp >= NOW() - INTERVAL '30 days'
-      `);
+          SELECT COUNT(*) as count
+          FROM appi_audit_events
+          WHERE event_timestamp >= NOW() - INTERVAL '30 days'
+        `);
       const auditEventsThisMonth = parseInt(auditMonthResult.rows[0]?.count || '0', 10);
 
       // Get data residency violations
       const residencyResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM appi_data_residency_log
-        WHERE geographic_location != 'Japan-Tokyo'
-      `);
+          SELECT COUNT(*) as count
+          FROM appi_data_residency_log
+          WHERE geographic_location != 'Japan-Tokyo'
+        `);
       const dataResidencyViolations = parseInt(residencyResult.rows[0]?.count || '0', 10);
       const dataResidencyStatus =
         dataResidencyViolations === 0 ? 'compliant' : 'violations_detected';
 
       // Get incident metrics
       const activeIncidentsResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM appi_incident_tracking
-        WHERE status IN ('open', 'investigating')
-      `);
+          SELECT COUNT(*) as count
+          FROM appi_incident_tracking
+          WHERE status IN ('open', 'investigating')
+        `);
       const activeIncidents = parseInt(activeIncidentsResult.rows[0]?.count || '0', 10);
 
       const totalIncidentsResult = await postgresql.query<{ count: string }>(
@@ -184,23 +184,23 @@ export const adminComplianceQueries = {
 
       // Get last incident
       const lastIncidentResult = await postgresql.query(`
-        SELECT
-          id, incident_id, incident_type, severity,
-          incident_timestamp as timestamp, status, affected_users_count
-        FROM appi_incident_tracking
-        ORDER BY incident_timestamp DESC
-        LIMIT 1
-      `);
+          SELECT
+            id, incident_id, incident_type, severity,
+            incident_timestamp as timestamp, status, affected_users_count
+          FROM appi_incident_tracking
+          ORDER BY incident_timestamp DESC
+          LIMIT 1
+        `);
       const lastIncident = lastIncidentResult.rows[0] || null;
 
       // Calculate average response time (time to resolve incidents)
       const avgResponseResult = await postgresql.query<{ avg_minutes: string }>(`
-        SELECT
-          AVG(EXTRACT(EPOCH FROM (resolved_timestamp - incident_timestamp)) / 60) as avg_minutes
-        FROM appi_incident_tracking
-        WHERE resolved_timestamp IS NOT NULL
-          AND incident_timestamp >= NOW() - INTERVAL '30 days'
-      `);
+          SELECT
+            AVG(EXTRACT(EPOCH FROM (resolved_timestamp - incident_timestamp)) / 60) as avg_minutes
+          FROM appi_incident_tracking
+          WHERE resolved_timestamp IS NOT NULL
+            AND incident_timestamp >= NOW() - INTERVAL '30 days'
+        `);
       const avgResponseTime = avgResponseResult.rows[0]?.avg_minutes
         ? parseFloat(avgResponseResult.rows[0].avg_minutes)
         : null;
@@ -270,12 +270,12 @@ export const adminComplianceQueries = {
     try {
       // Build dynamic query
       let query = `
-        SELECT
-          id, event_id, user_id, event_type, event_timestamp,
-          ip_address, user_agent, data_accessed, compliance_status, event_details
-        FROM appi_audit_events
-        WHERE event_timestamp >= $1 AND event_timestamp <= $2
-      `;
+          SELECT
+            id, event_id, user_id, event_type, event_timestamp,
+            ip_address, user_agent, data_accessed, compliance_status, event_details
+          FROM appi_audit_events
+          WHERE event_timestamp >= $1 AND event_timestamp <= $2
+        `;
       const params: any[] = [startDate, endDate];
       let paramIndex = 3;
 
@@ -345,25 +345,25 @@ export const adminComplianceQueries = {
 
       // Get Japan records
       const japanResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM appi_data_residency_log
-        WHERE geographic_location = 'Japan-Tokyo'
-      `);
+          SELECT COUNT(*) as count
+          FROM appi_data_residency_log
+          WHERE geographic_location = 'Japan-Tokyo'
+        `);
       const japanRecords = parseInt(japanResult.rows[0]?.count || '0', 10);
 
       // Get violations
       const violationsResult = await postgresql.query<{ count: string }>(`
-        SELECT COUNT(*) as count
-        FROM appi_data_residency_log
-        WHERE geographic_location != 'Japan-Tokyo'
-      `);
+          SELECT COUNT(*) as count
+          FROM appi_data_residency_log
+          WHERE geographic_location != 'Japan-Tokyo'
+        `);
       const violations = parseInt(violationsResult.rows[0]?.count || '0', 10);
 
       // Get last check timestamp
       const lastCheckResult = await postgresql.query<{ max_timestamp: Date }>(`
-        SELECT MAX(compliance_check_timestamp) as max_timestamp
-        FROM appi_data_residency_log
-      `);
+          SELECT MAX(compliance_check_timestamp) as max_timestamp
+          FROM appi_data_residency_log
+        `);
       const lastCheckTimestamp = lastCheckResult.rows[0]?.max_timestamp || new Date();
 
       // Get storage locations breakdown
@@ -372,13 +372,13 @@ export const adminComplianceQueries = {
         count: string;
         encryption: string;
       }>(`
-        SELECT
-          geographic_location as location,
-          COUNT(*) as count,
-          encryption_status as encryption
-        FROM appi_data_residency_log
-        GROUP BY geographic_location, encryption_status
-      `);
+          SELECT
+            geographic_location as location,
+            COUNT(*) as count,
+            encryption_status as encryption
+          FROM appi_data_residency_log
+          GROUP BY geographic_location, encryption_status
+        `);
 
       const storageLocations = locationsResult.rows.map(row => ({
         location: row.location,
@@ -426,15 +426,15 @@ export const adminComplianceQueries = {
     try {
       // Build dynamic query
       let query = `
-        SELECT
-          id, incident_id, incident_type, severity, incident_timestamp,
-          affected_users_count, data_types_affected, incident_description,
-          remediation_actions, status, regulatory_notification_sent,
-          regulatory_notification_timestamp, resolved_timestamp,
-          created_at, updated_at
-        FROM appi_incident_tracking
-        WHERE 1=1
-      `;
+          SELECT
+            id, incident_id, incident_type, severity, incident_timestamp,
+            affected_users_count, data_types_affected, incident_description,
+            remediation_actions, status, regulatory_notification_sent,
+            regulatory_notification_timestamp, resolved_timestamp,
+            created_at, updated_at
+          FROM appi_incident_tracking
+          WHERE 1=1
+        `;
       const params: any[] = [];
       let paramIndex = 1;
 
