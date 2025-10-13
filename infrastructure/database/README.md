@@ -14,8 +14,8 @@ This directory contains the complete APPI-compliant PostgreSQL database schema f
 
 ```bash
 # Create database and run complete schema
-createdb rento_production -O postgres
-psql -U postgres -d rento_production -f 001_initial_schema.sql
+yarn run db:up 
+yarn run db:migrate
 ```
 
 ## Production Setup
@@ -40,6 +40,14 @@ SELECT 'Schema Setup Complete' AS status,
 FROM information_schema.tables;"
 ```
 
+## Migrations
+
+Whenever a new migration is needed please adhere to the following steps: 
+
+1. Create a new migration file in the `/database` directory. It must be sequentially numbered and titled according to what it does in the DB. Example `004_add_table_name.sql`
+2. Add the new migration file to the `MIGRATIONS` array in the `migrations.ts` file. 
+3. Run the migration `yarn run db:migrate`
+
 ## APPI Compliance Features
 
 ### Audit Tables
@@ -61,6 +69,110 @@ FROM information_schema.tables;"
 - **Compliance monitoring** - Violation detection and alerting
 - **Geographic validation** - Real-time data residency checks
 
+### APPI Audit Event Types Management
+
+The `appi_audit_event_types` table provides **type safety** for audit logging while maintaining **flexibility** for adding new event types.
+
+## Current Event Types
+
+### 📋 Consent Management
+- `consent_read` - User consent data accessed
+- `consent_validation_failed` - Consent validation check failed
+- `consent_validated` - Consent validation check passed
+- `consent_history_accessed` - User consent history accessed
+- `consent_recorded` - Initial user consent recorded
+- `consent_updated` - User consent preferences updated
+- `consent_withdrawn` - User consent withdrawn
+- `consent_change` - Generic consent change event
+
+### 👤 User Management
+- `user_data_access` - User data accessed
+- `user_created` - New user account created
+- `user_updated` - User account information updated
+- `user_deleted` - User account deleted
+
+### 📝 Profile Management
+- `profile_data_access` - User profile data accessed
+- `profile_created` - User profile created
+- `profile_updated` - User profile information updated
+
+### 🗑️ Deletion Management
+- `deletion_request` - Data deletion request submitted
+- `deletion_processing` - Data deletion request being processed
+- `deletion_completed` - Data deletion request completed
+- `deletion_cancelled` - Data deletion request cancelled
+
+### 📊 Data Access
+- `data_access` - Generic data access event
+- `data_export` - User data exported for download
+
+### 🔐 Authentication
+- `login` - User login event
+- `logout` - User logout event
+- `login_failed` - User login attempt failed
+
+### ✅ Compliance
+- `audit_trail_generated` - Compliance audit trail generated
+- `privacy_policy_updated` - Privacy policy version updated
+- `compliance_report_generated` - Compliance report generated
+
+---
+
+## Adding New Event Types
+
+### Option 1: Via SQL Migration (Recommended for planned additions)
+
+Create a new migration file:
+
+```sql
+-- 004_add_new_event_types.sql
+INSERT INTO "public"."appi_audit_event_types" (event_type, category, description) VALUES
+    ('password_reset', 'authentication', 'User password reset requested'),
+    ('password_changed', 'authentication', 'User password successfully changed');
+```
+
+### Option 2: Via Helper Function (For runtime additions)
+
+```typescript
+import { addAuditEventType, EVENT_CATEGORIES } from '@/lib/database/auditEventTypes';
+
+await addAuditEventType({
+  eventType: 'password_reset',
+  category: EVENT_CATEGORIES.AUTHENTICATION,
+  description: 'User password reset requested',
+});
+```
+
+---
+
+## Using Event Types in Code
+
+### ✅ GOOD: Use constants for type safety
+
+```typescript
+import { AUDIT_EVENT_TYPES } from '@/lib/database/auditEventTypes';
+
+await logConsentEvent(
+  userId,
+  AUDIT_EVENT_TYPES.CONSENT_READ, // ✅ Autocomplete + type safety
+  { source: 'cache' },
+  context
+);
+```
+
+## Event Categories
+
+Events are organized into these high-level categories:
+
+- `data_access` - Data read/export operations
+- `consent_management` - Consent recording and validation
+- `user_management` - User CRUD operations
+- `profile_management` - Profile CRUD operations
+- `deletion_management` - Data deletion workflows
+- `authentication` - Login/logout events
+- `compliance` - Audit and reporting
+- `system` - System-level events
+
 ## Database Roles
 
 ### Production Roles
@@ -76,30 +188,6 @@ FROM information_schema.tables;"
 - **Statement timeouts** for query protection
 - **SSL enforcement** (configure in pg_hba.conf)
 - **Password policies** (update default passwords!)
-
-## Schema Migration from Convex
-
-### Key Changes
-1. **UUID Primary Keys** - All tables use UUID instead of Convex IDs
-2. **Proper Foreign Keys** - Full referential integrity
-3. **Array Fields** - PostgreSQL arrays for multi-value fields
-4. **Timestamp Handling** - TIMESTAMP WITH TIME ZONE for all dates
-5. **CHECK Constraints** - Data validation at database level
-
-### Convex to PostgreSQL Mapping
-- `v.id("table")` → `UUID REFERENCES table(id)`
-- `v.string()` → `VARCHAR(255)` or `TEXT`
-- `v.boolean()` → `BOOLEAN`
-- `v.int64()` → `BIGINT`
-- `v.float64()` → `DECIMAL(12,2)` or `DECIMAL(10,8)` for coordinates
-- `v.array()` → PostgreSQL arrays `TYPE[]`
-- `v.optional()` → `NULL` allowed
-
-### Index Optimization
-- **Composite indices** for frequent query patterns
-- **Partial indices** for filtered queries
-- **GIN indices** for array operations
-- **Covering indices** for common column combinations
 
 ## Performance Considerations
 
@@ -125,16 +213,12 @@ FROM information_schema.tables;"
 - [ ] **Update pg_hba.conf** for proper authentication methods
 - [ ] **Set up backup procedures** with encryption
 - [ ] **Configure monitoring and alerting**
-- [ ] **Test APPI compliance workflows**
 - [ ] **Validate geographic data residency**
-- [ ] **Test consent management flows**
-- [ ] **Verify audit log generation**
 
 ### Recommended pg_hba.conf
 ```
 # TYPE  DATABASE        USER                    ADDRESS                 METHOD
 hostssl rento_production rento_app_service      0.0.0.0/0               md5
-hostssl rento_production rento_compliance_officer 0.0.0.0/0            cert
 hostssl rento_production rento_admin            127.0.0.1/32            cert
 local   rento_production postgres                                        peer
 ```
@@ -147,15 +231,6 @@ ssl_key_file = 'server.key'
 log_statement = 'all'  # For audit compliance
 log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
 ```
-
-## Data Migration Strategy
-
-1. **Export from Convex** using the migration scripts
-2. **Transform data formats** (Convex IDs → UUIDs, timestamps, etc.)
-3. **Load into PostgreSQL** with validation
-4. **Verify data integrity** and foreign key constraints
-5. **Test application connectivity**
-6. **Validate APPI compliance features**
 
 ## Monitoring and Maintenance
 
@@ -172,7 +247,6 @@ log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
 - Validate backup procedures
 
 ### Monthly Reviews
-- Compliance officer review of audit trails
 - Performance optimization analysis
 - Security review and updates
 - Disaster recovery testing
