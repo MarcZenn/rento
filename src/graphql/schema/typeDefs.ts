@@ -206,6 +206,94 @@ export const typeDefs = `#graphql
   }
 
   # ============================================================================
+  # ADMIN COMPLIANCE TYPES
+  # ============================================================================
+  type ComplianceMetrics {
+    totalUsers: Int!
+    consentCompliant: Int!
+    consentPending: Int!
+    auditEventsToday: Int!
+    auditEventsThisWeek: Int!
+    auditEventsThisMonth: Int!
+    dataResidencyStatus: String!
+    dataResidencyViolations: Int!
+    lastIncident: IncidentSummary
+    activeIncidents: Int!
+    totalIncidents: Int!
+    avgResponseTime: Float
+    complianceScore: Float!
+  }
+
+  type IncidentSummary {
+    id: ID!
+    incidentId: String!
+    incidentType: String!
+    severity: String!
+    timestamp: DateTime!
+    status: String!
+    affectedUsersCount: Int!
+  }
+
+  type DataResidencyMetrics {
+    totalRecords: Int!
+    japanRecords: Int!
+    violations: Int!
+    lastCheckTimestamp: DateTime!
+    storageLocations: [StorageLocation!]!
+  }
+
+  type StorageLocation {
+    location: String!
+    recordCount: Int!
+    encryptionStatus: String!
+  }
+
+  type AuditLogSearchResult {
+    events: [APPIAuditEvent!]!
+    totalCount: Int!
+    page: Int!
+    perPage: Int!
+    hasMore: Boolean!
+  }
+
+  type IncidentTrackingResult {
+    incidents: [IncidentDetail!]!
+    totalCount: Int!
+    openCount: Int!
+    criticalCount: Int!
+  }
+
+  type IncidentDetail {
+    id: ID!
+    incidentId: String!
+    incidentType: String!
+    severity: String!
+    incidentTimestamp: DateTime!
+    affectedUsersCount: Int!
+    dataTypesAffected: [String!]
+    incidentDescription: String!
+    remediationActions: [String!]
+    status: String!
+    regulatoryNotificationSent: Boolean!
+    regulatoryNotificationTimestamp: DateTime
+    resolvedTimestamp: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
+  type ComplianceReport {
+    reportId: String!
+    generatedAt: DateTime!
+    timeRange: String!
+    metrics: ComplianceMetrics!
+    dataResidency: DataResidencyMetrics!
+    recentIncidents: [IncidentSummary!]!
+    topAuditEvents: [APPIAuditEvent!]!
+    complianceStatus: String!
+    recommendations: [String!]
+  }
+
+  # ============================================================================
   # QUERIES
   # ============================================================================
   type Query {
@@ -229,6 +317,26 @@ export const typeDefs = `#graphql
     # APPI Compliance queries
     getAuditEvents(userId: ID, startDate: DateTime, endDate: DateTime, eventType: String): [APPIAuditEvent!]!
     generateConsentAuditTrail(userId: ID!): JSON!
+
+    # Admin Compliance Dashboard Queries (Admin-only)
+    getComplianceMetrics(timeRange: String!): ComplianceMetrics!
+    searchAuditLogs(
+      startDate: DateTime!
+      endDate: DateTime!
+      eventType: String
+      userId: ID
+      complianceStatus: String
+      page: Int
+      perPage: Int
+    ): AuditLogSearchResult!
+    getDataResidencyMetrics: DataResidencyMetrics!
+    getIncidentTracking(
+      status: String
+      severity: String
+      startDate: DateTime
+      endDate: DateTime
+    ): IncidentTrackingResult!
+    generateComplianceReport(timeRange: String!): ComplianceReport!
   }
 
   # ============================================================================
