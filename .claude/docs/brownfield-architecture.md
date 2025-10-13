@@ -24,7 +24,7 @@ This document captures the CURRENT STATE of the Rento codebase as of September 2
 - **Core Business Logic**: `convex/` functions and schema
 - **Database Schema**: `convex/schema.ts` (comprehensive bilingual property rental schema)
 - **UI Components**: `components/` and `src/theme/` (Unistyles theming system)
-- **Internationalization**: `src/services/i18n/` (react-i18next implementation)
+- **Internationalization**: `src/lib/i18n/` (react-i18next implementation)
 
 ### PDRD Enhancement Impact Areas
 
@@ -32,7 +32,7 @@ Based on the planned roadmap, these areas will be most affected:
 - `convex/schema.ts` - Already has comprehensive APPI-compliant structure
 - `app/(protected)/(tabs)/search/` - Property search interface (currently placeholder)
 - `app/(protected)/(tabs)/favorites.tsx` - Favorites system (currently placeholder)
-- `src/services/i18n/` - Translation infrastructure (foundation exists)
+- `src/lib/i18n/` - Translation infrastructure (foundation exists)
 - Authentication flows in `app/(auth)/` (Clerk integration established)
 
 ## High Level Architecture
@@ -83,7 +83,6 @@ rento/
 │   ├── translations.ts           # Translation service functions
 │   └── auth.config.ts            # Clerk integration config
 ├── src/                          # Core application logic
-│   ├── services/i18n/            # Internationalization (EN/JA configured)
 │   ├── theme/                    # Unistyles theme system
 │   └── constants/                # App constants and images
 ├── components/                   # Reusable UI components
@@ -102,7 +101,7 @@ rento/
 - **Authentication System**: `app/(auth)/` + `@clerk/clerk-expo` - JWT-based auth, needs APPI migration
 - **Database Layer**: `convex/` - **FULLY IMPLEMENTED** schema for bilingual property rental
 - **UI Theme System**: `src/theme/` - Unistyles-based responsive theming
-- **Internationalization**: `src/services/i18n/` - react-i18next with AsyncStorage persistence
+- **Internationalization**: `src/lib/i18n/` - react-i18next with AsyncStorage persistence
 - **Route Protection**: `app/(protected)/` - Expo Router authentication guards
 
 ## Data Models and APIs
@@ -166,7 +165,7 @@ rento/
 |---------|---------|------------------|-----------|---------|
 | Clerk | Authentication | SDK | `@clerk/clerk-expo`, `convex/auth.config.ts` | **NEEDS MIGRATION** |
 | Convex | Database/Backend | SDK | `convex/` directory | **NEEDS SELF-HOSTING** |
-| react-i18next | Internationalization | Library | `src/services/i18n/` | IMPLEMENTED |
+| react-i18next | Internationalization | Library | `src/lib/i18n/` | IMPLEMENTED |
 | Expo | App Platform | Framework | `app.json`, Expo Router | CURRENT |
 
 ### Internal Integration Points
@@ -317,7 +316,7 @@ npm run lint:fix       # FAILS - ESLint config migration needed
 # Key directories for development
 ./app/(protected)/(tabs)/        # Main app screens
 ./convex/                        # Backend functions and schema
-./src/services/i18n/             # Internationalization
+./src/lib/i18n/             # Internationalization
 ./components/                    # Reusable UI components
 ./.claude/docs/                  # Project documentation
 ```

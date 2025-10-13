@@ -10,7 +10,7 @@ import * as Sentry from '@sentry/react-native';
 import { ThemeProvider } from '@/src/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/theme/useFonts';
-import '@/src/services/i18n';
+import '@/src/lib/i18n';
 
 // TODO:: Test device default language selection - change simulator langauge to JP and see if app is in JP when initially opened
 // TODO:: Add biometric auth

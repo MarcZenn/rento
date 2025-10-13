@@ -369,7 +369,7 @@ Rento creates the first comprehensive "Cultural Bridge Technology" platform that
 - react-i18next with AsyncStorage persistence
 - Device locale detection with fallback to English
 - Japanese (ja) and English (en) supported
-- Translation files in `src/services/i18n/locales/`
+- Translation files in `src/lib/i18n/locales/`
 
 ### Routing
 

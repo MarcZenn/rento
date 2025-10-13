@@ -1,5 +1,5 @@
 import { View, Pressable, Image, Text } from 'react-native';
-import { supported_locales, useTranslate } from '@/src/services/i18n';
+import { supported_locales, useTranslate } from '@/src/lib/i18n';
 import { StyleSheet } from 'react-native-unistyles';
 import { useTranslation } from 'react-i18next';
 
