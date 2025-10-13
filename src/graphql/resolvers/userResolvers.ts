@@ -3,7 +3,8 @@
  */
 
 import { GraphQLError } from 'graphql';
-import { postgresql, redis } from '../../lib/database/connection';
+import { postgresql, redis } from '@/src/lib/database/connection';
+import { AUDIT_EVENT_TYPES } from '@/src/lib/database/auditEventTypes';
 import type { PoolClient } from 'pg';
 
 // ============================================================================
@@ -12,7 +13,7 @@ import type { PoolClient } from 'pg';
 
 interface User {
   id: string;
-  clerk_id?: string;
+  // clerk_id?: string;
   cognito_id?: string;
   email: string;
   username: string;
@@ -65,7 +66,7 @@ async function logUserAccess(userId: string, operation: string, context: Context
       [
         `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         userId,
-        'user_data_access',
+        AUDIT_EVENT_TYPES.USER_DATA_ACCESS,
         context.req?.ip || '127.0.0.1',
         context.req?.headers?.['user-agent'] || 'server',
         operation,
@@ -94,9 +95,8 @@ export const userQueries = {
       });
     }
 
-    // Try cognito_id first, fallback to clerk_id for backward compatibility
-    const idField = context.user.cognitoId ? 'cognito_id' : 'clerk_id';
-    const idValue = context.user.cognitoId || context.user.clerkId;
+    const idField = context.user.cognitoId ? 'cognito_id' : '';
+    const idValue = context.user.cognitoId;
 
     if (!idValue) {
       throw new GraphQLError('Invalid authentication credentials', {
@@ -229,8 +229,8 @@ export const userMutations = {
     return await postgresql.transaction(async (client: PoolClient) => {
       // Check if user already exists
       const existingCheck = await client.query(
-        'SELECT id FROM users WHERE email = $1 OR clerk_id = $2 OR cognito_id = $3',
-        [input.email, input.clerkId || null, input.cognitoId || null]
+        'SELECT id FROM users WHERE email = $1 OR cognito_id = $2',
+        [input.email, input.cognitoId || null]
       );
 
       if (existingCheck.rows.length > 0) {
@@ -241,10 +241,10 @@ export const userMutations = {
 
       // Insert user
       const result = await client.query<User>(
-        `INSERT INTO users (clerk_id, cognito_id, email, username, created_at)
-         VALUES ($1, $2, $3, $4, NOW())
+        `INSERT INTO users (cognito_id, email, username, created_at)
+         VALUES ($1, $2, $3, NOW())
          RETURNING *`,
-        [input.clerkId || null, input.cognitoId || null, input.email, input.username]
+        [input.cognitoId || null, input.email, input.username]
       );
 
       const newUser = result.rows[0];
@@ -258,7 +258,7 @@ export const userMutations = {
         [
           `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
           newUser.id,
-          'user_created',
+          AUDIT_EVENT_TYPES.USER_CREATED,
           context.req?.ip || '127.0.0.1',
           context.req?.headers?.['user-agent'] || 'server',
           'User account created',
@@ -375,7 +375,7 @@ export const userMutations = {
         [
           `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
           id,
-          'user_deletion_requested',
+          AUDIT_EVENT_TYPES.DELETION_REQUEST,
           context.req?.ip || '127.0.0.1',
           context.req?.headers?.['user-agent'] || 'server',
           'User data deletion scheduled',
