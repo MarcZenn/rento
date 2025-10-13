@@ -32,32 +32,16 @@
  * 4. Run npm run db:status to see applied migrations vs pending migrations
  *
  */
-
 import { readFileSync } from 'fs';
-import { join } from 'path';
-import { postgresql } from '../../src/lib/database/connection';
-
-interface MigrationFile {
-  filename: string;
-  version: string;
-  description: string;
-  path: string;
-}
+import { MIGRATIONS, MigrationFile } from './migrations';
+import { postgresql } from '@/src/lib/database/connection';
 
 class DatabaseMigrator {
   /**
    * Get list of migration files in order
    */
   private getMigrationFiles(): MigrationFile[] {
-    return [
-      {
-        filename: '001_initial_schema.sql',
-        version: '001',
-        description: 'Initial APPI compliant schema with encrypted PII fields',
-        path: join(__dirname, '001_initial_schema.sql'),
-      },
-      // Add more migration files here as needed
-    ];
+    return MIGRATIONS;
   }
 
   /**
