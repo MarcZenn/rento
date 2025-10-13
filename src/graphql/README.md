@@ -90,7 +90,7 @@ Access Endpoints
 ### 2. GraphQL Resolvers
 
 #### User Resolvers (`src/graphql/resolvers/userResolvers.ts`)
-- ✅ Query: `currentUser`, `getUser`, `getUserByClerkId`, `getUserByCognitoId`, `getAllUsers`
+- ✅ Query: `currentUser`, `getUser`, `getUserByCognitoId`, `getAllUsers`
 - ✅ Mutation: `createUser`, `updateUser`, `deleteUser` (with 30-day APPI delay)
 - ✅ Redis caching (5-minute TTL)
 - ✅ APPI audit logging for all operations
@@ -132,7 +132,7 @@ Access Endpoints
 ### 4. Authentication Middleware
 **File:** `src/graphql/middleware/auth.ts`
 
-- ✅ JWT token verification (AWS Cognito + Clerk legacy support)
+- ✅ JWT token verification (AWS Cognito)
 - ✅ Context creation for resolvers
 - ✅ Authorization helper functions:
   - `requireRole(context, role)`
