@@ -3,7 +3,8 @@
  */
 
 import { GraphQLError } from 'graphql';
-import { postgresql, redis } from '../../lib/database/connection';
+import { postgresql, redis } from '@/src/lib/database/connection';
+import { AUDIT_EVENT_TYPES } from '@/src/lib/database/auditEventTypes';
 import type { PoolClient } from 'pg';
 
 // ============================================================================
@@ -111,10 +112,12 @@ export const consentQueries = {
       });
     }
 
+    const auditEventType = AUDIT_EVENT_TYPES.CONSENT_READ;
+
     // Check cache first
     const cached = await getCachedConsent(userId);
     if (cached) {
-      await logConsentEvent(userId, 'consent_read', { source: 'cache' }, context);
+      await logConsentEvent(userId, auditEventType, { source: 'cache' }, context);
       return cached;
     }
 
@@ -126,7 +129,7 @@ export const consentQueries = {
 
     const consent = result.rows[0] || null;
     if (consent) {
-      await logConsentEvent(userId, 'consent_read', { source: 'database' }, context);
+      await logConsentEvent(userId, auditEventType, { source: 'database' }, context);
       await cacheConsent(consent);
     }
 
@@ -149,11 +152,12 @@ export const consentQueries = {
     );
 
     const consent = result.rows[0] || null;
+    const auditFailedEventType = AUDIT_EVENT_TYPES.CONSENT_VALIDATION_FAILED;
 
     if (!consent) {
       await logConsentEvent(
         userId,
-        'consent_validation_failed',
+        auditFailedEventType,
         {
           reason: 'No consent record found',
           consentType,
@@ -173,7 +177,7 @@ export const consentQueries = {
     if (consent.withdrawal_timestamp) {
       await logConsentEvent(
         userId,
-        'consent_validation_failed',
+        auditFailedEventType,
         {
           reason: 'Consent withdrawn',
           withdrawalTimestamp: consent.withdrawal_timestamp,
@@ -203,7 +207,7 @@ export const consentQueries = {
 
     await logConsentEvent(
       userId,
-      'consent_validated',
+      AUDIT_EVENT_TYPES.CONSENT_VALIDATED,
       {
         isValid,
         consentType,
@@ -243,7 +247,7 @@ export const consentQueries = {
 
     await logConsentEvent(
       userId,
-      'consent_history_accessed',
+      AUDIT_EVENT_TYPES.CONSENT_HISTORY_ACCESSED,
       {
         recordCount: result.rows.length,
       },
@@ -340,7 +344,7 @@ export const consentQueries = {
 
     await logConsentEvent(
       userId,
-      'audit_trail_generated',
+      AUDIT_EVENT_TYPES.AUDIT_TRAIL_GENERATED,
       {
         historyCount: historyResult.rows.length,
         auditEventCount: auditResult.rows.length,
@@ -416,7 +420,7 @@ export const consentMutations = {
       // Log consent creation for APPI compliance
       await logConsentEvent(
         input.userId,
-        'consent_recorded',
+        AUDIT_EVENT_TYPES.CONSENT_RECORDED,
         {
           consentId: newConsent.id,
           profileData: input.profileDataConsent,
@@ -531,7 +535,7 @@ export const consentMutations = {
       // Log update for APPI compliance
       await logConsentEvent(
         userId,
-        'consent_updated',
+        AUDIT_EVENT_TYPES.CONSENT_UPDATED,
         {
           changes: input,
         },
@@ -597,7 +601,7 @@ export const consentMutations = {
       // Log withdrawal for APPI compliance
       await logConsentEvent(
         userId,
-        'consent_withdrawn',
+        AUDIT_EVENT_TYPES.CONSENT_WITHDRAWN,
         {
           withdrawalTimestamp: new Date().toISOString(),
         },
@@ -641,7 +645,7 @@ export const consentMutations = {
       // Log deletion request
       await logConsentEvent(
         userId,
-        'data_deletion_requested',
+        AUDIT_EVENT_TYPES.DELETION_REQUEST,
         {
           deletionRequestId: deletionRequest.id,
           deletionScope,

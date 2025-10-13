@@ -23,8 +23,8 @@
     "db:logs:postgres": "cd infrastructure/database && docker-compose logs -f postgres",
     "db:psql": "docker exec -it rento-postgres-dev psql -U rento_dev -d rento_dev",
     "db:clean": "cd infrastructure/database && docker-compose down -v",
-    "infrastructure:deploy": "cd infrastructure/aws && ./deploy.sh",
-    "infrastructure:deploy:dev": "cd infrastructure/aws && ./deploy.sh development"
+    "infrastructure:deploy:prod": "export AWS_PROFILE=rento-production-sso && cd infrastructure/aws/deploy && ./deploy.sh production",
+    "infrastructure:deploy:dev": "export AWS_PROFILE=rento-development-sso && cd infrastructure/aws/deploy && ./deploy.sh development"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
@@ -37,6 +37,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.6.0",
+    "aws-jwt-verify": "^5.1.1",
     "body-parser": "^2.2.0",
     "convex": "^1.24.1",
     "cors": "^2.8.5",

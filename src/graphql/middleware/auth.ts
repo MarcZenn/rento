@@ -36,6 +36,8 @@
  */
 
 import { GraphQLError } from 'graphql';
+import { CognitoJwtVerifier } from 'aws-jwt-verify';
+import 'dotenv/config';
 
 // ============================================================================
 // TYPES
@@ -49,6 +51,8 @@ interface DecodedToken {
   'cognito:groups'?: string[];
   exp: number;
   iat: number;
+  token_use?: string;
+  client_id?: string;
 }
 
 // The context object passed to every GraphQL resolver, containing:
@@ -60,6 +64,7 @@ interface Context {
     cognitoId?: string;
     clerkId?: string;
     email?: string;
+    username?: string;
     roles?: string[];
   };
   req: any;
@@ -67,77 +72,145 @@ interface Context {
 }
 
 // ============================================================================
+// JWT VERIFICATION SETUP
+// ============================================================================
+
+// Verify environment variables are set
+const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
+const COGNITO_BACKEND_CLIENT_ID = process.env.COGNITO_BACKEND_CLIENT_ID;
+const COGNITO_REGION = process.env.COGNITO_REGION || process.env.AWS_REGION || 'ap-northeast-1';
+
+if (!COGNITO_USER_POOL_ID) {
+  console.warn('⚠️ COGNITO_USER_POOL_ID not set - Cognito authentication will fail');
+}
+
+if (!COGNITO_BACKEND_CLIENT_ID) {
+  console.warn('⚠️ COGNITO_BACKEND_CLIENT_ID not set - Cognito authentication will fail');
+}
+
+/**
+ * Create Cognito JWT Verifier for Access Tokens
+ * Verifies JWT signatures against AWS Cognito public keys
+ * - Validates token signature cryptographically
+ * - Checks token expiration automatically
+ * - Validates token issuer (user pool)
+ * - Validates token audience (client ID)
+ */
+const accessTokenVerifier =
+  COGNITO_USER_POOL_ID && COGNITO_BACKEND_CLIENT_ID
+    ? CognitoJwtVerifier.create({
+        userPoolId: COGNITO_USER_POOL_ID,
+        tokenUse: 'access',
+        clientId: COGNITO_BACKEND_CLIENT_ID,
+      })
+    : null;
+
+/**
+ * Create Cognito JWT Verifier for ID Tokens
+ * ID tokens contain user profile information (email, username, etc.)
+ */
+const idTokenVerifier =
+  COGNITO_USER_POOL_ID && COGNITO_BACKEND_CLIENT_ID
+    ? CognitoJwtVerifier.create({
+        userPoolId: COGNITO_USER_POOL_ID,
+        tokenUse: 'id',
+        clientId: COGNITO_BACKEND_CLIENT_ID,
+      })
+    : null;
+
+// ============================================================================
 // JWT VERIFICATION
 // ============================================================================
 
 /**
- * Decode JWT token (basic implementation)
- * In production, use proper JWT verification libraries like:
- * - aws-jwt-verify for AWS Cognito Tokens
- */
-function decodeJWT(token: string): DecodedToken | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const payload = parts[1];
-    const decoded = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
-
-    return decoded;
-  } catch (error) {
-    console.error('JWT decode error:', error);
-    return null;
-  }
-}
-
-/**
- * Verify AWS Cognito JWT token
- * 1. Decodes the token
- * 2. Checks if token is expired (compares exp claim to current time)
- * 3. Throws UNAUTHENTICATED error if expired
- * TODO: Implement proper verification using aws-jwt-verify
+ * Verify AWS Cognito JWT token with proper cryptographic verification
+ *
+ * This function uses aws-jwt-verify to:
+ * 1. Download and cache Cognito's public keys (JWKS)
+ * 2. Verify the token's cryptographic signature
+ * 3. Validate token expiration, issuer, and audience
+ * 4. Return the verified payload
+ *
+ * @param token - JWT token from Authorization header
+ * @returns Verified token payload or null if verification fails
  */
 async function verifyCognitoToken(token: string): Promise<DecodedToken | null> {
-  // For now, just decode - in production, use aws-jwt-verify
-  const decoded = decodeJWT(token);
-
-  if (!decoded) {
+  if (!accessTokenVerifier || !idTokenVerifier) {
+    console.error('Cognito verifiers not initialized - check environment variables');
     return null;
   }
 
-  // Check token expiration
-  if (decoded.exp * 1000 < Date.now()) {
-    throw new GraphQLError('Token expired', {
-      extensions: { code: 'UNAUTHENTICATED' },
+  try {
+    // Try to verify as access token first (most common for API requests)
+    try {
+      const payload = await accessTokenVerifier.verify(token, {
+        // The aws-jwt-verify library requires the clientId parameter to be
+        // passed both when creating the verifier instance AND when calling
+        // the verify() method. This is by design - it allows for additional
+        // flexibility in verification while maintaining type safety.
+        clientId: COGNITO_BACKEND_CLIENT_ID!,
+      });
+      console.log('✅ Access token verified successfully');
+      return payload as DecodedToken;
+    } catch (accessError) {
+      // If access token verification fails, try ID token
+      // ID tokens are sometimes sent by mobile apps
+      try {
+        const payload = await idTokenVerifier.verify(token, {
+          // The aws-jwt-verify library requires the clientId parameter to be
+          // passed both when creating the verifier instance AND when calling
+          // the verify() method. This is by design - it allows for additional
+          // flexibility in verification while maintaining type safety.
+          clientId: COGNITO_BACKEND_CLIENT_ID!,
+        });
+        console.log('✅ ID token verified successfully');
+        return payload as DecodedToken;
+      } catch (idError) {
+        // Both verifications failed
+        console.error('Token verification failed for both access and ID token types');
+        throw accessError; // Throw the original access token error
+      }
+    }
+  } catch (error: any) {
+    // Handle specific JWT verification errors
+    if (error.message?.includes('expired')) {
+      throw new GraphQLError('Token expired - please refresh your session', {
+        extensions: {
+          code: 'UNAUTHENTICATED',
+          reason: 'TOKEN_EXPIRED',
+        },
+      });
+    }
+
+    if (error.message?.includes('invalid signature')) {
+      throw new GraphQLError('Invalid token signature', {
+        extensions: {
+          code: 'UNAUTHENTICATED',
+          reason: 'INVALID_SIGNATURE',
+        },
+      });
+    }
+
+    if (error.message?.includes('issuer')) {
+      console.error('Token issuer mismatch - token not from expected Cognito user pool');
+      throw new GraphQLError('Invalid token issuer', {
+        extensions: {
+          code: 'UNAUTHENTICATED',
+          reason: 'INVALID_ISSUER',
+        },
+      });
+    }
+
+    // Generic verification failure
+    console.error('Cognito token verification failed:', error.message);
+    throw new GraphQLError('Token verification failed', {
+      extensions: {
+        code: 'UNAUTHENTICATED',
+        reason: 'VERIFICATION_FAILED',
+      },
     });
   }
-
-  return decoded;
 }
-
-/**
- * Verify Clerk JWT token (legacy support)
- * TODO: Implement proper verification using @clerk/backend
- */
-// async function verifyClerkToken(token: string): Promise<DecodedToken | null> {
-//   // For now, just decode - in production, use @clerk/backend
-//   const decoded = decodeJWT(token);
-
-//   if (!decoded) {
-//     return null;
-//   }
-
-//   // Check token expiration
-//   if (decoded.exp * 1000 < Date.now()) {
-//     throw new GraphQLError('Token expired', {
-//       extensions: { code: 'UNAUTHENTICATED' },
-//     });
-//   }
-
-//   return decoded;
-// }
 
 // ============================================================================
 // AUTHENTICATION MIDDLEWARE
@@ -169,15 +242,8 @@ export async function createAuthContext({ req, res }: { req: any; res: any }): P
   }
 
   try {
-    // Try Cognito verification (preferred for APPI compliance)
-    let decoded = await verifyCognitoToken(token);
-    let authProvider: 'cognito' | 'clerk' = 'cognito';
-
-    // Fallback to Clerk for backward compatibility
-    // if (!decoded) {
-    //   decoded = await verifyClerkToken(token);
-    //   authProvider = 'clerk';
-    // }
+    // Verify Cognito token with proper cryptographic verification
+    const decoded = await verifyCognitoToken(token);
 
     if (!decoded) {
       throw new GraphQLError('Invalid token', {
@@ -191,29 +257,42 @@ export async function createAuthContext({ req, res }: { req: any; res: any }): P
     // resolvers
     context.user = {
       id: decoded.sub,
+      cognitoId: decoded.sub,
       email: decoded.email,
-      roles: decoded['cognito:groups'] || [],
+      username: decoded['cognito:username'],
+      roles: decoded['cognito:groups'] || [], // Role comes from here
     };
 
-    if (authProvider === 'cognito') {
-      context.user.cognitoId = decoded.sub;
-    } else {
-      context.user.clerkId = decoded.sub;
-    }
-
     // Log authentication for APPI compliance
-    console.log('User authenticated:', {
+    // Include timestamp, user ID, IP address for audit trail
+    console.log('🔐 User authenticated:', {
       userId: context.user.id,
-      provider: authProvider,
-      ip: req.ip,
+      username: context.user.username,
+      email: context.user.email,
+      provider: 'cognito',
+      region: COGNITO_REGION,
+      ip: req.ip || req.socket.remoteAddress,
+      timestamp: new Date().toISOString(),
+      userAgent: req.headers['user-agent'],
     });
   } catch (error) {
+    // Re-throw GraphQLErrors (already formatted with proper error codes)
     if (error instanceof GraphQLError) {
       throw error;
     }
-    console.error('Authentication error:', error);
+
+    // Handle unexpected errors
+    console.error('❌ Authentication error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
     throw new GraphQLError('Authentication failed', {
-      extensions: { code: 'UNAUTHENTICATED' },
+      extensions: {
+        code: 'UNAUTHENTICATED',
+        reason: 'UNEXPECTED_ERROR',
+      },
     });
   }
 

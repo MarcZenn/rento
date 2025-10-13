@@ -77,7 +77,7 @@ The Convex schema uses a hybrid internationalization approach:
 - react-i18next with AsyncStorage persistence
 - Device locale detection with fallback to English
 - Japanese (ja) and English (en) supported
-- Translation files in `src/services/i18n/locales/`
+- Translation files in `src/lib/i18n/locales/`
 
 ### Schema Considerations
 - Convex doesn't support unique constraints at schema level
