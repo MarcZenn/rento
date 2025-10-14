@@ -221,38 +221,38 @@ REDIS_PORT=$(aws cloudformation describe-stacks \
   --output text)
 
 # Create .env file for application
-cat > "../.env.${ENVIRONMENT}" << EOF
-# APPI Compliant Infrastructure Configuration - Tokyo Region
-# Generated on $(date)
+# cat > "../.env.${ENVIRONMENT}" << EOF
+# # APPI Compliant Infrastructure Configuration - Tokyo Region
+# # Generated on $(date)
 
-# AWS Cognito Configuration
-COGNITO_USER_POOL_ID=${USER_POOL_ID}
-COGNITO_MOBILE_CLIENT_ID=${MOBILE_CLIENT_ID}
-COGNITO_BACKEND_CLIENT_ID=${BACKEND_CLIENT_ID}
-COGNITO_REGION=${REGION}
-COGNITO_DOMAIN=${USER_POOL_DOMAIN}
+# # AWS Cognito Configuration
+# COGNITO_USER_POOL_ID=${USER_POOL_ID}
+# COGNITO_MOBILE_CLIENT_ID=${MOBILE_CLIENT_ID}
+# COGNITO_BACKEND_CLIENT_ID=${BACKEND_CLIENT_ID}
+# COGNITO_REGION=${REGION}
+# COGNITO_DOMAIN=${USER_POOL_DOMAIN}
 
-# PostgreSQL Configuration
-POSTGRES_HOST=${DB_ENDPOINT}
-POSTGRES_PORT=${DB_PORT}
-POSTGRES_DB=${DB_NAME}
-POSTGRES_USER=rento_admin
-POSTGRES_PASSWORD=${DB_PASSWORD}
-POSTGRES_SSL=require
+# # PostgreSQL Configuration
+# POSTGRES_HOST=${DB_ENDPOINT}
+# POSTGRES_PORT=${DB_PORT}
+# POSTGRES_DB=${DB_NAME}
+# POSTGRES_USER=rento_admin
+# POSTGRES_PASSWORD=${DB_PASSWORD}
+# POSTGRES_SSL=require
 
-# Redis Configuration
-REDIS_HOST=${REDIS_ENDPOINT}
-REDIS_PORT=${REDIS_PORT}
-REDIS_TLS=true
+# # Redis Configuration
+# REDIS_HOST=${REDIS_ENDPOINT}
+# REDIS_PORT=${REDIS_PORT}
+# REDIS_TLS=true
 
-# Region Configuration
-AWS_REGION=${REGION}
-DATA_LOCATION=Japan-Tokyo
+# # Region Configuration
+# AWS_REGION=${REGION}
+# DATA_LOCATION=Japan-Tokyo
 
-# APPI Compliance Flags
-APPI_COMPLIANT=true
-DATA_RESIDENCY_ENFORCEMENT=true
-AUDIT_LOGGING=true
+# # APPI Compliance Flags
+# APPI_COMPLIANT=true
+# DATA_RESIDENCY_ENFORCEMENT=true
+# AUDIT_LOGGING=true
 EOF
 
 echo ""

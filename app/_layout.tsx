@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { Slot, useNavigationContainerRef } from 'expo-router';
 import { ClerkProvider, ClerkLoaded, useAuth, useUser } from '@clerk/clerk-expo';
+import { ApolloProvider } from '@/src/amplify/ApolloProvider';
+import { configureAmplify } from '@/src/amplify/config';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
@@ -61,6 +63,7 @@ const InitialLayout = () => {
   useEffect(() => {
     const init = async () => {
       try {
+        await configureAmplify(); // Initialize AWS Amplify on app start
         await useFonts();
       } catch (err) {
         console.warn(err);
@@ -111,15 +114,17 @@ const RootLayout = () => {
   }, [ref]);
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
-      <ClerkLoaded>
-        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          <ThemeProvider>
-            <InitialLayout />
-          </ThemeProvider>
-        </ConvexProviderWithClerk>
-      </ClerkLoaded>
-    </ClerkProvider>
+    <ApolloProvider>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
+        <ClerkLoaded>
+          <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+            <ThemeProvider>
+              <InitialLayout />
+            </ThemeProvider>
+          </ConvexProviderWithClerk>
+        </ClerkLoaded>
+      </ClerkProvider>
+    </ApolloProvider>
   );
 };
 
