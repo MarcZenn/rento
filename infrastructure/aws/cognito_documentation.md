@@ -94,7 +94,7 @@ After deployment, the following variables are added to `.env.{ENVIRONMENT}`:
 ```bash
 # AWS Cognito Configuration
 COGNITO_USER_POOL_ID=ap-northeast-1_xxxxxxxxx
-COGNITO_MOBILE_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
+EXPO_PUBLIC_COGNITO_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
 COGNITO_BACKEND_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
 COGNITO_REGION=ap-northeast-1
 COGNITO_DOMAIN=rento-auth-production.auth.ap-northeast-1.amazoncognito.com
@@ -123,7 +123,7 @@ Amplify.configure({
     Cognito: {
       region: process.env.COGNITO_REGION,
       userPoolId: process.env.COGNITO_USER_POOL_ID,
-      userPoolClientId: process.env.COGNITO_MOBILE_CLIENT_ID,
+      userPoolClientId: process.env.EXPO_PUBLIC_COGNITO_CLIENT_ID,
     }
   }
 });

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { Slot, useNavigationContainerRef } from 'expo-router';
 import { ClerkProvider, ClerkLoaded, useAuth, useUser } from '@clerk/clerk-expo';
+import { ApolloProvider } from '@/src/apollo_client/ApolloProvider';
+import { configureAmplify } from '@/src/apollo_client/config';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
@@ -12,13 +14,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/theme/useFonts';
 import '@/src/lib/i18n';
 
-// TODO:: Test device default language selection - change simulator langauge to JP and see if app is in JP when initially opened
-// TODO:: Add biometric auth
-
-// TODO:: test email loginp
-// - check clerk errors
-// -- check wrong password errors
-// - check wrong email clerk errors
+// TODO:: Add biometric auth (AWS Amplify)
+// TODO:: (Refactor file structure - need better separation of concerns)
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
@@ -61,6 +58,7 @@ const InitialLayout = () => {
   useEffect(() => {
     const init = async () => {
       try {
+        await configureAmplify(); // Initialize AWS Amplify on app start
         await useFonts();
       } catch (err) {
         console.warn(err);
@@ -111,15 +109,17 @@ const RootLayout = () => {
   }, [ref]);
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
-      <ClerkLoaded>
-        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          <ThemeProvider>
-            <InitialLayout />
-          </ThemeProvider>
-        </ConvexProviderWithClerk>
-      </ClerkLoaded>
-    </ClerkProvider>
+    <ApolloProvider>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
+        <ClerkLoaded>
+          <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+            <ThemeProvider>
+              <InitialLayout />
+            </ThemeProvider>
+          </ConvexProviderWithClerk>
+        </ClerkLoaded>
+      </ClerkProvider>
+    </ApolloProvider>
   );
 };
 

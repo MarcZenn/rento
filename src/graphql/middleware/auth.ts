@@ -76,9 +76,8 @@ interface Context {
 // ============================================================================
 
 // Verify environment variables are set
-const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
-const COGNITO_BACKEND_CLIENT_ID = process.env.COGNITO_BACKEND_CLIENT_ID;
-const COGNITO_REGION = process.env.COGNITO_REGION || process.env.AWS_REGION || 'ap-northeast-1';
+const { COGNITO_USER_POOL_ID, COGNITO_BACKEND_CLIENT_ID, COGNITO_REGION, AWS_REGION } = process.env;
+const REGION = COGNITO_REGION || AWS_REGION || 'ap-northeast-1';
 
 if (!COGNITO_USER_POOL_ID) {
   console.warn('⚠️ COGNITO_USER_POOL_ID not set - Cognito authentication will fail');
@@ -270,7 +269,7 @@ export async function createAuthContext({ req, res }: { req: any; res: any }): P
       username: context.user.username,
       email: context.user.email,
       provider: 'cognito',
-      region: COGNITO_REGION,
+      region: REGION,
       ip: req.ip || req.socket.remoteAddress,
       timestamp: new Date().toISOString(),
       userAgent: req.headers['user-agent'],
