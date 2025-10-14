@@ -14,13 +14,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/src/theme/useFonts';
 import '@/src/lib/i18n';
 
-// TODO:: Test device default language selection - change simulator langauge to JP and see if app is in JP when initially opened
-// TODO:: Add biometric auth
-
-// TODO:: test email loginp
-// - check clerk errors
-// -- check wrong password errors
-// - check wrong email clerk errors
+// TODO:: Add biometric auth (AWS Amplify)
+// TODO:: (Refactor file structure - need better separation of concerns)
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
