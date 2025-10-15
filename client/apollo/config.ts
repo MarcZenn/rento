@@ -11,17 +11,23 @@
  */
 
 import { Amplify } from 'aws-amplify';
+import { ENV } from '@/client/config/env';
 
-const { EXPO_PUBLIC_COGNITO_USER_POOL_ID, EXPO_PUBLIC_COGNITO_CLIENT_ID, AWS_REGION } = process.env;
+const { userPoolClientId, userPoolId, region } = ENV.cognito;
 
-if (!EXPO_PUBLIC_COGNITO_USER_POOL_ID) {
-  console.error('❌ EXPO_PUBLIC_COGNITO_USER_POOL_ID is not set in environment variables');
-  throw new Error('Missing EXPO_PUBLIC_COGNITO_USER_POOL_ID - Please set in .env file');
+if (!userPoolId) {
+  console.error('❌ Cognito User Pool ID is not set in environment variables');
+  throw new Error('Missing Cognito User Pool ID - Please set in .env file');
 }
 
-if (!EXPO_PUBLIC_COGNITO_CLIENT_ID) {
-  console.error('❌ EXPO_PUBLIC_COGNITO_CLIENT_ID is not set in environment variables');
-  throw new Error('Missing EXPO_PUBLIC_COGNITO_CLIENT_ID - Please set in .env file');
+if (!userPoolClientId) {
+  console.error('❌ Cognito Client ID is not set in environment variables');
+  throw new Error('Missing Cognito Client ID - Please set in .env file');
+}
+
+if (!region) {
+  console.error('❌ Cognito AWS Region is not set in environment variables');
+  throw new Error('Missing Cognito AWS Region - Please set in .env file');
 }
 
 /**
@@ -45,10 +51,10 @@ export const configureAmplify = async () => {
           // User Pool ID - identifies your Cognito User Pool
           // Region is automatically inferred from the User Pool ID
           // (e.g., ap-northeast-1_XXXXXXXXX -> ap-northeast-1)
-          userPoolId: EXPO_PUBLIC_COGNITO_USER_POOL_ID,
+          userPoolId: ENV.cognito.userPoolId,
 
           // App Client ID - identifies this mobile app
-          userPoolClientId: EXPO_PUBLIC_COGNITO_CLIENT_ID,
+          userPoolClientId: ENV.cognito.userPoolClientId,
 
           // Login configuration
           loginWith: {
@@ -60,8 +66,8 @@ export const configureAmplify = async () => {
     });
 
     console.log('✅ AWS Amplify configured successfully');
-    console.log(`   Region: ${AWS_REGION}`);
-    console.log(`   User Pool: ${EXPO_PUBLIC_COGNITO_USER_POOL_ID}`);
+    console.log(`   Region: ${region}`);
+    console.log(`   User Pool: ${userPoolId}`);
   } catch (error) {
     console.error('❌ Failed to configure AWS Amplify:', error);
     throw error;
@@ -74,9 +80,9 @@ export const configureAmplify = async () => {
  */
 export const getAmplifyConfig = () => {
   return {
-    region: AWS_REGION,
-    userPoolId: EXPO_PUBLIC_COGNITO_USER_POOL_ID,
-    clientId: EXPO_PUBLIC_COGNITO_CLIENT_ID,
+    region: region,
+    userPoolId: userPoolId,
+    clientId: userPoolClientId,
   };
 };
 

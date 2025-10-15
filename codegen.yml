@@ -1,0 +1,65 @@
+# ============================================================================
+# GraphQL Code Generator Configuration
+# ============================================================================
+# Generates TypeScript types from GraphQL schema for type-safe client/server code
+#
+# Usage:
+#   npm run codegen           # Generate types once
+#   npm run codegen:watch     # Watch for changes and regenerate
+#   ./scripts/codegen.sh      # Use convenience script
+# ============================================================================
+
+schema: './server/graphql/schema/typeDefs.ts'
+
+# Optional: Add this when you have .graphql query/mutation files in client
+# documents:
+#   - 'client/**/*.graphql'
+#   - 'client/**/*.gql'
+
+generates:
+  # Generate TypeScript types from schema
+  ./shared/types/graphql.ts:
+    plugins:
+      - typescript
+      - typescript-resolvers
+    config:
+      # Type safety options
+      useIndexSignature: false
+      strictScalars: true
+      skipTypename: false
+      enumsAsTypes: true
+
+      # Scalar type mappings
+      scalars:
+        DateTime: string
+        JSON: any
+
+      # Generate helpful types
+      contextType: '@server/graphql/middleware/auth#GraphQLContext'
+      makeResolverTypeCallable: true
+
+      # Add helpful comments to generated types
+      addDocBlocks: true
+
+      # Naming conventions
+      typesPrefix: 'GQL_'
+      enumPrefix: false
+
+  # Optional: Generate React Apollo hooks when you add client queries
+  # Uncomment this when you have .graphql files in client/
+  # ./shared/types/graphql-operations.ts:
+  #   plugins:
+  #     - typescript
+  #     - typescript-operations
+  #     - typescript-react-apollo
+  #   config:
+  #     withHooks: true
+  #     withComponent: false
+  #     withHOC: false
+  #     scalars:
+  #       DateTime: string
+  #       JSON: any
+
+hooks:
+  afterAllFileWrite:
+    - prettier --write

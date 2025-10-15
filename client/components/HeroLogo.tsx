@@ -1,6 +1,6 @@
 import { View, Image } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { images } from '@/src/constants/images';
+import { images } from '@/client/constants/images';
 
 export const HeroLogo = () => {
   return (

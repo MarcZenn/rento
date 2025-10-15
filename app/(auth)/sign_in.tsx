@@ -5,12 +5,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link } from 'expo-router';
 
-import { CustomInput } from '@/components/custom/inputs/CustomInput';
-import { CustomButton } from '@/components/custom/buttons/CustomButton';
-import { useSignInSchema } from '@/src/services/clerk/schemas';
-import { HeroLogo } from '@/components/HeroLogo';
-import { Header } from '@/components/Header';
-import { useAuthActions } from '@/src/services/clerk/useAuthActions';
+import { CustomInput } from '@/client/components/custom/inputs/CustomInput';
+import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
+import { useSignInSchema } from '@/client/services/clerk/schemas';
+import { HeroLogo } from '@/client/components/HeroLogo';
+import { Header } from '@/client/components/Header';
+import { useAuthActions } from '@/client/services/clerk/useAuthActions';
 
 const SignIn = () => {
   const { t } = useTranslation();

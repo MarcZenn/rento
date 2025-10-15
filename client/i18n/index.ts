@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import translationEn from './locales/en-US/translations.json';
 import translationJa from './locales/ja-JP/translations.json';
 import { SUPPORTED_LOCALES, LANGUAGE_CODE } from './types';
-import { images } from '../../constants/images';
+import { images } from '../../../client/constants/images';
 
 const supported_locales: SUPPORTED_LOCALES = [
   {

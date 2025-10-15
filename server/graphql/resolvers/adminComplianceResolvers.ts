@@ -15,7 +15,7 @@
  *
  */
 import { GraphQLError } from 'graphql';
-import { postgresql } from '@/src/lib/database/connection';
+import { postgresql } from '@/server/database/connection';
 import { requireAdmin } from '@/src/graphql/middleware/auth';
 
 // ============================================================================

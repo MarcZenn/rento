@@ -1,7 +1,9 @@
+import { ENV } from '../client/config/env';
+
 export default {
   providers: [
     {
-      domain: process.env.CLERK_FRONTEND_API_URL,
+      domain: ENV.clerk.frontendApiUrl,
       applicationID: 'convex',
     },
   ],

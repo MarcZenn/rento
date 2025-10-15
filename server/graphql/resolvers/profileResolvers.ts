@@ -3,8 +3,8 @@
  */
 
 import { GraphQLError } from 'graphql';
-import { postgresql, redis } from '@/src/lib/database/connection';
-import { AUDIT_EVENT_TYPES } from '@/src/lib/database/auditEventTypes';
+import { postgresql, redis } from '@/server/database/connection';
+import { AUDIT_EVENT_TYPES } from '@/server/database/auditEventTypes';
 import type { PoolClient } from 'pg';
 
 // ============================================================================

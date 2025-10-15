@@ -1,9 +1,5 @@
 import { isClerkAPIResponseError, useSignIn, useSignUp } from '@clerk/clerk-expo';
-import {
-  useSignInSchema,
-  useSignUpSchema,
-  useVerifyEmailSchema,
-} from '@/src/services/clerk/schemas';
+import { useSignInSchema, useSignUpSchema, useVerifyEmailSchema } from './schemas';
 import { UseFormSetError } from 'react-hook-form';
 import { router } from 'expo-router';
 import { z } from 'zod';

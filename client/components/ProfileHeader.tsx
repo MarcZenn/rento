@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import { Id } from '@/convex/_generated/dataModel';
 import { StyleSheet } from 'react-native-unistyles';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserProfile } from '@/client/hooks/useUserProfile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ProfileProps = {

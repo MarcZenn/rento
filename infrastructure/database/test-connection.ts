@@ -11,7 +11,7 @@
  *
  */
 
-import { postgresql, redis } from '../../src/lib/database/connection';
+import { postgresql, redis } from '../../server/database/connection';
 
 interface TestResult {
   test: string;

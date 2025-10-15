@@ -19,13 +19,14 @@
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, Observable } from '@apollo/client';
 import { ErrorLink } from '@apollo/client/link/error';
 import { fetchAuthSession, signOut } from 'aws-amplify/auth';
+import { ENV } from '@/client/config/env';
 
 // TODO:: set up this endpoint in the backend
-const { EXPO_PUBLIC_GRAPHQL_ENDPOINT } = process.env;
+const { graphqlEndpoint } = ENV;
 
-if (!EXPO_PUBLIC_GRAPHQL_ENDPOINT) {
-  console.error('❌ EXPO_PUBLIC_GRAPHQL_ENDPOINT is not set in environment variables');
-  throw new Error('Missing EXPO_PUBLIC_GRAPHQL_ENDPOINT - Please set in .env file');
+if (!graphqlEndpoint) {
+  console.error('❌ GraphQL endpoint is not set in environment variables');
+  throw new Error('Missing GraphQL endpoint - Please set in .env file');
 }
 
 /**
@@ -191,7 +192,7 @@ const errorLink = new ErrorLink(({ error, operation, forward }) => {
  * HTTP Link - Connects to GraphQL API endpoint with custom fetch
  */
 const httpLink = new HttpLink({
-  uri: EXPO_PUBLIC_GRAPHQL_ENDPOINT,
+  uri: graphqlEndpoint,
   fetch: customFetch,
   credentials: 'include', // Include cookies if needed
 });
