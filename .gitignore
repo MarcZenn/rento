@@ -86,3 +86,7 @@ logs/*
 client/.env
 server/.env
 .env
+
+# builds
+/ios
+/android
