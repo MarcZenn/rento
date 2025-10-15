@@ -58,7 +58,7 @@ interface DecodedToken {
 // The context object passed to every GraphQL resolver, containing:
 //   - user: Authenticated user info (undefined if not authenticated)
 //   - req/res: Express request/response objects
-interface Context {
+export interface Context {
   user?: {
     id: string;
     cognitoId?: string;

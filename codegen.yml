@@ -35,7 +35,7 @@ generates:
         JSON: any
 
       # Generate helpful types
-      contextType: '@server/graphql/middleware/auth#GraphQLContext'
+      contextType: '@server/graphql/middleware/auth#Context'
       makeResolverTypeCallable: true
 
       # Add helpful comments to generated types
