@@ -4,8 +4,8 @@ import { router } from 'expo-router';
 import { StyleSheet } from 'react-native-unistyles';
 // import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { Header } from '@/components/Header';
-import { ProfileHeader } from '@/components/ProfileHeader';
+import { Header } from '@/client/components/Header';
+import { ProfileHeader } from '@/client/components/ProfileHeader';
 
 const Profile = () => {
   const { signOut } = useAuth();

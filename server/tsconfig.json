@@ -1,0 +1,28 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmit": false,
+    "types": ["node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "./**/*",
+    "../shared/**/*",
+    "../infrastructure/database/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "../app/**/*",
+    "../client/**/*",
+    "dist/**/*"
+  ]
+}

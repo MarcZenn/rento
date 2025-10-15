@@ -2,27 +2,26 @@ import { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { Slot, useNavigationContainerRef } from 'expo-router';
 import { ClerkProvider, ClerkLoaded, useAuth, useUser } from '@clerk/clerk-expo';
-import { ApolloProvider } from '@/src/apollo_client/ApolloProvider';
-import { configureAmplify } from '@/src/apollo_client/config';
+import { ApolloProvider } from '@/client/apollo';
+import { configureAmplify } from '@/client/apollo/config';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import * as Sentry from '@sentry/react-native';
+import { ENV } from '@/client/config/env';
 
-import { ThemeProvider } from '@/src/theme/ThemeProvider';
+import { ThemeProvider } from '@/client/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from '@/src/theme/useFonts';
-import '@/src/lib/i18n';
+import { useFonts } from '@/client/theme/useFonts';
+import '@/client/i18n';
 
 // TODO:: Add biometric auth (AWS Amplify)
-// TODO:: (Refactor file structure - need better separation of concerns)
-
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
 
-const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-if (!clerkPublishableKey) {
+const { publishableKey } = ENV.clerk;
+if (!publishableKey) {
   throw new Error(
     'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your env.'
   );
@@ -110,7 +109,7 @@ const RootLayout = () => {
 
   return (
     <ApolloProvider>
-      <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <ClerkLoaded>
           <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
             <ThemeProvider>

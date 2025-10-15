@@ -82,4 +82,11 @@ logs
 logs/*
 .claude/data/
 
-# @end expo-cli
+# @end expo-cli# Environment Files
+client/.env
+server/.env
+.env
+
+# builds
+/ios
+/android

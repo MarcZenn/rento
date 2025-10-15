@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
 import { Link } from 'expo-router';
 
-import { images } from '@/src/constants/images';
+import { images } from '@/client/constants/images';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { HeroLogo } from '@/components/HeroLogo';
-import { Header } from '@/components/Header';
-import { CustomButton } from '@/components/custom/buttons/CustomButton';
-import { SignInWith } from '@/components/SignInWith';
+import { HeroLogo } from '@/client/components/HeroLogo';
+import { Header } from '@/client/components/Header';
+import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
+import { SignInWith } from '@/client/components/SignInWith';
 
 export default function Welcome() {
   const { t } = useTranslation();
