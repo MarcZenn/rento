@@ -46,7 +46,7 @@ This project uses **custom native code** - which means:
    npm run ios
 
    # Android (requires Android Studio)
-   npm run adroid
+   npm run android
    ```
 
 ### Daily Development
