@@ -194,7 +194,7 @@ async function startServer() {
 
       // Close database connections
       try {
-        const { closeAllConnections } = await import('./database/connection');
+        const { closeAllConnections } = await import('./database/connection.js');
         await closeAllConnections();
         console.log('✅ Database connections closed');
       } catch (error) {

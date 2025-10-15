@@ -27,9 +27,6 @@ npm run codegen
 
 # Watch mode (regenerates on schema changes)
 npm run codegen:watch
-
-# Using convenience script
-./scripts/codegen.sh
 ```
 
 ## Usage Examples

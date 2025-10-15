@@ -16,7 +16,7 @@
  */
 import { GraphQLError } from 'graphql';
 import { postgresql } from '@/server/database/connection';
-import { requireAdmin } from '@/src/graphql/middleware/auth';
+import { requireAdmin } from '@/server/graphql/middleware/auth';
 
 // ============================================================================
 // TYPES
@@ -25,7 +25,7 @@ import { requireAdmin } from '@/src/graphql/middleware/auth';
 // Every GraphQL resolver receives this context object. It contains the
 // authenticated user (from JWT token) and the HTTP request/response.
 // role is checked to verify admin access.
-interface Context {
+export interface Context {
   user?: {
     id: string;
     cognitoId?: string;
@@ -36,7 +36,7 @@ interface Context {
   res: any;
 }
 
-interface ComplianceMetrics {
+export interface ComplianceMetrics {
   totalUsers: number;
   consentCompliant: number;
   consentPending: number;

@@ -11,7 +11,7 @@ import type { PoolClient } from 'pg';
 // TYPES
 // ============================================================================
 
-interface UserConsent {
+export interface UserConsent {
   id: string;
   user_id: string;
   profile_data_consent: boolean;
@@ -30,7 +30,7 @@ interface UserConsent {
   legal_basis: string;
 }
 
-interface Context {
+export interface Context {
   user?: {
     id: string;
     cognitoId?: string;

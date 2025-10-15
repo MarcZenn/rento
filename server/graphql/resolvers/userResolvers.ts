@@ -11,7 +11,7 @@ import type { PoolClient } from 'pg';
 // TYPES
 // ============================================================================
 
-interface User {
+export interface User {
   id: string;
   // clerk_id?: string;
   cognito_id?: string;
@@ -21,7 +21,7 @@ interface User {
   updated_at?: Date;
 }
 
-interface Context {
+export interface Context {
   user?: {
     id: string;
     cognitoId?: string;

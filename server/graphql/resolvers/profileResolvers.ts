@@ -11,7 +11,7 @@ import type { PoolClient } from 'pg';
 // TYPES
 // ============================================================================
 
-interface Profile {
+export interface Profile {
   id: string;
   user_id: string;
   phone_number?: string;
@@ -32,7 +32,7 @@ interface Profile {
   created_at: Date;
 }
 
-interface Context {
+export interface Context {
   user?: {
     id: string;
     cognitoId?: string;

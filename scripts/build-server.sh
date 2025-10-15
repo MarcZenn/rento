@@ -35,16 +35,16 @@ echo ""
 # Clean dist directory if requested
 if [ "$CLEAN" = true ]; then
   echo "🧹 Cleaning dist directory..."
-  rm -rf dist
+  rm -rf server/dist
 fi
 
 # Type check server code
 echo "🔍 Type checking server code..."
-npx tsc --project tsconfig.server.json --noEmit
+npx tsc --project server/tsconfig.json --noEmit
 
 # Compile TypeScript to JavaScript
 echo "🔨 Compiling TypeScript..."
-npx tsc --project tsconfig.server.json
+npx tsc --project server/tsconfig.json
 
 # Copy non-TypeScript files (if any)
 echo "📦 Copying assets..."
@@ -53,7 +53,7 @@ echo "📦 Copying assets..."
 
 echo ""
 echo "✅ Server build complete!"
-echo "📂 Output: ./dist/"
+echo "📂 Output: ./server/dist/"
 echo ""
 echo "To run the server:"
-echo "  NODE_ENV=production node dist/server/index.js"
+echo "  NODE_ENV=production node server/dist/index.js"

@@ -2,6 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": "./",
+    "rootDir": ".",
     "paths": {
       "@/*": ["./*"],
       "@client/*": ["./client/*"],

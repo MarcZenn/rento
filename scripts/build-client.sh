@@ -39,7 +39,7 @@ echo ""
 
 # Type check client code
 echo "🔍 Type checking client code..."
-npx tsc --project tsconfig.client.json --noEmit
+npx tsc --project client/tsconfig.json --noEmit
 
 # Run linter
 echo "🧹 Running linter..."

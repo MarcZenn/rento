@@ -6,7 +6,6 @@
 # Usage:
 #   npm run codegen           # Generate types once
 #   npm run codegen:watch     # Watch for changes and regenerate
-#   ./scripts/codegen.sh      # Use convenience script
 # ============================================================================
 
 schema: './server/graphql/schema/typeDefs.ts'
