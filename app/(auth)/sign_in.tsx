@@ -2,15 +2,15 @@ import { Text, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signIn } from '@/client/services/auth/signin';
 import { useForm } from 'react-hook-form';
 import { Link } from 'expo-router';
 
 import { CustomInput } from '@/client/components/custom/inputs/CustomInput';
 import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
-import { useSignInSchema } from '@/client/services/clerk/schemas';
+import { useSignInSchema } from '@/client/services/auth/schemas';
 import { HeroLogo } from '@/client/components/HeroLogo';
 import { Header } from '@/client/components/Header';
-import { useAuthActions } from '@/client/services/clerk/useAuthActions';
 
 const SignIn = () => {
   const { t } = useTranslation();
@@ -19,10 +19,7 @@ const SignIn = () => {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(useSignInSchema()),
-  });
-  const { logIn } = useAuthActions(setError);
+  } = useForm({ resolver: zodResolver(useSignInSchema()) });
 
   return (
     <KeyboardAvoidingView
@@ -60,7 +57,10 @@ const SignIn = () => {
 
         <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
 
-        <CustomButton onPress={handleSubmit(logIn)} style={[styles.signInButton]}>
+        <CustomButton
+          onPress={handleSubmit(data => signIn(data, setError))}
+          style={[styles.signInButton]}
+        >
           <Text style={[styles.signInButtonText]}>{t('auth.sign_in')}</Text>
         </CustomButton>
 

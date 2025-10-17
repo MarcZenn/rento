@@ -131,8 +131,8 @@ aws sts get-caller-identity --profile rento-development-sso
 aws sts get-caller-identity --profile rento-production-sso
 
 # Expected output shows your AWS account ID
-```
 
+```
 **Expected output:**
 ```json
 {
@@ -313,22 +313,6 @@ Policy Name=`rentodevopspolicy`
 
 ## 4. Cost Awareness
 
-### ✅ Approx. Estimated Monthly Costs
-
-| Service | Configuration | Monthly Cost |
-|---------|--------------|--------------|
-| Cognito User Pool | 1,000 MAU + Advanced Security | ~$55 |
-| RDS PostgreSQL | db.t3.micro, Multi-AZ | ~$155 |
-| ElastiCache Redis | cache.t3.micro | ~$50 |
-| CloudWatch Logs | ~5GB/month | ~$5 |
-| Data Transfer | Minimal (same region) | ~$5 |
-| **Production Total** | | **~$270/month** |
-
-**Development Environment (Smaller Instances):**
-- RDS: db.t3.micro (Single-AZ) = ~$25/month
-- Redis: cache.t3.micro = ~$25/month
-- Cognito: Free tier (no advanced security) = $0
-- **Dev Total**: ~$55/month
 
 ### ✅ AWS Billing Setup
 

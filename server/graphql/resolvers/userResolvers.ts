@@ -148,27 +148,6 @@ export const userQueries = {
   },
 
   /**
-   * Get user by Clerk ID (legacy support)
-   */
-  // getUserByClerkId: async (
-  //   _: any,
-  //   { clerkId }: { clerkId: string },
-  //   context: Context
-  // ): Promise<User | null> => {
-  //   const result = await postgresql.query<User>('SELECT * FROM users WHERE clerk_id = $1', [
-  //     clerkId,
-  //   ]);
-
-  //   const user = result.rows[0] || null;
-  //   if (user) {
-  //     await logUserAccess(user.id, 'getUserByClerkId', context);
-  //     await cacheUser(user);
-  //   }
-
-  //   return user;
-  // },
-
-  /**
    * Get user by Cognito ID
    */
   getUserByCognitoId: async (

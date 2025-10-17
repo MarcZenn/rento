@@ -1,9 +1,19 @@
+/**
+ * Social Sign-In Component (AWS Cognito)
+ *
+ * TODO: Configure AWS Cognito User Pool for social sign-in:
+ * 1. In AWS Cognito Console, configure identity providers (Google, Line)
+ * 2. Set up OAuth redirect URIs in Cognito settings
+ * 3. Add social provider credentials (Client ID, Client Secret)
+ * 4. Configure Amplify with social provider settings
+ * 5. Implement signInWithRedirect from aws-amplify/auth
+ *
+ * For now, social sign-in buttons are disabled until Cognito is configured.
+ */
+
 import React, { useCallback, useEffect, PropsWithChildren } from 'react';
 import { StyleSheet } from 'react-native-unistyles';
-import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import { useSSO } from '@clerk/clerk-expo';
-import { router } from 'expo-router';
 
 import { CustomButton } from './custom/buttons/CustomButton';
 
@@ -12,15 +22,12 @@ type LineSSOStrategy = `oauth_line`;
 type Props = {
   strategy: GoogleSSOStrategy | LineSSOStrategy;
 };
-const redirectPath = '/(protected)/(tabs)/feed';
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
     // Preloads the browser for Android devices to reduce authentication load time
-    // See: https://docs.expo.dev/guides/authentication/#improving-user-experience
     void WebBrowser.warmUpAsync();
     return () => {
-      // Cleanup: closes browser when component unmounts
       void WebBrowser.coolDownAsync();
     };
   }, []);
@@ -32,47 +39,21 @@ WebBrowser.maybeCompleteAuthSession();
 export const SignInWith = ({ children, strategy }: PropsWithChildren<Props>) => {
   useWarmUpBrowser();
 
-  // Use the `useSSO()` hook to access the `startSSOFlow()` method
-  const { startSSOFlow } = useSSO();
-
   const onPress = useCallback(async () => {
-    try {
-      // Start the authentication process by calling `startSSOFlow()`
-      const { createdSessionId, setActive, signIn, signUp, authSessionResult } = await startSSOFlow(
-        {
-          strategy: strategy,
-          // For web, defaults to current path
-          // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
-          // For more info, see https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions
-          redirectUrl: AuthSession.makeRedirectUri(),
-        }
-      );
+    // TODO: Implement AWS Cognito social sign-in
+    // This requires configuring OAuth providers in Cognito User Pool
+    // See: https://docs.amplify.aws/react-native/build-a-backend/auth/add-social-provider/
 
-      // If sign in was successful, set the active session
-      if (createdSessionId) {
-        await setActive!({ session: createdSessionId });
-        router.replace(redirectPath);
-      } else {
-        // If there is no `createdSessionId`,
-        // there are missing requirements, such as MFA, username formatting, etc.
-        // Use the `signIn` or `signUp` returned from `startSSOFlow` to handle next steps
-        const response = await signUp?.update({
-          username: signUp!.username
-            ? signUp!.username
-            : signUp!.emailAddress!.split('@')[0].replace(/\./g, ''),
-        });
-        if (response?.status === 'complete') {
-          await setActive!({ session: signUp!.createdSessionId });
-          router.replace(redirectPath);
-        }
-      }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.log('error', err);
-      console.error(JSON.stringify(err, null, 2));
-    }
-  }, []);
+    const providerName = strategy === 'oauth_google' ? 'Google' : 'Line';
+
+    // Alert.alert(
+    //   'Social Sign-In Not Configured',
+    //   `${providerName} sign-in requires AWS Cognito OAuth configuration. Please use email sign-in for now.`,
+    //   [{ text: 'OK' }]
+    // );
+
+    console.log(`Social sign-in with ${providerName} not yet configured in AWS Cognito`);
+  }, [strategy]);
 
   return (
     <CustomButton style={[styles.ssoButton]} onPress={onPress}>

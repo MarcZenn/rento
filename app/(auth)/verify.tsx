@@ -4,11 +4,13 @@ import { StyleSheet } from 'react-native-unistyles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { useVerifyEmailSchema } from '@/client/services/clerk/schemas';
+import { verify } from '@client/services/auth/verify';
+import { useVerifyEmailSchema } from '@/client/services/auth/schemas';
 import { CustomInput } from '@/client/components/custom/inputs/CustomInput';
 import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
 import { Header } from '@/client/components/Header';
-import { useAuthActions } from '@/client/services/clerk/useAuthActions';
+
+import { useLocalSearchParams } from 'expo-router';
 
 const VerifyEmail = () => {
   const { t } = useTranslation();
@@ -20,7 +22,7 @@ const VerifyEmail = () => {
   } = useForm({
     resolver: zodResolver(useVerifyEmailSchema()),
   });
-  const { verifyEmail } = useAuthActions(setError);
+  const { email } = useLocalSearchParams() as { email: string };
 
   return (
     <KeyboardAvoidingView
@@ -41,7 +43,10 @@ const VerifyEmail = () => {
           style={[styles.input]}
         />
         <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
-        <CustomButton onPress={handleSubmit(verifyEmail)} style={styles.signUpButton}>
+        <CustomButton
+          onPress={handleSubmit(data => verify(data, setError, email))}
+          style={styles.signUpButton}
+        >
           <Text style={[styles.signUpButtonText]}>{t('forms.submit')}</Text>
         </CustomButton>
       </View>
