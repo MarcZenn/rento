@@ -583,8 +583,6 @@ aws ssm get-parameter \
 
 4. **Test authentication flow** end-to-end
 
-5. **Remove Clerk dependency** (Task 13)
-
 ---
 
 ## Troubleshooting Common Issues

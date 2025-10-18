@@ -299,7 +299,6 @@ export const typeDefs = `#graphql
     # User queries
     currentUser: User
     getUser(id: ID!): User
-    getUserByClerkId(clerkId: String!): User
     getUserByCognitoId(cognitoId: String!): User
     getAllUsers: [User!]!
     getUserTypes: [UserType!]!

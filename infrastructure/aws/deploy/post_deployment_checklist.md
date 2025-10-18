@@ -446,7 +446,7 @@ SET log_min_duration_statement = 100;
 - [ ] Backend authentication integrated
 - [ ] Mobile app configured with Amplify
 - [ ] Consent modal implemented
-- [ ] Clerk dependency removed
+- [x] Clerk dependency removed
 
 ### Monitoring
 - [ ] CloudWatch dashboards created
