@@ -9,14 +9,13 @@ import { router } from 'expo-router';
 
 /**
  * NOTE: User creation in the database is now handled automatically by
- * AWS Lambda PostConfirmation trigger. When Cognito successfully creates
- * a user, it invokes the Lambda function which calls our GraphQL API to
+ * AWS Lambda PreSignUp trigger. When Cognito successfully creates
+ * a user, it invokes a Lambda function which calls our GraphQL API to
  * create the user record in PostgreSQL (users + profiles tables).
  *
  * This ensures data consistency - if Lambda fails to create the DB record,
  * Cognito will reject the user confirmation, preventing orphaned users.
  */
-
 type SetFormError = UseFormSetError<{
   email: string;
   password: string;

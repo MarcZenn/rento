@@ -7,6 +7,14 @@ import {
 } from './schemas';
 import { router } from 'expo-router';
 
+/**
+ * NOTE: User validation in the database is now handled automatically by
+ * AWS Lambda PostConfirmation trigger. When Cognito successfully confirms
+ * a user, it invokes a Lambda function which calls our GraphQL API to
+ * update the user record in PostgreSQL (is_verified = true).
+ *
+ * This ensures data consistency
+ */
 type SetFormError = UseFormSetError<{
   code: string;
 }>;
