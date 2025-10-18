@@ -304,7 +304,6 @@ export type GQL_Query = {
   getIncidentTracking: GQL_IncidentTrackingResult;
   getProfile?: Maybe<GQL_Profile>;
   getUser?: Maybe<GQL_User>;
-  getUserByClerkId?: Maybe<GQL_User>;
   getUserByCognitoId?: Maybe<GQL_User>;
   getUserConsent?: Maybe<GQL_UserConsent>;
   getUserProfile?: Maybe<GQL_Profile>;
@@ -349,10 +348,6 @@ export type GQL_QueryGetProfileArgs = {
 
 export type GQL_QueryGetUserArgs = {
   id: Scalars['ID']['input'];
-};
-
-export type GQL_QueryGetUserByClerkIdArgs = {
-  clerkId: Scalars['String']['input'];
 };
 
 export type GQL_QueryGetUserByCognitoIdArgs = {
@@ -1017,12 +1012,6 @@ export type GQL_QueryResolvers<
     ParentType,
     ContextType,
     RequireFields<GQL_QueryGetUserArgs, 'id'>
-  >;
-  getUserByClerkId?: Resolver<
-    Maybe<GQL_ResolversTypes['User']>,
-    ParentType,
-    ContextType,
-    RequireFields<GQL_QueryGetUserByClerkIdArgs, 'clerkId'>
   >;
   getUserByCognitoId?: Resolver<
     Maybe<GQL_ResolversTypes['User']>,

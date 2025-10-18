@@ -64,7 +64,7 @@ export const handler: PostConfirmationTriggerHandler = async (
     triggerSource: event.triggerSource,
   });
 
-  const { sub, email, preferred_username } = event.request.userAttributes;
+  const { sub, email } = event.request.userAttributes;
 
   // Validate required attributes
   if (!sub || !email) {
