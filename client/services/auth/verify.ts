@@ -1,6 +1,10 @@
 import { confirmSignUp } from 'aws-amplify/auth';
 import { UseFormSetError } from 'react-hook-form';
-import { VerifyFields, mapAmplifyErrorToVerifyField } from './schemas';
+import {
+  VerifyFields,
+  mapAmplifyErrorToVerifyField,
+  getUserFriendlyErrorMessages,
+} from './schemas';
 import { router } from 'expo-router';
 
 type SetFormError = UseFormSetError<{
@@ -26,9 +30,10 @@ export const verify = async (data: VerifyFields, setError: SetFormError, email: 
     }
   } catch (err: any) {
     console.error('Verification error:', err);
+    const userFriendlyMessage = getUserFriendlyErrorMessages(err);
     const formField = mapAmplifyErrorToVerifyField(err);
     setError(formField, {
-      message: err.message || 'An unknown error occurred',
+      message: userFriendlyMessage,
     });
   }
 };

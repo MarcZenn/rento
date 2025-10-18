@@ -1,21 +1,21 @@
 import { signUp as amplifySignUp, type SignUpOutput } from 'aws-amplify/auth';
-import { apolloClient } from '@/client/apollo';
-import { gql } from '@apollo/client';
 import { UseFormSetError } from 'react-hook-form';
-import { mapAmplifyErrorToSignUpField, SignUpFields } from './schemas';
+import {
+  mapAmplifyErrorToSignUpField,
+  SignUpFields,
+  getUserFriendlyErrorMessages,
+} from './schemas';
 import { router } from 'expo-router';
 
-const CREATE_USER_MUTATION = gql`
-  mutation CreateUser($input: CreateUserInput!) {
-    createUser(input: $input) {
-      id
-      cognitoId
-      email
-      username
-      createdAt
-    }
-  }
-`;
+/**
+ * NOTE: User creation in the database is now handled automatically by
+ * AWS Lambda PostConfirmation trigger. When Cognito successfully creates
+ * a user, it invokes the Lambda function which calls our GraphQL API to
+ * create the user record in PostgreSQL (users + profiles tables).
+ *
+ * This ensures data consistency - if Lambda fails to create the DB record,
+ * Cognito will reject the user confirmation, preventing orphaned users.
+ */
 
 type SetFormError = UseFormSetError<{
   email: string;
@@ -23,37 +23,27 @@ type SetFormError = UseFormSetError<{
   username: string;
 }>;
 
-const handleNextSteps = async (result: SignUpOutput, username: string, email: string) => {
-  try {
-    if (result.nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
-      await apolloClient.mutate({
-        mutation: CREATE_USER_MUTATION,
-        variables: {
-          input: {
-            cognitoId: result.userId,
-            email,
-            username: username || email.split('@')[0],
-          },
-        },
-      });
-
-      router.push({
-        pathname: '/verify',
-        params: {
-          email,
-        },
-      });
-    } else if (result.isSignUpComplete) {
-      router.push('/home'); // Unlikely but handle immediate completion
-    }
-  } catch (error) {
-    // TODO:: Rollback logic needed in case of orphaned user
+const handleNextSteps = async (result: SignUpOutput, email: string) => {
+  if (result.nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
+    // User needs to verify their email
+    // Lambda will automatically create the database record after verification
+    router.push({
+      pathname: '/verify',
+      params: {
+        email,
+      },
+    });
+  } else if (result.isSignUpComplete) {
+    // Unlikely scenario - immediate completion without verification
+    router.push('/home');
   }
 };
 
 export const signUp = async (data: SignUpFields, setError: SetFormError) => {
   try {
     const { email, password, username } = data;
+
+    // Create user in AWS Cognito
     const result = await amplifySignUp({
       username: email,
       password,
@@ -64,12 +54,15 @@ export const signUp = async (data: SignUpFields, setError: SetFormError) => {
         },
       },
     });
-    await handleNextSteps(result, username, email);
+
+    // Handle next steps (verification flow)
+    await handleNextSteps(result, email);
   } catch (err: any) {
     console.error('Sign up error:', err);
+    const userFriendlyMessage = getUserFriendlyErrorMessages(err);
     const formField = mapAmplifyErrorToSignUpField(err);
     setError(formField, {
-      message: err.message || 'An unknown error occurred',
+      message: userFriendlyMessage,
     });
   }
 };
