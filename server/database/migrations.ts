@@ -27,5 +27,17 @@ export const MIGRATIONS: MigrationFile[] = [
       'Add appi_audit_event_types lookup table with foreign key constraint for type safety',
     path: join(__dirname, '003_appi_audit_event_types.sql'),
   },
+  {
+    filename: '004_add_is_verified_to_users.sql',
+    version: '004',
+    description: 'Add is_verified row to users table to track Cognito user confirmation',
+    path: join(__dirname, '004_add_is_verified_to_users.sql'),
+  },
+  {
+    filename: '005_add_is_verified_audit_events.sql',
+    version: '005',
+    description: 'Add is_verified event type to appi_audit_event_types table',
+    path: join(__dirname, '005_add_is_verified_audit_events.sql'),
+  },
   // Add more migration files here as needed
 ];
