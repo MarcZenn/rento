@@ -57,6 +57,7 @@ export const AUDIT_EVENT_TYPES = {
   LOGIN: 'login',
   LOGOUT: 'logout',
   LOGIN_FAILED: 'login_failed',
+  IS_VERIFIED: 'is_verified',
 
   // Compliance
   AUDIT_TRAIL_GENERATED: 'audit_trail_generated',

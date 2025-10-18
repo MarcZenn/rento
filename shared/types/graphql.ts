@@ -118,9 +118,9 @@ export type GQL_CreateProfileInput = {
 };
 
 export type GQL_CreateUserInput = {
-  clerkId?: InputMaybe<Scalars['String']['input']>;
   cognitoId?: InputMaybe<Scalars['String']['input']>;
   email: Scalars['String']['input'];
+  isVerified?: InputMaybe<Scalars['Boolean']['input']>;
   username: Scalars['String']['input'];
 };
 
@@ -200,6 +200,7 @@ export type GQL_Mutation = {
   updateProfile: GQL_Profile;
   updateUser: GQL_User;
   updateUserConsent: GQL_UserConsent;
+  updateUserIsVerified: GQL_User;
   withdrawConsent: GQL_MutationResponse;
 };
 
@@ -250,6 +251,10 @@ export type GQL_MutationUpdateUserArgs = {
 export type GQL_MutationUpdateUserConsentArgs = {
   input: GQL_UpdateConsentInput;
   userId: Scalars['ID']['input'];
+};
+
+export type GQL_MutationUpdateUserIsVerifiedArgs = {
+  cognitoId: Scalars['String']['input'];
 };
 
 export type GQL_MutationWithdrawConsentArgs = {
@@ -429,11 +434,11 @@ export type GQL_UpdateUserInput = {
 
 export type GQL_User = {
   __typename?: 'User';
-  clerkId?: Maybe<Scalars['String']['output']>;
   cognitoId?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  isVerified: Scalars['Boolean']['output'];
   profile?: Maybe<GQL_Profile>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   username: Scalars['String']['output'];
@@ -901,6 +906,12 @@ export type GQL_MutationResolvers<
     ContextType,
     RequireFields<GQL_MutationUpdateUserConsentArgs, 'input' | 'userId'>
   >;
+  updateUserIsVerified?: Resolver<
+    GQL_ResolversTypes['User'],
+    ParentType,
+    ContextType,
+    RequireFields<GQL_MutationUpdateUserIsVerifiedArgs, 'cognitoId'>
+  >;
   withdrawConsent?: Resolver<
     GQL_ResolversTypes['MutationResponse'],
     ParentType,
@@ -1060,11 +1071,11 @@ export type GQL_UserResolvers<
   ContextType = Context,
   ParentType extends GQL_ResolversParentTypes['User'] = GQL_ResolversParentTypes['User'],
 > = {
-  clerkId?: Resolver<Maybe<GQL_ResolversTypes['String']>, ParentType, ContextType>;
   cognitoId?: Resolver<Maybe<GQL_ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQL_ResolversTypes['DateTime'], ParentType, ContextType>;
   email?: Resolver<GQL_ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQL_ResolversTypes['ID'], ParentType, ContextType>;
+  isVerified?: Resolver<GQL_ResolversTypes['Boolean'], ParentType, ContextType>;
   profile?: Resolver<Maybe<GQL_ResolversTypes['Profile']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<GQL_ResolversTypes['DateTime']>, ParentType, ContextType>;
   username?: Resolver<GQL_ResolversTypes['String'], ParentType, ContextType>;

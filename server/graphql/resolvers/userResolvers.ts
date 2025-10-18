@@ -13,10 +13,10 @@ import type { PoolClient } from 'pg';
 
 export interface User {
   id: string;
-  // clerk_id?: string;
   cognito_id?: string;
   email: string;
   username: string;
+  is_verified: boolean;
   created_at: Date;
   updated_at?: Date;
 }
@@ -221,10 +221,10 @@ export const userMutations = {
 
       // Insert user
       const result = await client.query<User>(
-        `INSERT INTO users (cognito_id, email, username, created_at)
-         VALUES ($1, $2, $3, NOW())
+        `INSERT INTO users (cognito_id, email, username, is_verified, created_at)
+         VALUES ($1, $2, $3, $4, NOW())
          RETURNING *`,
-        [input.cognitoId || null, input.email, input.username]
+        [input.cognitoId || null, input.email, input.username, input.emailVerified ?? false]
       );
 
       const newUser = result.rows[0];
@@ -397,6 +397,59 @@ export const userMutations = {
         message: 'User deletion scheduled for 30 days from now',
       };
     });
+  },
+
+  /**
+   * Update user email verification status
+   * Called by Cognito PostConfirmation trigger
+   */
+  updateUserIsVerified: async (
+    _: any,
+    { cognitoId }: { cognitoId: string },
+    context: Context
+  ): Promise<User> => {
+    // Update is_verified to true
+    const result = await postgresql.query<User>(
+      `UPDATE users
+       SET is_verified = true, updated_at = NOW()
+       WHERE cognito_id = $1
+       RETURNING *`,
+      [cognitoId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new GraphQLError('User not found', {
+        extensions: { code: 'NOT_FOUND' },
+      });
+    }
+
+    const updatedUser = result.rows[0];
+
+    // Invalidate cache
+    await invalidateUserCache(updatedUser.id);
+
+    // Log email verification for APPI compliance
+    await postgresql.query(
+      `INSERT INTO appi_audit_events (
+        event_id, user_id, event_type, event_timestamp,
+        ip_address, user_agent, data_accessed, compliance_status, event_details
+      ) VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8)`,
+      [
+        `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        updatedUser.id,
+        AUDIT_EVENT_TYPES.IS_VERIFIED,
+        context.req?.ip || '127.0.0.1',
+        context.req?.headers?.['user-agent'] || 'cognito-lambda',
+        'Email verification completed',
+        'compliant',
+        JSON.stringify({ cognitoId, emailVerified: true }),
+      ]
+    );
+
+    // Cache the updated user
+    await cacheUser(updatedUser);
+
+    return updatedUser;
   },
 };
 

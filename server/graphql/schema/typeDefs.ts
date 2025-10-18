@@ -2,7 +2,6 @@
  * GraphQL Type Definitions for APPI-Compliant Rento Application
  * PostgreSQL-backed GraphQL API
  */
-
 export const typeDefs = `#graphql
   # ============================================================================
   # SCALAR TYPES
@@ -15,10 +14,10 @@ export const typeDefs = `#graphql
   # ============================================================================
   type User {
     id: ID!
-    clerkId: String
     cognitoId: String
     email: String!
     username: String!
+    isVerified: Boolean!
     createdAt: DateTime!
     updatedAt: DateTime
     profile: Profile
@@ -119,10 +118,10 @@ export const typeDefs = `#graphql
   # INPUT TYPES
   # ============================================================================
   input CreateUserInput {
-    clerkId: String
     cognitoId: String
     email: String!
     username: String!
+    isVerified: Boolean
   }
 
   input UpdateUserInput {
@@ -346,6 +345,7 @@ export const typeDefs = `#graphql
     # User mutations
     createUser(input: CreateUserInput!): User!
     updateUser(id: ID!, input: UpdateUserInput!): User!
+    updateUserIsVerified(cognitoId: String!): User!
     deleteUser(id: ID!): MutationResponse!
 
     # Profile mutations
