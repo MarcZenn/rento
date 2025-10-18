@@ -202,7 +202,8 @@ export const userQueries = {
 export const userMutations = {
   /**
    * Create new user
-   * Replaces Convex createUser mutation
+   * - also creates an empty profile for the user
+   *
    */
   createUser: async (_: any, { input }: { input: any }, context: Context): Promise<User> => {
     return await postgresql.transaction(async (client: PoolClient) => {
@@ -228,6 +229,13 @@ export const userMutations = {
 
       const newUser = result.rows[0];
 
+      // Create empty profile for the user (required for app functionality)
+      await client.query(
+        `INSERT INTO profiles (user_id, created_at, onboarding_completed)
+         VALUES ($1, NOW(), false)`,
+        [newUser.id]
+      );
+
       // Log user creation for APPI compliance
       await client.query(
         `INSERT INTO appi_audit_events (
@@ -243,6 +251,24 @@ export const userMutations = {
           'User account created',
           'compliant',
           JSON.stringify({ email: input.email, username: input.username }),
+        ]
+      );
+
+      // Log profile creation for APPI compliance
+      await client.query(
+        `INSERT INTO appi_audit_events (
+          event_id, user_id, event_type, event_timestamp,
+          ip_address, user_agent, data_accessed, compliance_status, event_details
+        ) VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8)`,
+        [
+          `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+          newUser.id,
+          AUDIT_EVENT_TYPES.PROFILE_CREATED,
+          context.req?.ip || '127.0.0.1',
+          context.req?.headers?.['user-agent'] || 'server',
+          'User profile created',
+          'compliant',
+          JSON.stringify({ userId: newUser.id }),
         ]
       );
 
@@ -383,7 +409,7 @@ export const userFieldResolvers = {
     /**
      * Resolve user profile
      */
-    profile: async (parent: User, _: any, context: Context) => {
+    profile: async (parent: User) => {
       const result = await postgresql.query('SELECT * FROM profiles WHERE user_id = $1', [
         parent.id,
       ]);

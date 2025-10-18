@@ -4,7 +4,7 @@
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-export const userNotFound = 'UserNotFoundException',
+const userNotFound = 'UserNotFoundException',
   invalidParameter = 'InvalidParameterException',
   notAuthorized = 'NotAuthorizedException',
   notConfirmed = 'UserNotConfirmedException',
