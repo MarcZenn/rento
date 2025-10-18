@@ -1,0 +1,526 @@
+# ============================================================================
+# DEV NOTES
+# ============================================================================
+#
+# This CloudFormation template deploys AWS Cognito User Pool with APPI compliance
+# and a Lambda trigger for automatic database synchronization.
+#
+# What it does:
+#
+# 1. AWS Cognito User Pool
+# - Creates user pool for authentication
+# - Enforces Japanese banking standard password policies
+# - Configures MFA options
+# - Sets up custom APPI compliance attributes
+#
+# 2. Lambda PreSignUp Trigger
+# - Creates users in PostgreSQL immediately upon signup (before email verification)
+# - Allows unverified users to access the app with limited features
+# - Calls GraphQL API to create user records with email_verified = false
+#
+# 3. Lambda PostConfirmation Trigger
+# - Updates email_verified = true when user confirms their email
+# - Maintains data consistency between Cognito and database
+#
+# 4. Security & Compliance
+# - Advanced security features enabled
+# - 2-year audit log retention
+# - Custom attributes for APPI compliance tracking
+# - JWT tokens include compliance claims
+#
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'APPI Compliant AWS Cognito User Pool with Lambda PostConfirmation trigger'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: 'production'
+    AllowedValues: ['development', 'staging', 'production']
+    Description: 'Deployment environment'
+
+  DomainPrefix:
+    Type: String
+    Default: 'rento-auth-production'
+    Description: 'Cognito domain prefix for hosted UI'
+
+  GraphQLApiUrl:
+    Type: String
+    Description: 'GraphQL API endpoint URL for Lambda to call'
+    Default: 'https://api.rento.app/graphql'
+
+  GraphQLApiKey:
+    Type: String
+    NoEcho: true
+    Description: 'API key for GraphQL authentication'
+
+Resources:
+  # ============================================================================
+  # COGNITO USER POOL
+  # ============================================================================
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${Environment}-rento-appi-users'
+
+      # Username and sign-in options
+      UsernameAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+
+      # Auto-verified attributes
+      AutoVerifiedAttributes:
+        - email
+
+      # Password Policy (Japanese Banking Standards)
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 7
+
+      # MFA Configuration
+      MfaConfiguration: OPTIONAL
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+        - SMS_MFA
+
+      # Account recovery
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+
+      # Email configuration
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+
+      # SMS configuration for MFA
+      SmsConfiguration:
+        SnsCallerArn: !GetAtt CognitoSNSRole.Arn
+        ExternalId: !Sub '${Environment}-rento-cognito'
+
+      # User attribute schema - APPI compliance attributes
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: preferred_username
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+        - Name: consent_version
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+        - Name: consent_timestamp
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+        - Name: data_residency_confirmed
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+        - Name: privacy_policy_accepted
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+
+      # Advanced security
+      UserPoolAddOns:
+        AdvancedSecurityMode: ENFORCED
+
+      # Lambda triggers
+      LambdaConfig:
+        PreSignUp: !GetAtt PreSignUpFunction.Arn
+        PostConfirmation: !GetAtt PostConfirmationFunction.Arn
+        PreTokenGeneration: !GetAtt PreTokenGenerationFunction.Arn
+
+      # Email verification
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailMessage: 'Rento認証コード: {####}'
+        EmailSubject: 'Rentoアカウントの確認'
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-user-pool'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: APPICompliant
+          Value: 'true'
+        - Key: DataLocation
+          Value: 'Japan-Tokyo'
+
+  # Cognito User Pool Domain
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref DomainPrefix
+      UserPoolId: !Ref UserPool
+
+  # ============================================================================
+  # APP CLIENTS
+  # ============================================================================
+
+  # Mobile App Client (React Native)
+  MobileAppClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${Environment}-rento-mobile-client'
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+
+      # Auth flows
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+      # Token validity
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+
+      # Prevent user existence errors
+      PreventUserExistenceErrors: ENABLED
+
+      # Attribute permissions
+      ReadAttributes:
+        - email
+        - email_verified
+        - preferred_username
+        - custom:consent_version
+        - custom:privacy_policy_accepted
+
+      WriteAttributes:
+        - email
+        - preferred_username
+
+  # Backend App Client (GraphQL Server)
+  BackendAppClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${Environment}-rento-backend-client'
+      UserPoolId: !Ref UserPool
+      GenerateSecret: true
+
+      # Auth flows for backend
+      ExplicitAuthFlows:
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+
+      # Token validity
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+
+  # ============================================================================
+  # USER POOL GROUPS
+  # ============================================================================
+
+  AdministratorsGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: administrators
+      Description: 'Administrators with full access'
+      UserPoolId: !Ref UserPool
+      Precedence: 1
+
+  UsersGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: users
+      Description: 'Standard users'
+      UserPoolId: !Ref UserPool
+      Precedence: 10
+
+  # ============================================================================
+  # LAMBDA FUNCTIONS
+  # ============================================================================
+
+  # IAM Role for Lambda execution
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-rento-cognito-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CognitoTriggerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-lambda-role'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # PreSignUp Lambda Function (creates user in DB immediately)
+  PreSignUpFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Environment}-rento-cognito-pre-signup'
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+
+      # Code will be uploaded via deployment script
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            console.log('PreSignUp trigger - placeholder code');
+            return event;
+          };
+
+      Environment:
+        Variables:
+          GRAPHQL_API_URL: !Ref GraphQLApiUrl
+          GRAPHQL_API_KEY: !Ref GraphQLApiKey
+          ENVIRONMENT: !Ref Environment
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-pre-signup'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # PostConfirmation Lambda Function (updates email_verified to true)
+  PostConfirmationFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Environment}-rento-cognito-post-confirmation'
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+
+      # Code will be uploaded via deployment script
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            console.log('PostConfirmation trigger - placeholder code');
+            return event;
+          };
+
+      Environment:
+        Variables:
+          GRAPHQL_API_URL: !Ref GraphQLApiUrl
+          GRAPHQL_API_KEY: !Ref GraphQLApiKey
+          ENVIRONMENT: !Ref Environment
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-post-confirmation'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # PreTokenGeneration Lambda Function (adds APPI claims to JWT)
+  PreTokenGenerationFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Environment}-rento-cognito-pre-token'
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 10
+      MemorySize: 128
+
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            event.response = {
+              claimsOverrideDetails: {
+                claimsToAddOrOverride: {
+                  'custom:environment': process.env.ENVIRONMENT,
+                  'custom:data_region': 'ap-northeast-1',
+                  'custom:compliance_framework': 'APPI',
+                },
+              },
+            };
+            return event;
+          };
+
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-pre-token'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Lambda permission for Cognito to invoke PreSignUp
+  PreSignUpInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PreSignUpFunction
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  # Lambda permission for Cognito to invoke PostConfirmation
+  PostConfirmationInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostConfirmationFunction
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  # Lambda permission for Cognito to invoke PreTokenGeneration
+  PreTokenInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PreTokenGenerationFunction
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  # ============================================================================
+  # CLOUDWATCH LOGS
+  # ============================================================================
+
+  PreSignUpLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-pre-signup'
+      RetentionInDays: 730  # 2 years for APPI compliance
+
+  PostConfirmationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-post-confirmation'
+      RetentionInDays: 730  # 2 years for APPI compliance
+
+  PreTokenLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-pre-token'
+      RetentionInDays: 730  # 2 years for APPI compliance
+
+  CognitoAuditLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/cognito/${Environment}-rento-audit-logs'
+      RetentionInDays: 730  # 2 years for APPI compliance
+
+  # ============================================================================
+  # IAM ROLE FOR SNS (MFA)
+  # ============================================================================
+
+  CognitoSNSRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cognito-idp.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CognitoSNSPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-cognito-sns-role'
+        - Key: Environment
+          Value: !Ref Environment
+
+# ============================================================================
+# OUTPUTS
+# ============================================================================
+
+Outputs:
+  UserPoolId:
+    Description: 'Cognito User Pool ID'
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub '${Environment}-rento-user-pool-id'
+
+  UserPoolArn:
+    Description: 'Cognito User Pool ARN'
+    Value: !GetAtt UserPool.Arn
+    Export:
+      Name: !Sub '${Environment}-rento-user-pool-arn'
+
+  MobileAppClientId:
+    Description: 'Mobile App Client ID'
+    Value: !Ref MobileAppClient
+    Export:
+      Name: !Sub '${Environment}-rento-mobile-client-id'
+
+  BackendAppClientId:
+    Description: 'Backend App Client ID'
+    Value: !Ref BackendAppClient
+    Export:
+      Name: !Sub '${Environment}-rento-backend-client-id'
+
+  UserPoolDomain:
+    Description: 'Cognito User Pool Domain'
+    Value: !Sub '${DomainPrefix}.auth.ap-northeast-1.amazoncognito.com'
+    Export:
+      Name: !Sub '${Environment}-rento-user-pool-domain'
+
+  PreSignUpFunctionArn:
+    Description: 'PreSignUp Lambda Function ARN'
+    Value: !GetAtt PreSignUpFunction.Arn
+    Export:
+      Name: !Sub '${Environment}-pre-signup-arn'
+
+  PreSignUpFunctionName:
+    Description: 'PreSignUp Lambda Function Name'
+    Value: !Ref PreSignUpFunction
+    Export:
+      Name: !Sub '${Environment}-pre-signup-name'
+
+  PostConfirmationFunctionArn:
+    Description: 'PostConfirmation Lambda Function ARN'
+    Value: !GetAtt PostConfirmationFunction.Arn
+    Export:
+      Name: !Sub '${Environment}-post-confirmation-arn'
+
+  PostConfirmationFunctionName:
+    Description: 'PostConfirmation Lambda Function Name'
+    Value: !Ref PostConfirmationFunction
+    Export:
+      Name: !Sub '${Environment}-post-confirmation-name'

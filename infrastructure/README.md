@@ -1,12 +1,14 @@
 # APPI Compliant Database Infrastructure
 
-This directory contains the complete infrastructure setup for migrating Rento from Convex to self-hosted PostgreSQL + Redis with full APPI (Act on Protection of Personal Information) compliance for the Japanese market.
+This directory contains the complete infrastructure setup for the self-hosted PostgreSQL + Redis & Lambda triggers with full APPI (Act on Protection of Personal Information) compliance for the Japanese market.
 
 ## 🏗️ Architecture Overview
 
 ### Core Components
 - **PostgreSQL 15+** on AWS RDS (Tokyo region ap-northeast-1)
 - **Redis 7+** on AWS ElastiCache for caching and session management
+- **PreSignup Lambda+** AWS Lambda for keeping Cognito + DB synced
+- **PostConfirmation Lambda+** AWS Lambda for keeping Cognito + DB synced
 - **AES-256 encryption** for data at rest with AWS KMS
 - **TLS 1.3** with certificate pinning for all connections
 - **Multi-AZ deployment** within Tokyo region for high availability
@@ -21,26 +23,11 @@ This directory contains the complete infrastructure setup for migrating Rento fr
 - **Incident tracking** and regulatory notification workflows
 - **Encrypted PII fields** with decrypt functions for authorized access
 
-## 📁 Directory Structure
-
-```
-infrastructure/
-├── aws/
-│   ├── cloudformation-rds-postgres.yml  # PostgreSQL RDS infrastructure
-│   ├── cloudformation-redis.yml         # Redis ElastiCache setup
-│   └── deploy.sh                        # Deployment script
-├── database/
-│   ├── 001_initial_schema.sql           # Complete PostgreSQL schema
-│   ├── migrate.ts                       # Migration management
-│   └── test-connection.ts               # Connection testing
-└── README.md                            # This file
-```
-
 ## 🚀 Deployment Instructions
 
 ### Prerequisites
 
-1. **AWS CLI** configured with Tokyo region access
+1. **AWS CLI** SSO configured with Tokyo region access
 2. **Node.js 18+** with TypeScript support
 3. **AWS IAM permissions** for RDS, ElastiCache, KMS, and VPC management
 
@@ -48,7 +35,7 @@ infrastructure/
 
 ```bash
 # Deploy to production
-npm run infrastructure:deploy
+npm run infrastructure:deploy:prod
 
 # Deploy to development
 npm run infrastructure:deploy:dev
@@ -61,17 +48,13 @@ This will:
 - Set up KMS keys for encryption
 - Configure security groups and network isolation
 - Generate secure passwords and store in Parameter Store
+- Deploy AWS Cognito User Pool and Lambda trigger for automatic DB synchronization
 
 ### Step 2: Install Dependencies
 
 ```bash
 npm install
 ```
-
-New dependencies added:
-- `pg`: PostgreSQL client library
-- `ioredis`: Redis client with TLS support
-- `@types/pg`: TypeScript definitions
 
 ### Step 3: Configure Environment
 

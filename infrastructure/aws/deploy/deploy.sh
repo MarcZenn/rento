@@ -74,14 +74,50 @@ aws configure get region || aws configure set region $REGION
 DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-24)
 echo "🔐 Generated secure database password"
 
+# Generate API key for Lambda to call GraphQL API
+GRAPHQL_API_KEY=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
+echo "🔑 Generated GraphQL API key for Lambda"
+
+# Prompt for GraphQL API URL (or use default)
+read -p "Enter GraphQL API URL [https://api.rento.app/graphql]: " GRAPHQL_URL
+GRAPHQL_URL=${GRAPHQL_URL:-https://api.rento.app/graphql}
+echo "📡 Using GraphQL API: $GRAPHQL_URL"
+
+# Build and package Lambda functions
+echo "🔨 Building Lambda PreSignUp function..."
+cd ../lambda/pre-signup
+
+# Install dependencies and build
+npm install --production
+npm run build
+
+# Package Lambda
+echo "📦 Packaging PreSignUp Lambda function..."
+npm run package
+
+echo "🔨 Building Lambda PostConfirmation function..."
+cd ../post-confirmation
+
+# Install dependencies and build
+npm install --production
+npm run build
+
+# Package Lambda
+echo "📦 Packaging PostConfirmation Lambda function..."
+npm run package
+
+cd ../../deploy
+
 # Deploy (or create) AWS Cognito User Pool stack
 echo "🔐 Deploying AWS Cognito User Pool stack..."
 aws cloudformation deploy \
-  --template-file cloudformation-cognito-userpool.yml \
+  --template-file ../cloudformation-cognito-userpool.yml \
   --stack-name "${STACK_PREFIX}-cognito-${ENVIRONMENT}" \
   --parameter-overrides \
     Environment=$ENVIRONMENT \
     DomainPrefix="rento-auth-${ENVIRONMENT}" \
+    GraphQLApiUrl=$GRAPHQL_URL \
+    GraphQLApiKey=$GRAPHQL_API_KEY \
   --capabilities CAPABILITY_NAMED_IAM \
   --region $REGION \
   --tags \
@@ -91,9 +127,43 @@ aws cloudformation deploy \
 
 # Wait for Cognito stack to complete
 echo "⏳ Waiting for Cognito stack to complete..."
+aws cloudformation wait stack-update-complete \
+  --stack-name "${STACK_PREFIX}-cognito-${ENVIRONMENT}" \
+  --region $REGION 2>/dev/null || \
 aws cloudformation wait stack-create-complete \
   --stack-name "${STACK_PREFIX}-cognito-${ENVIRONMENT}" \
   --region $REGION
+
+# Upload Lambda function code
+echo "⬆️  Uploading Lambda function code..."
+
+# Upload PreSignUp Lambda
+PRE_SIGNUP_FUNCTION_NAME=$(aws cloudformation describe-stacks \
+  --stack-name "${STACK_PREFIX}-cognito-${ENVIRONMENT}" \
+  --region $REGION \
+  --query "Stacks[0].Outputs[?OutputKey=='PreSignUpFunctionName'].OutputValue" \
+  --output text)
+
+aws lambda update-function-code \
+  --function-name $PRE_SIGNUP_FUNCTION_NAME \
+  --zip-file fileb://../lambda/pre-signup.zip \
+  --region $REGION
+
+echo "✅ PreSignUp Lambda function deployed successfully"
+
+# Upload PostConfirmation Lambda
+POST_CONFIRMATION_FUNCTION_NAME=$(aws cloudformation describe-stacks \
+  --stack-name "${STACK_PREFIX}-cognito-${ENVIRONMENT}" \
+  --region $REGION \
+  --query "Stacks[0].Outputs[?OutputKey=='PostConfirmationFunctionName'].OutputValue" \
+  --output text)
+
+aws lambda update-function-code \
+  --function-name $POST_CONFIRMATION_FUNCTION_NAME \
+  --zip-file fileb://../lambda/post-confirmation.zip \
+  --region $REGION
+
+echo "✅ PostConfirmation Lambda function deployed successfully"
 
 # Get Cognito outputs
 USER_POOL_ID=$(aws cloudformation describe-stacks \
@@ -313,6 +383,13 @@ aws ssm put-parameter \
   --name "/${ENVIRONMENT}/rento/cognito/domain" \
   --value "$USER_POOL_DOMAIN" \
   --type "String" \
+  --region $REGION \
+  --overwrite
+
+aws ssm put-parameter \
+  --name "/${ENVIRONMENT}/rento/graphql/api-key" \
+  --value "$GRAPHQL_API_KEY" \
+  --type "SecureString" \
   --region $REGION \
   --overwrite
 
