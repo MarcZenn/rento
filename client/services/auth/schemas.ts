@@ -2,7 +2,9 @@
  * Validation schemas for authentication forms
  */
 import { useTranslation } from 'react-i18next';
+import i81n from '../../i18n';
 import { z } from 'zod';
+import i18n from '../../i18n';
 
 const userNotFound = 'UserNotFoundException',
   invalidParameter = 'InvalidParameterException',
@@ -11,11 +13,12 @@ const userNotFound = 'UserNotFoundException',
   usernameExists = 'UsernameExistsException',
   invalidPassword = 'InvalidPasswordException',
   codeMismatch = 'CodeMismatchException',
-  codeExpired = 'ExpiredCodeException';
+  codeExpired = 'ExpiredCodeException',
+  tooManyAttempts = 'LimitExceededException';
 
 /**
  * Get user-friendly error message for verification errors
- * TODO:: translate into JP as well
+ *
  */
 export const getUserFriendlyErrorMessages = (error: any): string => {
   const errorCode = error.name || error.code;
@@ -23,55 +26,55 @@ export const getUserFriendlyErrorMessages = (error: any): string => {
 
   // Lambda PostConfirmation failure (database sync failed)
   if (
-    errorMessage.includes('PostConfirmation failed') ||
+    errorMessage.includes('PreSignUp failed') ||
     errorMessage.includes('GraphQL') ||
     errorMessage.includes('database')
   ) {
-    return 'Account creation failed. Please try signing up again or contact support if the issue persists.';
+    return i18n.t('auth.errors.triggerFailure');
   }
 
   // User does not exist or could not be found
   if (errorCode === userNotFound) {
-    return 'Username does not exist - please try again.';
+    return i81n.t('auth.errors.userNotFound');
   }
 
-  // user has not yet verified their email
+  // user has not yet confirmed cognito email
   if (errorCode === notConfirmed) {
-    return 'Account not yet confirmed - please check your email for verification code or request another one.';
+    return i18n.t('auth.errors.notConfirmed');
   }
 
   // username already exists
   if (errorCode === usernameExists) {
-    return 'Username already exists - please try a different username.';
+    return i18n.t('auth.errors.usernameExists');
   }
 
   // Invalid verification code
   if (errorCode === codeMismatch || errorMessage.includes('code')) {
-    return 'Invalid verification code. Please check and try again.';
+    return i18n.t('auth.errors.codeMismatch');
   }
 
   // Invalid password
   if (errorCode === invalidPassword) {
-    return 'Password is invalid - please try a different password.';
+    return i18n.t('auth.errors.invalidPassword');
   }
 
   // Code expired
   if (errorCode === codeExpired || errorMessage.includes('expired')) {
-    return 'Verification code has expired. Please request a new code.';
+    return i18n.t('auth.errors.codeExpired');
   }
 
   // Too many attempts
-  if (errorCode === 'LimitExceededException' || errorMessage.includes('attempts')) {
-    return 'Too many failed attempts. Please try again later.';
+  if (errorCode === tooManyAttempts || errorMessage.includes('attempts')) {
+    return i18n.t('auth.errors.tooManyAttempts');
   }
 
   // User already confirmed
   if (errorCode === notAuthorized && errorMessage.includes('confirmed')) {
-    return 'Account already verified. Please try signing in.';
+    return i18n.t('auth.errors.notAuthorizedConfirmed');
   }
 
   // Generic fallback
-  return 'Verification failed. Please try again or contact support.';
+  return i18n.t('auth.errors.genericFallback');
 };
 
 // ============================================================================
