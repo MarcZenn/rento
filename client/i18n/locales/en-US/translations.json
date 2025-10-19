@@ -16,7 +16,19 @@
         "sign_in": "Sign in",
         "create_account": "Create an account",
         "no_account": "Don't have an account? Sign up.",
-        "have_account": "Already have an account? Sign in." 
+        "have_account": "Already have an account? Sign in.",
+        "errors": {
+            "userNotFound": "Username does not exist - please try again.",
+            "notAuthorizedConfirmed": "Account already verified. Please try signing in.",
+            "notConfirmed": "Account not yet confirmed - please check your email for verification code or request another one.",
+            "usernameExists": "Username already exists - please try a different username.",
+            "invalidPassword": "Password is invalid - please try a different password.",
+            "codeMismatch": "Invalid verification code. Please check and try again.",
+            "codeExpired": "Verification code has expired. Please request a new code.",
+            "tooManyAttempts": "Too many failed attempts. Please try again later.",
+            "genericFallback": "Verification failed. Please try again or contact support.",
+            "triggerFailure": "Account creation failed. Please try signing up again or contact support if the issue persists."
+        } 
     },
     "forms": {
         "email": {

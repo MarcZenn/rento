@@ -29,7 +29,6 @@ export interface Context {
   user?: {
     id: string;
     cognitoId?: string;
-    clerkId?: string;
     roles?: string[]; // this is key -> determines admin access
   };
   req: any;

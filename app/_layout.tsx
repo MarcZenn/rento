@@ -1,31 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { Slot, useNavigationContainerRef } from 'expo-router';
-import { ClerkProvider, ClerkLoaded, useAuth, useUser } from '@clerk/clerk-expo';
 import { ApolloProvider } from '@/client/apollo';
 import { configureAmplify } from '@/client/apollo/config';
-import { tokenCache } from '@clerk/clerk-expo/token-cache';
-import { ConvexReactClient } from 'convex/react';
-import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import * as Sentry from '@sentry/react-native';
-import { ENV } from '@/client/config/env';
+import { useGetCurrentUser } from '@/client/services/auth/hooks/useGetCurrentUser';
 
 import { ThemeProvider } from '@/client/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from '@/client/theme/useFonts';
 import '@/client/i18n';
-
-// TODO:: Add biometric auth (AWS Amplify)
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
-  unsavedChangesWarning: false,
-});
-
-const { publishableKey } = ENV.clerk;
-if (!publishableKey) {
-  throw new Error(
-    'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your env.'
-  );
-}
 
 // Construct a new instrumentation instance. This is needed to communicate between the integration and React
 const navigationIntegration = Sentry.reactNavigationIntegration();
@@ -52,12 +36,26 @@ SplashScreen.setOptions({
 
 const InitialLayout = () => {
   const [appIsReady, setAppIsReady] = useState(false);
-  const user = useUser();
+  const { userId } = useGetCurrentUser();
+
+  // Set Sentry user if authenticated
+  useEffect(() => {
+    const setSentryUser = async () => {
+      if (userId) {
+        Sentry.setUser({ id: userId });
+      } else {
+        Sentry.setUser(null);
+      }
+    };
+
+    setSentryUser();
+  }, [userId]);
 
   useEffect(() => {
     const init = async () => {
       try {
-        await configureAmplify(); // Initialize AWS Amplify on app start
+        // Initialize AWS Amplify on app start
+        await configureAmplify();
         await useFonts();
       } catch (err) {
         console.warn(err);
@@ -68,14 +66,6 @@ const InitialLayout = () => {
 
     init();
   }, []);
-
-  useEffect(() => {
-    if (user && user.user) {
-      Sentry.setUser({ email: user.user.emailAddresses[0].emailAddress, id: user.user.id });
-    } else {
-      Sentry.setUser(null);
-    }
-  }, [user]);
 
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
@@ -109,15 +99,9 @@ const RootLayout = () => {
 
   return (
     <ApolloProvider>
-      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        <ClerkLoaded>
-          <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-            <ThemeProvider>
-              <InitialLayout />
-            </ThemeProvider>
-          </ConvexProviderWithClerk>
-        </ClerkLoaded>
-      </ClerkProvider>
+      <ThemeProvider>
+        <InitialLayout />
+      </ThemeProvider>
     </ApolloProvider>
   );
 };

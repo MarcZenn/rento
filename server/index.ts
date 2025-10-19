@@ -173,7 +173,6 @@ async function startServer() {
     console.log('📊 APPI Compliance Features Enabled:');
     console.log('   ✓ Audit logging for all operations');
     console.log('   ✓ Response time monitoring (<200ms target)');
-    console.log('   ✓ JWT authentication (Cognito + Clerk)');
     console.log('   ✓ Data residency controls');
     console.log('   ✓ Redis caching layer');
     console.log('');

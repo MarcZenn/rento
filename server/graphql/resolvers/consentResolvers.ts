@@ -34,7 +34,6 @@ export interface Context {
   user?: {
     id: string;
     cognitoId?: string;
-    clerkId?: string;
   };
   req: any;
 }

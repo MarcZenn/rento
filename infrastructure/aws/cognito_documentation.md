@@ -293,9 +293,7 @@ Estimated monthly costs (1,000 MAU):
 
 After deploying Cognito:
 
-2. **Task 9**: Configure React Native Apollo Client with AWS Amplify
 3. **Task 10**: Create APPI Consent Modal Component (frontend)
-4. **Task 13**: Remove Clerk dependency completely
 
 ## Resources
 

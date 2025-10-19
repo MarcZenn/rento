@@ -3,7 +3,7 @@
 // DEV NOTES
 // ============================================================================
  * Authentication Middleware for GraphQL
- * Handles JWT verification for both AWS Cognito and Clerk (legacy)
+ * Handles JWT verification for AWS Cognito
  * 
  * Authenticates and authorizes users for the GraphQL API. It extracts 
  * JWT tokens from requests, verifies them, and injects user identity 
@@ -24,8 +24,6 @@
  *  2. Apollo Server calls createAuthContext() 
  *  3. Extract token from header
  *  4. Try verifyCognitoToken(token)
- *          ↓ (if fails)
- *  5. Try verifyClerkToken(token)
  *  6. Decode token → Extract user ID, email, roles
  *  7. Build context object with user info
  *  8. Log authentication event (APPI compliance)
@@ -62,7 +60,6 @@ export interface Context {
   user?: {
     id: string;
     cognitoId?: string;
-    clerkId?: string;
     email?: string;
     username?: string;
     roles?: string[];

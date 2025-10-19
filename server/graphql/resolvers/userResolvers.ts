@@ -13,10 +13,10 @@ import type { PoolClient } from 'pg';
 
 export interface User {
   id: string;
-  // clerk_id?: string;
   cognito_id?: string;
   email: string;
   username: string;
+  is_verified: boolean;
   created_at: Date;
   updated_at?: Date;
 }
@@ -25,7 +25,6 @@ export interface Context {
   user?: {
     id: string;
     cognitoId?: string;
-    clerkId?: string;
   };
   req: any;
 }
@@ -148,27 +147,6 @@ export const userQueries = {
   },
 
   /**
-   * Get user by Clerk ID (legacy support)
-   */
-  // getUserByClerkId: async (
-  //   _: any,
-  //   { clerkId }: { clerkId: string },
-  //   context: Context
-  // ): Promise<User | null> => {
-  //   const result = await postgresql.query<User>('SELECT * FROM users WHERE clerk_id = $1', [
-  //     clerkId,
-  //   ]);
-
-  //   const user = result.rows[0] || null;
-  //   if (user) {
-  //     await logUserAccess(user.id, 'getUserByClerkId', context);
-  //     await cacheUser(user);
-  //   }
-
-  //   return user;
-  // },
-
-  /**
    * Get user by Cognito ID
    */
   getUserByCognitoId: async (
@@ -223,7 +201,8 @@ export const userQueries = {
 export const userMutations = {
   /**
    * Create new user
-   * Replaces Convex createUser mutation
+   * - also creates an empty profile for the user
+   *
    */
   createUser: async (_: any, { input }: { input: any }, context: Context): Promise<User> => {
     return await postgresql.transaction(async (client: PoolClient) => {
@@ -241,13 +220,20 @@ export const userMutations = {
 
       // Insert user
       const result = await client.query<User>(
-        `INSERT INTO users (cognito_id, email, username, created_at)
-         VALUES ($1, $2, $3, NOW())
+        `INSERT INTO users (cognito_id, email, username, is_verified, created_at)
+         VALUES ($1, $2, $3, $4, NOW())
          RETURNING *`,
-        [input.cognitoId || null, input.email, input.username]
+        [input.cognitoId || null, input.email, input.username, input.emailVerified ?? false]
       );
 
       const newUser = result.rows[0];
+
+      // Create empty profile for the user (required for app functionality)
+      await client.query(
+        `INSERT INTO profiles (user_id, created_at, onboarding_completed)
+         VALUES ($1, NOW(), false)`,
+        [newUser.id]
+      );
 
       // Log user creation for APPI compliance
       await client.query(
@@ -264,6 +250,24 @@ export const userMutations = {
           'User account created',
           'compliant',
           JSON.stringify({ email: input.email, username: input.username }),
+        ]
+      );
+
+      // Log profile creation for APPI compliance
+      await client.query(
+        `INSERT INTO appi_audit_events (
+          event_id, user_id, event_type, event_timestamp,
+          ip_address, user_agent, data_accessed, compliance_status, event_details
+        ) VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8)`,
+        [
+          `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+          newUser.id,
+          AUDIT_EVENT_TYPES.PROFILE_CREATED,
+          context.req?.ip || '127.0.0.1',
+          context.req?.headers?.['user-agent'] || 'server',
+          'User profile created',
+          'compliant',
+          JSON.stringify({ userId: newUser.id }),
         ]
       );
 
@@ -393,6 +397,59 @@ export const userMutations = {
       };
     });
   },
+
+  /**
+   * Update user email verification status
+   * Called by Cognito PostConfirmation trigger
+   */
+  updateUserIsVerified: async (
+    _: any,
+    { cognitoId }: { cognitoId: string },
+    context: Context
+  ): Promise<User> => {
+    // Update is_verified to true
+    const result = await postgresql.query<User>(
+      `UPDATE users
+       SET is_verified = true, updated_at = NOW()
+       WHERE cognito_id = $1
+       RETURNING *`,
+      [cognitoId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new GraphQLError('User not found', {
+        extensions: { code: 'NOT_FOUND' },
+      });
+    }
+
+    const updatedUser = result.rows[0];
+
+    // Invalidate cache
+    await invalidateUserCache(updatedUser.id);
+
+    // Log email verification for APPI compliance
+    await postgresql.query(
+      `INSERT INTO appi_audit_events (
+        event_id, user_id, event_type, event_timestamp,
+        ip_address, user_agent, data_accessed, compliance_status, event_details
+      ) VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8)`,
+      [
+        `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        updatedUser.id,
+        AUDIT_EVENT_TYPES.IS_VERIFIED,
+        context.req?.ip || '127.0.0.1',
+        context.req?.headers?.['user-agent'] || 'cognito-lambda',
+        'Email verification completed',
+        'compliant',
+        JSON.stringify({ cognitoId, emailVerified: true }),
+      ]
+    );
+
+    // Cache the updated user
+    await cacheUser(updatedUser);
+
+    return updatedUser;
+  },
 };
 
 // ============================================================================
@@ -404,7 +461,7 @@ export const userFieldResolvers = {
     /**
      * Resolve user profile
      */
-    profile: async (parent: User, _: any, context: Context) => {
+    profile: async (parent: User) => {
       const result = await postgresql.query('SELECT * FROM profiles WHERE user_id = $1', [
         parent.id,
       ]);

@@ -3,7 +3,6 @@
       "allow": [
         "WebSearch",
         "WebFetch(domain:docs.convex.dev)",
-        "WebFetch(domain:clerk.com)",
         "Bash(mkdir:*)",
         "Bash(uv:*)",
         "Bash(find:*)",

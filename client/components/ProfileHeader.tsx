@@ -1,11 +1,10 @@
 import { View, Text } from 'react-native';
-import { Id } from '@/convex/_generated/dataModel';
 import { StyleSheet } from 'react-native-unistyles';
-import { useUserProfile } from '@/client/hooks/useUserProfile';
+import { useUserProfile } from '@/client/services/api/hooks/useUserProfile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ProfileProps = {
-  userId?: Id<'users'>;
+  userId?: string;
   showBackButton?: boolean;
 };
 

@@ -1,14 +1,14 @@
 import { Text, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { signUp } from '@/client/services/auth/signup';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StyleSheet } from 'react-native-unistyles';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { Link } from 'expo-router';
 
-import { useSignUpSchema } from '@/client/services/clerk/schemas';
+import { useSignUpSchema } from '@/client/services/auth/schemas';
 import { CustomInput } from '@/client/components/custom/inputs/CustomInput';
 import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
-import { useAuthActions } from '@/client/services/clerk/useAuthActions';
 import { HeroLogo } from '@/client/components/HeroLogo';
 import { Header } from '@/client/components/Header';
 
@@ -19,10 +19,7 @@ const SignUp = () => {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(useSignUpSchema()),
-  });
-  const { createAccount } = useAuthActions(setError);
+  } = useForm({ resolver: zodResolver(useSignUpSchema()) });
 
   return (
     <KeyboardAvoidingView
@@ -66,7 +63,10 @@ const SignUp = () => {
 
         <Text style={[styles.errorText]}>{errors.root && errors.root.message}</Text>
 
-        <CustomButton onPress={handleSubmit(createAccount)} style={styles.signUpButton}>
+        <CustomButton
+          onPress={handleSubmit(data => signUp(data, setError))}
+          style={styles.signUpButton}
+        >
           <Text style={[styles.signUpButtonText]}>{t('auth.sign_up')}</Text>
         </CustomButton>
 

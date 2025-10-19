@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { Stack, router, useSegments } from 'expo-router';
-import { useAuth } from '@clerk/clerk-expo';
+import { useCheckAuth } from '@/client/services/auth/hooks/useCheckAuth';
+import { LoadingSpinner } from '@/client/components/custom/loaders/Loading';
 
 const PublicLayout = () => {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoading } = useCheckAuth();
   const segments = useSegments();
   const inAuthGroup = segments[0] === '(auth)';
   const inProtectedGroup = segments[0] === '(protected)';
@@ -15,6 +16,10 @@ const PublicLayout = () => {
       router.replace('/(auth)/welcome');
     }
   }, [isSignedIn]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Stack>

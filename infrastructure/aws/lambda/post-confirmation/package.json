@@ -1,0 +1,22 @@
+{
+  "name": "cognito-post-confirmation-trigger",
+  "version": "1.0.0",
+  "description": "AWS Cognito PostConfirmation trigger to sync users to PostgreSQL",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "package": "npm run build && zip -r ../post-confirmation.zip . -x '*.ts' 'tsconfig.json' 'node_modules/@types/*' '.DS_Store'",
+    "clean": "rm -rf dist *.js *.js.map node_modules"
+  },
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.138"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "Rento Engineering",
+  "license": "PRIVATE"
+}

@@ -55,16 +55,11 @@ function getOptionalEnv(key: string, defaultValue: string): string {
 export const ENV = {
   // GraphQL API Configuration
   graphqlEndpoint: getRequiredEnv('EXPO_PUBLIC_GRAPHQL_ENDPOINT'),
-  // Authentication - Clerk
-  clerk: {
-    publishableKey: getRequiredEnv('EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY'),
-    frontendApiUrl: getRequiredEnv('CLERK_FRONTEND_API_URL'),
-  },
-  // Authentication - AWS Cognito (if using)
+  // Authentication - AWS Cognito
   cognito: {
-    region: getOptionalEnv('EXPO_PUBLIC_AWS_REGION', 'ap-northeast-1'),
-    userPoolId: getOptionalEnv('EXPO_PUBLIC_COGNITO_USER_POOL_ID', ''),
-    userPoolClientId: getOptionalEnv('EXPO_PUBLIC_COGNITO_CLIENT_ID', ''),
+    region: getRequiredEnv('EXPO_PUBLIC_AWS_REGION'),
+    userPoolId: getRequiredEnv('EXPO_PUBLIC_COGNITO_USER_POOL_ID'),
+    userPoolClientId: getRequiredEnv('EXPO_PUBLIC_COGNITO_CLIENT_ID'),
   },
   // Application Configuration
   app: {
@@ -109,7 +104,8 @@ if (isDevelopment && __DEV__) {
   console.log('📋 Environment Configuration:', {
     environment: ENV.app.environment,
     graphqlEndpoint: ENV.graphqlEndpoint,
-    hasClerkKey: !!ENV.clerk.publishableKey,
+    cognitoRegion: ENV.cognito.region,
+    hasCognitoUserPool: !!ENV.cognito.userPoolId,
     defaultLanguage: ENV.i18n.defaultLanguage,
   });
 }
