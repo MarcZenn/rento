@@ -264,55 +264,11 @@ aws ssm describe-parameters --region ap-northeast-1
 
 Policy Name=`rentodevopspolicy`
 
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "rentodevopspolicy",
-            "Effect": "Allow",
-            "Action": [
-                "rds:*",
-                "elasticache:*",
-                "cloudformation:*",
-                "cognito-identity:*",
-                "cognito-sync:*",
-                "cognito-idp:*",
-                "amplify:*",
-                "s3:*",
-                "ec2:*",
-                "servicecatalog:*",
-                "securityhub:DescribeHub",
-                "securityhub:DescribeProducts",
-                "securityhub:DescribeProductsV2",
-                "cloudwatch:*",
-                "iam:CreateRole",
-                "iam:PutRolePolicy",
-                "iam:AttachRolePolicy",
-                "iam:PassRole",
-                "iam:GetRole",
-                "iam:DeleteRole",
-                "iam:DetachRolePolicy",
-                "iam:DeleteRolePolicy",
-                "lambda:*",
-                "kms:*",
-                "vpce:*",
-                "logs:*",
-                "ssm:PutParameter",
-                "ssm:GetParameter",
-                "ssm:DescribeParameters",
-                "sns:Publish"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-```
+- Ask AWS admin for policy definition
 
 ---
 
 ## 4. Cost Awareness
-
 
 ### ✅ AWS Billing Setup
 

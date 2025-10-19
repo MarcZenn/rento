@@ -2,7 +2,6 @@
  * PostgreSQL + Redis Connection Layer for APPI Compliance
  * Tokyo Region deployment with encryption and audit compliance
  */
-
 // ============================================================================
 // DEV NOTES
 // ============================================================================
@@ -27,7 +26,6 @@
  * - Implement PII encryption separately
  * - Monitor DB operations performance individually
  */
-
 import { Pool, PoolClient } from 'pg';
 import Redis from 'ioredis';
 import 'dotenv/config';

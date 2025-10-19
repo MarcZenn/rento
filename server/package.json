@@ -1,0 +1,26 @@
+{
+  "name": "@rento/server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rento backend server and database management",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "build": "../scripts/build-server.sh",
+    "db:dev:migrate": "DOTENV_CONFIG_PATH=.env.development tsx -r dotenv/config database/migrate.ts",
+    "db:dev:status": "DOTENV_CONFIG_PATH=.env.development tsx -r dotenv/config database/migrate.ts status",
+    "db:dev:init-appi": "DOTENV_CONFIG_PATH=.env.development tsx -r dotenv/config database/migrate.ts init-appi",
+    "db:dev:test": "DOTENV_CONFIG_PATH=.env.development tsx -r dotenv/config database/test-connection.ts",
+    "db:dev:up": "cd database && docker-compose up -d",
+    "db:dev:down": "cd database && docker-compose down",
+    "db:dev:restart": "cd database && docker-compose restart",
+    "db:dev:logs": "cd database && docker-compose logs -f",
+    "db:dev:logs:postgres": "cd database && docker-compose logs -f postgres",
+    "db:dev:psql": "docker exec -it rento-postgres-dev psql -U rento_dev -d rento_dev",
+    "db:dev:clean": "cd database && docker-compose down -v",
+    "db:prod:migrate": "DOTENV_CONFIG_PATH=.env tsx -r dotenv/config database/migrate.ts",
+    "db:prod:status": "DOTENV_CONFIG_PATH=.env tsx -r dotenv/config database/migrate.ts status",
+    "db:prod:init-appi": "DOTENV_CONFIG_PATH=.env tsx -r dotenv/config database/migrate.ts init-appi",
+    "db:prod:test": "DOTENV_CONFIG_PATH=.env tsx -r dotenv/config database/test-connection.ts"
+  }
+}

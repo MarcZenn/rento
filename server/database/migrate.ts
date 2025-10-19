@@ -34,7 +34,7 @@
  */
 import { readFileSync } from 'fs';
 import { MIGRATIONS, MigrationFile } from './migrations';
-import { postgresql } from '@/server/database/connection';
+import { postgresql } from './connection';
 
 class DatabaseMigrator {
   /**
