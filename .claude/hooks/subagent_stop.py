@@ -16,7 +16,9 @@ from datetime import datetime
 
 try:
     from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
-    load_dotenv()
+    # Load from project root (where this hook is executed from)
+    env_path = Path.cwd() / ".env"
+    load_dotenv(dotenv_path=env_path if env_path.exists() else None)
 except ImportError:
     pass  # dotenv is optional
 

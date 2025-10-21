@@ -15,23 +15,24 @@ from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
 def main():
     """
     ElevenLabs Turbo v2.5 TTS Script
-    
+
     Uses ElevenLabs' Turbo v2.5 model for fast, high-quality text-to-speech.
     Accepts optional text prompt as command-line argument.
-    
+
     Usage:
     - ./eleven_turbo_tts.py                    # Uses default text
     - ./eleven_turbo_tts.py "Your custom text" # Uses provided text
-    
+
     Features:
     - Fast generation (optimized for real-time use)
     - High-quality voice synthesis
     - Stable production model
     - Cost-effective for high-volume usage
     """
-    
-    # Load environment variables
-    load_dotenv()
+
+    # Load environment variables from project root
+    env_path = Path.cwd() / ".env"
+    load_dotenv(dotenv_path=env_path if env_path.exists() else None)
     
     # Get API key from environment
     api_key = os.getenv('ELEVENLABS_API_KEY')
@@ -43,8 +44,8 @@ def main():
     
     try:
         from elevenlabs.client import ElevenLabs #pyright: ignore[reportMissingImports]
-        from elevenlabs import play #pyright: ignore[reportMissingImports]
-        
+        from elevenlabs import stream #pyright: ignore[reportMissingImports]
+
         # Initialize client
         elevenlabs = ElevenLabs(api_key=api_key)
         
@@ -61,15 +62,15 @@ def main():
         print("🔊 Generating and playing...")
         
         try:
-            # Generate and play audio directly
-            audio = elevenlabs.text_to_speech.convert(
+            # Generate and stream audio directly
+            audio_stream = elevenlabs.text_to_speech.convert(
                 text=text,
                 voice_id="WejK3H1m7MI9CHnIjW9K",  # Specified voice
                 model_id="eleven_turbo_v2_5",
                 output_format="mp3_44100_128",
             )
-            
-            play(audio)
+
+            stream(audio_stream)
             print("✅ Playback complete!")
             
         except Exception as e:
