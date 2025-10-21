@@ -1,0 +1,17 @@
+{
+    "name": "@rento/client",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Rento frontend apollo client",
+    "scripts": {
+      "dev": "tsx watch index.ts",
+      "start": "tsx index.ts",
+      "client:build": "../scripts/build-client.sh all --method=eas",
+      "client:build:ios": "../scripts/build-client.sh ios --method=eas",
+      "client:build:android": "../scripts/build-client.sh android --method=eas",
+      "client:build:web": "../scripts/build-client.sh web",
+      "client:build:local:ios": "../scripts/build-client.sh ios --method=local",
+      "client:build:local:android": "../scripts/build-client.sh android --method=local"
+    }
+  }
+  
