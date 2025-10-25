@@ -4,7 +4,7 @@
 # DEPLOY EC2 GRAPHQL API INFRASTRUCTURE
 # ============================================================================
 # This deploys the EC2 instance infrastructure (not the application code)
-# Use deploy-graphql-ec2.sh to deploy the actual GraphQL application
+# Use server/deploy/deploy-to-ec2.sh to deploy the actual GraphQL application
 # ============================================================================
 
 set -e
@@ -161,5 +161,5 @@ echo ""
 echo "📝 Next Steps:"
 echo "  1. Wait 2-3 minutes for EC2 instance to fully initialize"
 echo "  2. If you need to deploy GraphQL application code:"
-echo "     ./deploy-graphql-ec2.sh $ENVIRONMENT"
+echo "     cd ../../../server/deploy && ./deploy-to-ec2.sh $ENVIRONMENT"
 echo ""

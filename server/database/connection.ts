@@ -89,8 +89,14 @@ class PostgreSQLManager {
 
     // Only add SSL for production or when explicitly enabled
     if (process.env.NODE_ENV === 'production' || process.env.POSTGRES_SSL === 'true') {
+      // Respect POSTGRES_SSL_REJECT_UNAUTHORIZED env var for flexibility
+      // Defaults to true for production, false for development
+      const rejectUnauthorized = process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED !== undefined
+        ? process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED === 'true'
+        : process.env.NODE_ENV === 'production';
+
       this.config.ssl = {
-        rejectUnauthorized: process.env.NODE_ENV === 'production',
+        rejectUnauthorized,
       };
     }
 

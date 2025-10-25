@@ -80,6 +80,16 @@ DB_ENDPOINT=$(aws cloudformation describe-stacks \
   --query "Stacks[0].Outputs[?OutputKey=='DatabaseEndpoint'].OutputValue" \
   --output text)
 
+# Store database endpoint in Parameter Store
+echo "🔐 Storing database endpoint in Parameter Store..."
+aws ssm put-parameter \
+  --profile $PROFILE \
+  --name "/${ENVIRONMENT}/rento/postgres/endpoint" \
+  --value "$DB_ENDPOINT" \
+  --type "String" \
+  --region $REGION \
+  --overwrite
+
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📋 DEPLOYMENT OUTPUTS"

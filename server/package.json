@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
-    "build": "../scripts/build-server.sh",
+    "build": "./build-server.sh",
     "db:dev:migrate": "DOTENV_CONFIG_PATH=.env.development tsx -r dotenv/config database/migrate.ts",
     "db:dev:status": "DOTENV_CONFIG_PATH=.env.development tsx -r dotenv/config database/migrate.ts status",
     "db:dev:init-appi": "DOTENV_CONFIG_PATH=.env.development tsx -r dotenv/config database/migrate.ts init-appi",
