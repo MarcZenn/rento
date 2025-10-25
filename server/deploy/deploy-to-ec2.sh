@@ -99,8 +99,8 @@ cp -r ./dist/* "$DEPLOY_DIR/"
 
 # Copy package.json and package-lock.json from ROOT (monorepo setup)
 # This ensures all dependencies are available for npm install on EC2
-cp ../package.json "$DEPLOY_DIR/"
-cp ../package-lock.json "$DEPLOY_DIR/" 2>/dev/null || true
+cp ./package.json "$DEPLOY_DIR/"
+cp ./package-lock.json "$DEPLOY_DIR/" 2>/dev/null || true
 
 echo "✅ Deployment package created: $DEPLOY_DIR"
 echo ""

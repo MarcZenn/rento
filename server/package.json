@@ -22,5 +22,26 @@
     "db:prod:status": "DOTENV_CONFIG_PATH=.env tsx -r dotenv/config database/migrate.ts status",
     "db:prod:init-appi": "DOTENV_CONFIG_PATH=.env tsx -r dotenv/config database/migrate.ts init-appi",
     "db:prod:test": "DOTENV_CONFIG_PATH=.env tsx -r dotenv/config database/test-connection.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/express5": "^1.1.2",
+    "aws-jwt-verify": "^5.1.1",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "graphql": "^16.11.0",
+    "ioredis": "^5.3.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.6.0",
+    "@types/pg": "^8.15.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "~5.8.3"
   }
 }
