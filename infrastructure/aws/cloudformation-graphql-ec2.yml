@@ -101,7 +101,7 @@ Conditions:
 Mappings:
   RegionMap:
     ap-northeast-1:  # Tokyo
-      AMI: ami-0d52744d6551d851e  # Amazon Linux 2023 ARM64 (update as needed)
+      AMI: ami-0fd2716637ab776ce  # Amazon Linux 2023 x86_64 (al2023-ami-2023.9.20251020.0-kernel-6.12)
 
 # ============================================================================
 # RESOURCES
@@ -276,17 +276,15 @@ Resources:
 
           # Install CloudWatch agent
           echo "==> Installing CloudWatch agent..."
-          wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/arm64/latest/amazon-cloudwatch-agent.rpm
+          wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
           rpm -U ./amazon-cloudwatch-agent.rpm
 
           # Create application directory
           echo "==> Creating application directory..."
           mkdir -p /opt/rento-api
+          mkdir -p /opt/rento-api/logs
+          chown -R ec2-user:ec2-user /opt/rento-api
           cd /opt/rento-api
-
-          # Create deployment user (optional, for security)
-          # useradd -r -s /bin/bash -d /opt/rento-api rento
-          # chown -R rento:rento /opt/rento-api
 
           # Install unattended-upgrades for automatic security updates (APPI requirement)
           echo "==> Configuring automatic security updates..."
