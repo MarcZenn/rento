@@ -90,3 +90,8 @@ server/.env
 # builds
 /ios
 /android
+
+# Lambda build artifacts
+infrastructure/aws/lambda/**/*.zip
+infrastructure/aws/lambda/**/index.js
+infrastructure/aws/lambda/**/index.js.map
