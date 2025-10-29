@@ -2,6 +2,10 @@
 
 ...under construction...
 
+## Structure
+
+
+
 ## Rento Build Guide
 
 This project uses **custom native code** - which means:

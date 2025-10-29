@@ -33,8 +33,9 @@ async def main():
     - Live audio playback via LocalAudioPlayer
     """
 
-    # Load environment variables
-    load_dotenv()
+    # Load environment variables from project root
+    env_path = Path.cwd() / ".env"
+    load_dotenv(dotenv_path=env_path if env_path.exists() else None)
 
     # Get API key from environment
     api_key = os.getenv("OPENAI_API_KEY")

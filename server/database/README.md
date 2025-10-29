@@ -4,72 +4,251 @@ This directory contains the complete APPI-compliant PostgreSQL database schema f
 
 **CRITICAL**: This schema contains production-ready APPI compliance features but requires proper security configuration before deployment. Always test in a development environment first.
 
-## File Overview
-
-- `001_initial_schema.sql` - **Initial Schema Setup** with all tables, indices, security, and APPI compliance features
-- `README.md` - This documentation file
-
-
 ## Quick Setup
 
 ```bash
-# Create database and run complete schema
+# Create database
 yarn run db:up 
-yarn run db:migrate
 ```
 
-## Production Setup
+## Database Migration System
+
+A **unified, environment-aware database migration system** that handles local Docker, AWS RDS Development, and AWS RDS Production with intelligent automation and safety checks.
+
+### 📋 System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Single migrate.ts File                    │
+│                                                               │
+│  Detects environment → Configures connection → Runs safely  │
+└─────────────────────────────────────────────────────────────┘
+                                ↓
+        ┌──────────────────────┼──────────────────────┐
+        │                      │                       │
+   ┌────▼────┐          ┌─────▼──────┐         ┌─────▼──────┐
+   │  LOCAL  │          │    DEV     │         │    PROD    │
+   │         │          │            │         │            │
+   │ Docker  │          │  AWS RDS   │         │  AWS RDS   │
+   │ No AWS  │          │  + SSO     │         │  + SSO     │
+   │ No SSL  │          │  + Secrets │         │  + Secrets │
+   └─────────┘          └────────────┘         └────────────┘
+```
+
+### Commands by Environment
+
+| Environment | Start DB | Run Migrations | Check Status |
+|-------------|----------|----------------|--------------|
+| **Local** | `npm run db:local:up` | `npm run db:migrate:local` | `npm run db:migrate:local:status` |
+| **Dev** | N/A (AWS managed) | `npm run db:migrate:dev` | `npm run db:migrate:dev:status` |
+| **Prod** | N/A (AWS managed) | `npm run db:migrate:prod` | `npm run db:migrate:prod:status` |
+
+---
+
+### 🔧 How It Works
+
+#### 1. Local Environment
+```bash
+npm run db:migrate:local
+```
+
+**What Happens:**
+1. Sets `MIGRATION_ENV=local`
+2. Loads `.env.local` (if exists, falls back to defaults)
+3. Connects to `localhost:5432`
+4. Shows connection details
+5. Runs migrations (no confirmation required - safe!)
+
+**Perfect For:**
+- Daily development
+- Testing new migrations
+- Rapid iteration
+
+---
+
+#### 2. Running Deployments 
+
+##### A. Single Manual Process for Both Environments
+
+**To run migrations in DEVELOPMENT:**
+```
+1. Go to GitHub repository
+2. Click "Actions" tab
+3. Select "Deploy Database Migrations"
+4. Click "Run workflow"
+5. Select environment: development
+6. Click "Run workflow"
+```
+
+**To run migrations in PRODUCTION:**
+```
+Same steps, but select: production
+
+##### B. Separate Deployment Scripts
 
 ```bash
-# 1. Create database with proper encoding for Japanese
-createdb rento_production \
-  --owner=postgres \
-  --encoding=UTF8 \
-  --lc-collate=ja_JP.UTF-8 \
-  --lc-ctype=ja_JP.UTF-8 \
-  --template=template0
-
-# 2. Run the consolidated schema (includes all tables, indices, triggers, security)
-psql -U postgres -d rento_production -f 001_initial_schema.sql
-
-# 3. Verify setup completed successfully
-psql -U postgres -d rento_production -c "
-SELECT 'Schema Setup Complete' AS status,
-       COUNT(*) FILTER (WHERE table_schema = 'public') AS tables_created,
-       (SELECT COUNT(*) FROM pg_roles WHERE rolname LIKE 'rento_%') AS roles_created
-FROM information_schema.tables;"
+npm run db:migrate:dev
 ```
 
-## Migrations
+**What Happens:**
+1. Sets `MIGRATION_ENV=dev`
+2. Loads `.env.development` (if exists)
+3. **Checks AWS SSO session** for `rento-development-sso` profile
+4. If expired → **Opens browser for login automatically**
+5. **Fetches RDS endpoint** from CloudFormation stack `development-rento-rds`
+6. **Fetches DB password** from Secrets Manager `rento/development/db-password`
+7. Shows full connection details + checklist
+8. **Requires typing "MIGRATE DEV"** to proceed
+9. Runs migrations with SSL
 
-Whenever a new migration is needed please adhere to the following steps: 
+**Perfect For:**
+- Testing migrations in cloud environment
+- Team collaboration
+- Integration testing
 
-1. Create a new migration file in the `/database` directory. It must be sequentially numbered and titled according to what it does in the DB. Example `004_add_table_name.sql`
-2. Add the new migration file to the `MIGRATIONS` array in the `migrations.ts` file. 
-3. Run the migration `yarn run db:migrate`
+---
 
-## APPI Compliance Features
+#### 3. Production Environment (AWS RDS)
+```bash
+npm run db:migrate:prod
+```
 
-### Audit Tables
-- `appi_audit_events` - Comprehensive user activity logging
-- `appi_data_residency_log` - Geographic data storage validation
-- `appi_incident_tracking` - Compliance incident management
-- `consent_history` - Detailed consent change tracking
+**What Happens:**
+1. Sets `MIGRATION_ENV=prod`
+2. Loads `.env.production` (if exists)
+3. **Checks AWS SSO session** for `rento-production-sso` profile
+4. If expired → **Opens browser for login automatically**
+5. **Fetches RDS endpoint** from CloudFormation stack `production-rento-rds`
+6. **Fetches DB password** from Secrets Manager `rento/production/db-password`
+7. Shows **critical warning** + comprehensive checklist
+8. **Requires typing "MIGRATE PRODUCTION"** to proceed
+9. Runs migrations with SSL
 
-### Data Protection
-- **Row Level Security (RLS)** on all user-sensitive tables
-- **Field-level encryption** for PII data
-- **Geographic validation** ensuring Japan-only data storage
-- **Automated consent logging** with IP and timestamp tracking
-- **2-year audit retention** with automated cleanup
+**Perfect For:**
+- Scheduled production deployments
+- CI/CD automation
+- Manual emergency fixes
 
-### Compliance Automation
-- **Consent change triggers** - Automatic history logging
-- **Data deletion workflows** - 30-day deletion scheduling
-- **Compliance monitoring** - Violation detection and alerting
-- **Geographic validation** - Real-time data residency checks
+### 🔧 Configuration Requirements
 
-### APPI Audit Event Types Management
+#### AWS CLI Profiles
+
+Add to `~/.aws/config`:
+
+```ini
+[profile rento-development-sso]
+sso_start_url = https://your-org.awsapps.com/start
+sso_region = ap-northeast-1
+sso_account_id = 123456789012  # Dev account
+sso_role_name = DeveloperAccess
+region = ap-northeast-1
+
+[profile rento-production-sso]
+sso_start_url = https://your-org.awsapps.com/start
+sso_region = ap-northeast-1
+sso_account_id = 987654321098  # Prod account
+sso_role_name = AdminAccess
+region = ap-northeast-1
+```
+
+---
+
+### 🔒 Safety Features
+
+#### 1. Environment Detection
+Shows exactly where you're connecting:
+```
+✅ LOCAL → Safe, Docker
+⚠️  DEV → AWS RDS Development
+🚨 PROD → AWS RDS Production (danger!)
+```
+
+#### 2. Progressive Confirmation
+- **Local**: None (safe)
+- **Dev**: Type `MIGRATE DEV`
+- **Prod**: Type `MIGRATE PRODUCTION`
+
+---
+
+### 📊 Migration Flow Diagram
+
+```
+User runs command
+        ↓
+┌───────────────────────┐
+│ Detect MIGRATION_ENV  │
+│  (local/dev/prod)     │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ Load configuration    │
+│  - Env file           │
+│  - AWS profile        │
+│  - Stack names        │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ AWS SSO (if needed)   │
+│  - Check session      │
+│  - Auto-login if exp  │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ Fetch AWS resources   │ (if needed)
+│  - RDS endpoint       │
+│  - DB password        │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ Display target info   │
+│  - Connection details │
+│  - Safety checklist   │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ Get confirmation      │
+│  (if not local/CI)    │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ Connect to database   │
+│  - Test health        │
+│  - Create migrations  │
+│    tracking table     │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ Apply migrations      │
+│  - Check if applied   │
+│  - Verify checksum    │
+│  - Run in transaction │
+│  - Track environment  │
+└───────────────────────┘
+        ↓
+┌───────────────────────┐
+│ Verify success        │
+│  - Health check       │
+│  - Show status        │
+└───────────────────────┘
+```
+
+---
+
+### 🎓 Learning Resources
+
+### Understanding the Code
+
+Key sections in `migrate.ts`:
+
+1. **Lines 72-100**: Environment configurations
+2. **Lines 106-197**: AWS SSO manager
+3. **Lines 203-330**: Configuration loader
+4. **Lines 336-426**: Safety checks
+5. **Lines 432-696**: Migration logic
+
+---
+
+## APPI Audit Event Types Management
 
 The `appi_audit_event_types` table provides **type safety** for audit logging while maintaining **flexibility** for adding new event types.
 

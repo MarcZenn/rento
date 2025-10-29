@@ -14,6 +14,20 @@ This directory contains the complete infrastructure setup for the self-hosted Po
 - **Multi-AZ deployment** within Tokyo region for high availability
 - **Row Level Security (RLS)** for fine-grained access control
 - **PII encryption** using pgcrypto for application-level protection
+- **GitHub OIDC Provider & Roles** enables keyless GitHub Actions deployments
+- **AWS Codebuild Migration Projects** enables database migrations via GitHub Actions
+
+**3-Tier Architecture**:
+- Security Layers (3-Tier Architecture):
+- Public Tier:   EC2 GraphQL API (public subnet, internet-facing)
+                 ↓
+  Private Tier:  RDS + Redis (private subnet, NO internet access)
+- Least Privilege: Databases should NEVER be in public subnets -
+  they should only be accessible from application servers
+- APPI Compliance: Separating tiers is actually BETTER for
+  compliance (defense in depth)
+- Flexibility: You can tear down/rebuild the public networking
+  without touching your databases
 
 ### APPI Compliance Features
 - **Geographic data residency** enforcement (Japan-only)
@@ -23,111 +37,59 @@ This directory contains the complete infrastructure setup for the self-hosted Po
 - **Incident tracking** and regulatory notification workflows
 - **Encrypted PII fields** with decrypt functions for authorized access
 
-## 🚀 Deployment Instructions
+Industry Standard Architecture
+
+  ┌─────────────────────────────────────────────┐
+  │           Internet (Public)                 │
+  └──────────────────┬──────────────────────────┘
+                     │ HTTPS/TLS
+           ┌─────────▼─────────┐
+           │  Internet Gateway │
+           └─────────┬─────────┘
+                     │
+      ┌──────────────┴──────────────┐
+      │   Public Subnet (10.0.10/24)│  ← EC2 GraphQL API
+      │   - EC2 with Elastic IP     │    (APPI Compliant)
+      │   - Security Group: 443,4000│
+      └──────────────┬──────────────┘
+                     │ Internal VPC routing
+      ┌──────────────▼──────────────┐
+      │  Private Subnet (10.0.1/24) │  ← RDS + Redis
+      │   - PostgreSQL RDS          │    (APPI Compliant)
+      │   - Redis ElastiCache       │
+      │   - NO Internet Access      │
+      └─────────────────────────────┘
 
 ### Prerequisites
 
-1. **AWS CLI** SSO configured with Tokyo region access
-2. **Node.js 18+** with TypeScript support
-3. **AWS IAM permissions** for RDS, ElastiCache, KMS, and VPC management
+Ensure you have:
+
+- AWS CLI v2.x installed
+- AWS SSO configured with profiles:
+  - `rento-development-sso`
+  - `rento-production-sso`
+- Admin access to GitHub repository: `marczenn/rento`
+- Appropriate AWS IAM permissions
+
+**Verify AWS CLI:**
+```bash
+aws --version
+# Should show: aws-cli/2.x.x or higher
+```
+
+**Verify AWS SSO:**
+```bash
+aws sts get-caller-identity --profile rento-development-sso
+aws sts get-caller-identity --profile rento-production-sso
+```
 
 ### Step 1: Deploy AWS Infrastructure
 
-```bash
-# Deploy to production
-npm run infrastructure:deploy:prod
+Reference the `deployment_guide.md` in /deploy to understand how to manage and deploy all AWS resources.
 
-# Deploy to development
-npm run infrastructure:deploy:dev
-```
+### Step 2: Run Database Migrations
 
-This will:
-- Create VPC with private subnets in Tokyo AZ-1a and AZ-1c
-- Deploy PostgreSQL RDS with Multi-AZ and encryption
-- Deploy Redis ElastiCache cluster with TLS
-- Set up KMS keys for encryption
-- Configure security groups and network isolation
-- Generate secure passwords and store in Parameter Store
-- Deploy AWS Cognito User Pool and Lambda trigger for automatic DB synchronization
-
-### Step 2: Install Dependencies
-
-```bash
-npm install
-```
-
-### Step 3: Configure Environment
-
-The deployment script creates `.env.production` or `.env.development` with:
-
-```env
-# PostgreSQL Configuration
-POSTGRES_HOST=<rds-endpoint>
-POSTGRES_PORT=5432
-POSTGRES_DB=rento_appi_db
-POSTGRES_USER=rento_admin
-POSTGRES_PASSWORD=<generated-password>
-POSTGRES_SSL=require
-
-# Redis Configuration
-REDIS_HOST=<elasticache-endpoint>
-REDIS_PORT=6379
-REDIS_TLS=true
-
-# Encryption Key for PII (generate securely)
-APP_ENCRYPTION_KEY=<your-encryption-key>
-```
-
-### Step 4: Run Database Migrations
-
-```bash
-# Check migration status
-npm run db:status
-
-# Apply all migrations
-npm run db:migrate
-
-# Initialize APPI compliance data
-npm run db:init-appi
-```
-
-### Step 5: Test Connections
-
-```bash
-npm run db:test
-```
-
-This comprehensive test suite validates:
-- Basic database connectivity
-- PostgreSQL functionality and extensions
-- Redis caching and sessions
-- APPI compliance features
-- Performance benchmarks
-
-## 📊 Database Schema
-
-### Core Tables
-- `users` - User accounts (PII encrypted)
-- `profiles` - User profiles with RLS
-- `user_consent` - APPI consent tracking
-- `consent_history` - Full audit trail
-- `privacy_policy_versions` - Policy version management
-
-### APPI Compliance Tables
-- `appi_audit_events` - All data access events
-- `appi_data_residency_log` - Geographic compliance tracking
-- `appi_incident_tracking` - Security incident management
-
-### Property & Location Tables
-- `properties` - Rental properties
-- `agencies` - Real estate agencies
-- `agents` - Individual agents
-- `wards` - Japanese administrative divisions
-- `prefectures` - Japanese prefectures
-
-### Messaging Tables
-- `chats` - User-agent conversations
-- `messages` - Individual messages with translation
+Reference the `README.md` file in the `/server/database/` directory for database migrations instructions.
 
 ## 🔐 Security Features
 
@@ -150,22 +112,6 @@ This comprehensive test suite validates:
 - **Automated retention** policies
 - **Incident response** workflows
 
-## 🧪 Testing & Validation
-
-### Automated Tests
-Run `npm run db:test` to execute comprehensive validation:
-
-1. **Connection Health** - PostgreSQL and Redis connectivity
-2. **Functionality Tests** - Basic operations and transactions
-3. **APPI Compliance** - Audit logging, RLS, and encryption
-4. **Performance Benchmarks** - Sub-100ms response time validation
-
-### Manual Verification
-1. Check AWS Console for resource deployment
-2. Verify data residency in Tokyo region only
-3. Test encryption/decryption of PII fields
-4. Validate audit log generation
-
 ## 📈 Performance Targets
 
 ### APPI Compliance Requirements
@@ -179,23 +125,6 @@ Run `npm run db:test` to execute comprehensive validation:
 - **Connection pooling** for efficient resource usage
 - **Read replicas** (can be added later for read-heavy workloads)
 - **Automated backups** with 14-day retention
-
-## 🔄 Migration from Convex
-
-The migration process involves:
-
-1. **Schema Conversion** - Convex documents → PostgreSQL tables
-2. **Data Migration** - Export/transform/import existing data
-3. **Function Migration** - Convex functions → PostgreSQL procedures/Node.js
-4. **GraphQL Integration** - Update resolvers to use PostgreSQL
-5. **Testing & Validation** - Comprehensive functionality testing
-
-### Key Changes
-- **Document IDs** - Convex IDs → PostgreSQL UUIDs
-- **Schema Enforcement** - Flexible documents → Structured tables
-- **Relationships** - References via foreign keys
-- **Indexes** - Optimized for common query patterns
-- **Transactions** - Full ACID compliance
 
 ## 🚨 Monitoring & Alerts
 
@@ -214,7 +143,6 @@ The migration process involves:
 ## 📚 Operational Procedures
 
 ### Daily Operations
-- Monitor connection health via `npm run db:test`
 - Review audit logs for compliance
 - Check backup completion status
 
@@ -244,13 +172,6 @@ The migration process involves:
 # Review connection pooling configuration
 # Check for long-running queries
 # Verify network routing
-```
-
-**Migration Failures**
-```bash
-npm run db:status  # Check applied migrations
-npm run db:test    # Validate connections
-# Review migration logs
 ```
 
 ### Emergency Procedures

@@ -15,8 +15,8 @@
  *
  */
 import { GraphQLError } from 'graphql';
-import { postgresql } from '@/server/database/connection';
-import { requireAdmin } from '@/server/graphql/middleware/auth';
+import { postgresql } from '../../database/connection';
+import { requireAdmin } from '../middleware/auth';
 
 // ============================================================================
 // TYPES

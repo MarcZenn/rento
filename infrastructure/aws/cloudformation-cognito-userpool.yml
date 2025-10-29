@@ -61,7 +61,7 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub '${Environment}-rento-appi-users'
+      UserPoolName: !Sub '${Environment}-rento-users'
 
       # Username and sign-in options
       UsernameAttributes:
@@ -122,11 +122,11 @@ Resources:
           AttributeDataType: String
           Mutable: true
           Required: false
-        - Name: data_residency_confirmed
+        - Name: data_residency_ok
           AttributeDataType: String
           Mutable: true
           Required: false
-        - Name: privacy_policy_accepted
+        - Name: privacy_accepted
           AttributeDataType: String
           Mutable: true
           Required: false
@@ -147,15 +147,12 @@ Resources:
         EmailMessage: 'Rento認証コード: {####}'
         EmailSubject: 'Rentoアカウントの確認'
 
-      Tags:
-        - Key: Name
-          Value: !Sub '${Environment}-rento-user-pool'
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: APPICompliant
-          Value: 'true'
-        - Key: DataLocation
-          Value: 'Japan-Tokyo'
+      # User Pool Tags (uses different format than standard CloudFormation Tags)
+      UserPoolTags:
+        Name: !Sub '${Environment}-rento-user-pool'
+        Environment: !Ref Environment
+        APPICompliant: 'true'
+        DataLocation: 'Japan-Tokyo'
 
   # Cognito User Pool Domain
   UserPoolDomain:
@@ -200,7 +197,7 @@ Resources:
         - email_verified
         - preferred_username
         - custom:consent_version
-        - custom:privacy_policy_accepted
+        - custom:privacy_accepted
 
       WriteAttributes:
         - email
@@ -267,26 +264,35 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Policies:
-        - PolicyName: CognitoTriggerPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: '*'
       Tags:
         - Key: Name
           Value: !Sub '${Environment}-rento-lambda-role'
         - Key: Environment
           Value: !Ref Environment
 
+  # CloudWatch Log Groups (must be created before Lambda functions)
+  PreSignUpLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-pre-signup'
+      RetentionInDays: 731  # 2 years for APPI compliance
+
+  PostConfirmationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-post-confirmation'
+      RetentionInDays: 731  # 2 years for APPI compliance
+
+  PreTokenLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-pre-token'
+      RetentionInDays: 731  # 2 years for APPI compliance
+
   # PreSignUp Lambda Function (creates user in DB immediately)
   PreSignUpFunction:
     Type: AWS::Lambda::Function
+    DependsOn: PreSignUpLogGroup
     Properties:
       FunctionName: !Sub '${Environment}-rento-cognito-pre-signup'
       Runtime: nodejs20.x
@@ -318,6 +324,7 @@ Resources:
   # PostConfirmation Lambda Function (updates email_verified to true)
   PostConfirmationFunction:
     Type: AWS::Lambda::Function
+    DependsOn: PostConfirmationLogGroup
     Properties:
       FunctionName: !Sub '${Environment}-rento-cognito-post-confirmation'
       Runtime: nodejs20.x
@@ -349,6 +356,7 @@ Resources:
   # PreTokenGeneration Lambda Function (adds APPI claims to JWT)
   PreTokenGenerationFunction:
     Type: AWS::Lambda::Function
+    DependsOn: PreTokenLogGroup
     Properties:
       FunctionName: !Sub '${Environment}-rento-cognito-pre-token'
       Runtime: nodejs20.x
@@ -410,32 +418,14 @@ Resources:
       SourceArn: !GetAtt UserPool.Arn
 
   # ============================================================================
-  # CLOUDWATCH LOGS
+  # CLOUDWATCH LOGS - COGNITO AUDIT
   # ============================================================================
-
-  PreSignUpLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-pre-signup'
-      RetentionInDays: 730  # 2 years for APPI compliance
-
-  PostConfirmationLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-post-confirmation'
-      RetentionInDays: 730  # 2 years for APPI compliance
-
-  PreTokenLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${Environment}-rento-cognito-pre-token'
-      RetentionInDays: 730  # 2 years for APPI compliance
 
   CognitoAuditLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/cognito/${Environment}-rento-audit-logs'
-      RetentionInDays: 730  # 2 years for APPI compliance
+      RetentionInDays: 731  # 2 years for APPI compliance
 
   # ============================================================================
   # IAM ROLE FOR SNS (MFA)
@@ -444,6 +434,7 @@ Resources:
   CognitoSNSRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub '${Environment}-rento-cognito-sns-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:

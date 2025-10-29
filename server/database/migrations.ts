@@ -34,10 +34,10 @@ export const MIGRATIONS: MigrationFile[] = [
     path: join(__dirname, '004_add_is_verified_to_users.sql'),
   },
   {
-    filename: '005_add_is_verified_audit_events.sql',
+    filename: '005_add_is_verified_audit_event.sql',
     version: '005',
     description: 'Add is_verified event type to appi_audit_event_types table',
-    path: join(__dirname, '005_add_is_verified_audit_events.sql'),
+    path: join(__dirname, '005_add_is_verified_audit_event.sql'),
   },
   // Add more migration files here as needed
 ];

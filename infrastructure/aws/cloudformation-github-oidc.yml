@@ -1,0 +1,208 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'GitHub Actions OIDC Provider and IAM Roles for Rento application deployment'
+
+# ============================================================================
+# PARAMETERS
+# ============================================================================
+
+Parameters:
+  Environment:
+    Type: String
+    Description: 'Target environment for this GitHub Actions role'
+    AllowedValues:
+      - development
+      - production
+
+  GitHubOrg:
+    Type: String
+    Description: 'GitHub organization or username'
+    Default: 'marczenn'
+
+  GitHubRepo:
+    Type: String
+    Description: 'GitHub repository name (without org/user prefix)'
+    Default: 'rento'
+
+  OIDCProviderArn:
+    Type: String
+    Description: 'ARN of the GitHub OIDC Provider (leave empty to create new)'
+    Default: ''
+
+# ============================================================================
+# CONDITIONS
+# ============================================================================
+
+Conditions:
+  CreateOIDCProvider: !Equals [!Ref OIDCProviderArn, '']
+  IsProduction: !Equals [!Ref Environment, 'production']
+  IsDevelopment: !Equals [!Ref Environment, 'development']
+
+# ============================================================================
+# RESOURCES
+# ============================================================================
+
+Resources:
+
+  # --------------------------------------------------------------------------
+  # GitHub OIDC Provider (created only once per AWS account)
+  # --------------------------------------------------------------------------
+
+  GitHubOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        # GitHub Actions thumbprint (valid as of 2024, rotate annually)
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+        - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
+      Tags:
+        - Key: Name
+          Value: GitHubActionsOIDCProvider
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # --------------------------------------------------------------------------
+  # IAM Role for GitHub Actions
+  # --------------------------------------------------------------------------
+
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'GitHubActionsRole-${Environment}'
+      Description: !Sub 'GitHub Actions OIDC role for ${Environment} environment deployments'
+      MaxSessionDuration: 3600  # 1 hour
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If
+                - CreateOIDCProvider
+                - !GetAtt GitHubOIDCProvider.Arn
+                - !Ref OIDCProviderArn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                # Allow all branches and tags from the repo
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOrg}/${GitHubRepo}:*'
+      Tags:
+        - Key: Name
+          Value: !Sub 'GitHubActionsRole-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # --------------------------------------------------------------------------
+  # IAM Policy for GitHub Actions - CodeBuild Trigger Permissions
+  # --------------------------------------------------------------------------
+
+  GitHubActionsCodeBuildPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CodeBuildMigrationTrigger
+      Roles:
+        - !Ref GitHubActionsRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # STS Get Caller Identity (for account verification)
+          - Sid: STSGetCallerIdentity
+            Effect: Allow
+            Action:
+              - sts:GetCallerIdentity
+            Resource: '*'
+
+          # CodeBuild Trigger and Monitor
+          - Sid: CodeBuildTriggerAndMonitor
+            Effect: Allow
+            Action:
+              - codebuild:StartBuild
+              - codebuild:BatchGetBuilds
+              - codebuild:ListBuildsForProject
+            Resource:
+              - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${Environment}-rento-database-migration'
+
+          # CloudWatch Logs Read Access (for monitoring migrations)
+          - Sid: CodeBuildLogsRead
+            Effect: Allow
+            Action:
+              - logs:GetLogEvents
+              - logs:FilterLogEvents
+            Resource:
+              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-rento-migration'
+              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-rento-migration:*'
+
+  # --------------------------------------------------------------------------
+  # IAM Policy for GitHub Actions - Additional Deployment Permissions
+  # (Reserved for future use: ECS, Lambda, S3, etc.)
+  # --------------------------------------------------------------------------
+
+  GitHubActionsDeploymentPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DeploymentPermissions
+      Roles:
+        - !Ref GitHubActionsRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # CloudFormation Stack Read Access (for deployment verification)
+          - Sid: CloudFormationReadAccess
+            Effect: Allow
+            Action:
+              - cloudformation:DescribeStacks
+              - cloudformation:DescribeStackEvents
+              - cloudformation:DescribeStackResources
+              - cloudformation:ListStacks
+              - cloudformation:ListExports
+            Resource: '*'
+
+          # Future: Add ECS deployment permissions when needed
+          # Future: Add Lambda deployment permissions when needed
+          # Future: Add S3 deployment permissions when needed
+
+# ============================================================================
+# OUTPUTS
+# ============================================================================
+
+Outputs:
+  GitHubActionsRoleArn:
+    Description: 'ARN of the GitHub Actions IAM Role - Add this to GitHub Secrets'
+    Value: !GetAtt GitHubActionsRole.Arn
+    Export:
+      Name: !Sub '${Environment}-github-actions-role-arn'
+
+  GitHubActionsRoleName:
+    Description: 'Name of the GitHub Actions IAM Role'
+    Value: !Ref GitHubActionsRole
+    Export:
+      Name: !Sub '${Environment}-github-actions-role-name'
+
+  OIDCProviderArn:
+    Condition: CreateOIDCProvider
+    Description: 'ARN of the GitHub OIDC Provider'
+    Value: !GetAtt GitHubOIDCProvider.Arn
+    Export:
+      Name: github-oidc-provider-arn
+
+  GitHubSecretInstructions:
+    Description: 'Instructions for adding the role ARN to GitHub Secrets'
+    Value: !Sub |
+      Add this secret to your GitHub repository:
+
+      Secret Name (${Environment}): AWS_ROLE_ARN_${Environment}
+      Secret Value: ${GitHubActionsRole.Arn}
+
+      Also add your AWS Account ID:
+      Secret Name: AWS_ACCOUNT_ID_${Environment}
+      Secret Value: ${AWS::AccountId}
+
+  ConsoleURL:
+    Description: 'AWS Console URL for the IAM Role'
+    Value: !Sub 'https://console.aws.amazon.com/iam/home?region=${AWS::Region}#/roles/${GitHubActionsRole}'

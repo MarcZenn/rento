@@ -1,0 +1,194 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Add Public Networking to Existing Rento VPC (Internet Gateway + Public Subnets)'
+
+# ============================================================================
+# PURPOSE
+# ============================================================================
+# This template adds public networking components to the existing VPC created
+# by the RDS stack:
+# - Internet Gateway
+# - Public subnets in 2 AZs
+# - Route tables with routes to Internet Gateway
+# - NAT Gateways for private subnet internet access (optional)
+#
+# This allows EC2 instances to be deployed in public subnets with Elastic IPs
+# ============================================================================
+
+Parameters:
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues:
+      - development
+      - staging
+      - production
+    Description: Environment name
+
+  VPCId:
+    Type: String
+    Description: Existing VPC ID from RDS stack
+    Default: vpc-085fd52c7234adc73
+
+  EnableNATGateway:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: Create NAT Gateway for private subnets (adds cost ~$32/month)
+
+Conditions:
+  CreateNATGateway: !Equals [!Ref EnableNATGateway, 'true']
+
+Resources:
+  # ==========================================================================
+  # INTERNET GATEWAY
+  # ==========================================================================
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-igw'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: APPICompliant
+          Value: 'true'
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCId
+      InternetGatewayId: !Ref InternetGateway
+
+  # ==========================================================================
+  # PUBLIC SUBNETS (2 AZs for high availability)
+  # ==========================================================================
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCId
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: ap-northeast-1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-public-subnet-1'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Type
+          Value: Public
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCId
+      CidrBlock: 10.0.11.0/24
+      AvailabilityZone: ap-northeast-1c
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-public-subnet-2'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Type
+          Value: Public
+
+  # ==========================================================================
+  # PUBLIC ROUTE TABLE
+  # ==========================================================================
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-public-rt'
+        - Key: Environment
+          Value: !Ref Environment
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # ==========================================================================
+  # NAT GATEWAY (OPTIONAL - for private subnets to access internet)
+  # ==========================================================================
+  # Cost: ~$32/month per NAT Gateway
+  # Needed if private subnets need outbound internet access
+  # ==========================================================================
+
+  NATGatewayEIP:
+    Type: AWS::EC2::EIP
+    Condition: CreateNATGateway
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-nat-eip'
+        - Key: Environment
+          Value: !Ref Environment
+
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Condition: CreateNATGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-nat-gw'
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  InternetGatewayId:
+    Description: Internet Gateway ID
+    Value: !Ref InternetGateway
+    Export:
+      Name: !Sub '${Environment}-rento-igw-id'
+
+  PublicSubnetIds:
+    Description: Public Subnet IDs (comma-separated)
+    Value: !Sub '${PublicSubnet1},${PublicSubnet2}'
+    Export:
+      Name: !Sub '${Environment}-rento-public-subnet-ids'
+
+  PublicSubnet1Id:
+    Description: Public Subnet 1 ID
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub '${Environment}-rento-public-subnet-1-id'
+
+  PublicSubnet2Id:
+    Description: Public Subnet 2 ID
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: !Sub '${Environment}-rento-public-subnet-2-id'
+
+  NATGatewayId:
+    Condition: CreateNATGateway
+    Description: NAT Gateway ID
+    Value: !Ref NATGateway
+    Export:
+      Name: !Sub '${Environment}-rento-nat-gw-id'

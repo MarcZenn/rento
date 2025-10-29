@@ -22,7 +22,7 @@
 # - Configures security groups to control DB Access
 # 
 # 2. PSQL RDS Instance
-# - PostgresSQL 15.4 with APPI compliance settings
+# - PostgresSQL 15.14 with APPI compliance settings
 # - Multi-AZ deployment for 99.95% availability
 # - AES-256 encryption at rest with KMS keys
 # - Automated backups w/ 14-day retention 
@@ -173,7 +173,7 @@ Resources:
               - 'kms:Decrypt'
               - 'kms:GenerateDataKey'
             Resource: '*'
-      KeyRotationStatus: true
+      EnableKeyRotation: true
       Tags:
         - Key: Name
           Value: !Sub '${Environment}-rento-rds-kms-key'
@@ -205,8 +205,8 @@ Resources:
         ssl: '1'
         # Row-level security for data access control
         row_security: '1'
-        # Enable pgcrypto extension for PII encryption
-        shared_preload_libraries: 'pg_stat_statements,pgcrypto'
+        # Enable performance monitoring (pgcrypto will be enabled via CREATE EXTENSION during migrations)
+        shared_preload_libraries: 'pg_stat_statements'
       Tags:
         - Key: Name
           Value: !Sub '${Environment}-rento-db-params'
@@ -222,7 +222,7 @@ Resources:
       DBName: !Ref DBName
       DBInstanceClass: !Ref DBInstanceClass
       Engine: postgres
-      EngineVersion: '15.4'
+      EngineVersion: '15.14'
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
       AllocatedStorage: '100'
@@ -315,6 +315,12 @@ Outputs:
     Value: !Ref AppSecurityGroup
     Export:
       Name: !Sub '${Environment}-rento-app-sg-id'
+
+  PrivateSubnetIds:
+    Description: 'Private Subnet IDs (comma-separated)'
+    Value: !Sub '${PrivateSubnet1},${PrivateSubnet2}'
+    Export:
+      Name: !Sub '${Environment}-rento-private-subnet-ids'
 
   KMSKeyId:
     Description: 'KMS Key ID for encryption'

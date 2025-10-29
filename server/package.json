@@ -1,0 +1,44 @@
+{
+  "name": "@rento/server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rento backend server and database management",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "build": "./build-server.sh",
+    "db:migrate:local": "MIGRATION_ENV=local tsx database/migrate.ts",
+    "db:migrate:local:status": "MIGRATION_ENV=local tsx database/migrate.ts status",
+    "db:migrate:dev": "MIGRATION_ENV=dev tsx database/migrate.ts",
+    "db:migrate:dev:status": "MIGRATION_ENV=dev tsx database/migrate.ts status",
+    "db:migrate:prod": "MIGRATION_ENV=prod tsx database/migrate.ts",
+    "db:migrate:prod:status": "MIGRATION_ENV=prod tsx database/migrate.ts status",
+    "db:local:up": "cd database && docker-compose up -d",
+    "db:local:down": "cd database && docker-compose down",
+    "db:local:restart": "cd database && docker-compose restart",
+    "db:local:logs": "cd database && docker-compose logs -f postgres",
+    "db:local:psql": "docker exec -it rento-postgres-dev psql -U rento_dev -d rento_dev",
+    "db:local:clean": "cd database && docker-compose down -v"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/express5": "^1.1.2",
+    "aws-jwt-verify": "^5.1.1",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "graphql": "^16.11.0",
+    "ioredis": "^5.3.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.6.0",
+    "@types/pg": "^8.15.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "~5.8.3"
+  }
+}

@@ -92,7 +92,7 @@ Resources:
               - 'kms:Decrypt'
               - 'kms:GenerateDataKey'
             Resource: '*'
-      KeyRotationStatus: true
+      EnableKeyRotation: true
       Tags:
         - Key: Name
           Value: !Sub '${Environment}-rento-redis-kms-key'
@@ -112,22 +112,18 @@ Resources:
   RedisParameterGroup:
     Type: AWS::ElastiCache::ParameterGroup
     Properties:
-      CacheParameterGroupFamily: 'redis7.x'
-      Description: 'Redis parameter group with APPI compliance settings'
+      CacheParameterGroupFamily: redis7
+      Description: "Redis parameter group with APPI compliance settings"
       Properties:
-        # Enable SSL/TLS for encryption in transit
-        tls-port: '6379'
-        # Disable non-TLS port for security
-        port: '0'
-        # Memory optimization
-        maxmemory-policy: 'allkeys-lru'
+        maxmemory-policy: allkeys-lru
+        timeout: '300'
 
   # Redis Replication Group (Cluster Mode Disabled for session storage)
   RedisReplicationGroup:
     Type: AWS::ElastiCache::ReplicationGroup
     Properties:
       ReplicationGroupId: !Sub '${Environment}-rento-redis'
-      Description: 'Redis cluster for session management and caching'
+      ReplicationGroupDescription: "Redis cluster for session management and caching"
 
       # Node configuration
       CacheNodeType: !Ref RedisNodeType

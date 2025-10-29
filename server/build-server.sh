@@ -5,7 +5,7 @@
 # Builds the Node.js GraphQL server for production deployment
 #
 # Usage:
-#   ./scripts/build-server.sh [--clean]
+#   ./build-server.sh [--clean]
 #
 # Options:
 #   --clean    Remove dist directory before building
@@ -35,25 +35,25 @@ echo ""
 # Clean dist directory if requested
 if [ "$CLEAN" = true ]; then
   echo "🧹 Cleaning dist directory..."
-  rm -rf server/dist
+  rm -rf dist
 fi
 
 # Type check server code
 echo "🔍 Type checking server code..."
-npx tsc --project server/tsconfig.json --noEmit
+npx tsc --project tsconfig.json --noEmit
 
 # Compile TypeScript to JavaScript
 echo "🔨 Compiling TypeScript..."
-npx tsc --project server/tsconfig.json
+npx tsc --project tsconfig.json
 
 # Copy non-TypeScript files (if any)
 echo "📦 Copying assets..."
 # Add any necessary file copying here
-# cp -r server/config/*.json dist/server/config/ || true
+# cp -r config/*.json dist/config/ || true
 
 echo ""
 echo "✅ Server build complete!"
-echo "📂 Output: ./server/dist/"
+echo "📂 Output: ./dist/"
 echo ""
 echo "To run the server:"
-echo "  NODE_ENV=production node server/dist/index.js"
+echo "  NODE_ENV=production node dist/index.js"
