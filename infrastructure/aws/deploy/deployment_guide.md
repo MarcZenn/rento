@@ -237,6 +237,42 @@ cd ../../../server/deploy
 
 ---
 
+#### Step 6: Deploy GitHub OIDC Provider & Roles
+
+Development: 
+
+```bash
+cd ../../../server/deploy
+./deploy-github-oidc.sh dev
+```
+
+Production: 
+
+```bash
+cd ../../../server/deploy
+./deploy-github-oidc.sh prod
+```
+
+**Time**: ~2-3 minutes | **What it creates**: GitHub Open ID Connect Provider
+
+#### Step 7: Deploy Codebuild
+
+Development: 
+
+```bash
+cd ../../../server/deploy
+./deploy-codebuild.sh dev
+```
+
+Production: 
+
+```bash
+cd ../../../server/deploy
+./deploy-codebuild.sh prod
+```
+
+**Time**: ~2-3 minutes | **What it creates**: AWS Codebuild to allow GitHub Actions DB migrations
+
 ## Deployment Summary
 
 After completing all steps, you should have:

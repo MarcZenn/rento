@@ -95,54 +95,101 @@ jobs:
           fi
           echo "✅ Confirmed development account"
 
-      - name: Install Dependencies
-        working-directory: server
-        run: npm ci
-
-      - name: Create RDS Snapshot (Development)
+      - name: Trigger CodeBuild Migration (Development)
         run: |
-          SNAPSHOT_ID="dev-pre-migration-$(date +%Y%m%d-%H%M%S)"
-          echo "Creating snapshot: $SNAPSHOT_ID"
-          echo "SNAPSHOT_ID=$SNAPSHOT_ID" >> $GITHUB_ENV
+          echo "=========================================="
+          echo "Starting CodeBuild Database Migration"
+          echo "=========================================="
+          echo "Environment: development"
+          echo "Project: development-rento-database-migration"
+          echo "Time: $(date)"
+          echo "=========================================="
 
-          aws rds create-db-snapshot \
-            --db-instance-identifier development-rento-postgres \
-            --db-snapshot-identifier "$SNAPSHOT_ID" \
-            --tags Key=Environment,Value=Development Key=CreatedBy,Value=GitHubActions
+          # Start CodeBuild project
+          BUILD_ID=$(aws codebuild start-build \
+            --project-name development-rento-database-migration \
+            --source-version ${{ github.ref_name }} \
+            --query 'build.id' \
+            --output text)
 
-          echo "⏳ Waiting for snapshot to complete..."
-          aws rds wait db-snapshot-completed \
-            --db-snapshot-identifier "$SNAPSHOT_ID" \
-            --max-attempts 30 \
-            --delay 10
+          echo "✅ CodeBuild started successfully"
+          echo "Build ID: $BUILD_ID"
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
 
-          echo "✅ Snapshot completed: $SNAPSHOT_ID"
+          # Extract log info for easy access
+          LOG_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/development-rento-database-migration/build/$BUILD_ID"
+          echo "📊 View logs: $LOG_URL"
+          echo "LOG_URL=$LOG_URL" >> $GITHUB_ENV
 
-      - name: Check Migration Status
-        working-directory: server
-        env:
-          CI: true
-          MIGRATION_ENV: dev
-        run: |
-          echo "Current migration status:"
-          npm run db:migrate:dev:status || true
+          echo ""
+          echo "⏳ Waiting for migration to complete..."
+          echo "This may take 10-15 minutes (includes RDS snapshot creation)"
+          echo ""
 
-      - name: Run Migrations (Development)
-        working-directory: server
-        env:
-          CI: true
-          AUTO_CONFIRM: true
-          MIGRATION_ENV: dev
-        run: npm run db:migrate:dev
+          # Poll until build completes
+          ATTEMPT=0
+          MAX_ATTEMPTS=120  # 20 minutes max (10 second intervals)
 
-      - name: Verify Migration Success
-        working-directory: server
-        env:
-          CI: true
-          MIGRATION_ENV: dev
-        run: |
-          echo "Verifying database health..."
-          npm run db:migrate:dev:status
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            STATUS=$(aws codebuild batch-get-builds \
+              --ids "$BUILD_ID" \
+              --query 'builds[0].buildStatus' \
+              --output text)
+
+            PHASE=$(aws codebuild batch-get-builds \
+              --ids "$BUILD_ID" \
+              --query 'builds[0].currentPhase' \
+              --output text)
+
+            echo "[$ATTEMPT/$MAX_ATTEMPTS] Status: $STATUS | Phase: $PHASE"
+
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              echo ""
+              echo "=========================================="
+              echo "✅ Migration Completed Successfully"
+              echo "=========================================="
+
+              # Get snapshot ID from build artifacts/logs if available
+              SNAPSHOT_INFO=$(aws codebuild batch-get-builds \
+                --ids "$BUILD_ID" \
+                --query 'builds[0].phases[?phaseType==`PRE_BUILD`].contexts[0].message' \
+                --output text 2>/dev/null || echo "")
+
+              if [ ! -z "$SNAPSHOT_INFO" ]; then
+                echo "Snapshot: $SNAPSHOT_INFO"
+              fi
+
+              echo "Build ID: $BUILD_ID"
+              echo "View logs: $LOG_URL"
+              echo "=========================================="
+              exit 0
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "FAULT" ] || [ "$STATUS" = "TIMED_OUT" ] || [ "$STATUS" = "STOPPED" ]; then
+              echo ""
+              echo "=========================================="
+              echo "❌ Migration Failed"
+              echo "=========================================="
+              echo "Status: $STATUS"
+              echo "Phase: $PHASE"
+              echo "Build ID: $BUILD_ID"
+              echo "View logs: $LOG_URL"
+              echo "=========================================="
+              exit 1
+            fi
+
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep 10
+          done
+
+          # Timeout reached
+          echo ""
+          echo "=========================================="
+          echo "⏰ Build Timeout"
+          echo "=========================================="
+          echo "Build exceeded maximum wait time (20 minutes)"
+          echo "Build ID: $BUILD_ID"
+          echo "View logs: $LOG_URL"
+          echo "=========================================="
+          exit 1
 
       - name: Create GitHub Issue on Failure
         if: failure()
@@ -215,54 +262,110 @@ jobs:
           fi
           echo "✅ Confirmed production account"
 
-      - name: Install Dependencies
-        working-directory: server
-        run: npm ci
-
-      - name: Create RDS Snapshot (Production)
+      - name: Trigger CodeBuild Migration (Production)
         run: |
-          SNAPSHOT_ID="prod-pre-migration-$(date +%Y%m%d-%H%M%S)"
-          echo "Creating production snapshot: $SNAPSHOT_ID"
-          echo "SNAPSHOT_ID=$SNAPSHOT_ID" >> $GITHUB_ENV
+          echo "=========================================="
+          echo "🚨 PRODUCTION DATABASE MIGRATION 🚨"
+          echo "=========================================="
+          echo "Environment: PRODUCTION"
+          echo "Project: production-rento-database-migration"
+          echo "Time: $(date)"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "=========================================="
+          echo "⚠️  This will modify the production database"
+          echo "⚠️  RDS snapshot will be created automatically"
+          echo "=========================================="
 
-          aws rds create-db-snapshot \
-            --db-instance-identifier production-rento-postgres \
-            --db-snapshot-identifier "$SNAPSHOT_ID" \
-            --tags Key=Environment,Value=Production Key=CreatedBy,Value=GitHubActions Key=Critical,Value=true
+          # Start CodeBuild project
+          BUILD_ID=$(aws codebuild start-build \
+            --project-name production-rento-database-migration \
+            --source-version ${{ github.ref_name }} \
+            --query 'build.id' \
+            --output text)
 
-          echo "⏳ Waiting for snapshot to complete..."
-          aws rds wait db-snapshot-completed \
-            --db-snapshot-identifier "$SNAPSHOT_ID" \
-            --max-attempts 30 \
-            --delay 10
+          echo "✅ CodeBuild started successfully"
+          echo "Build ID: $BUILD_ID"
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
 
-          echo "✅ Snapshot completed: $SNAPSHOT_ID"
+          # Extract log info for easy access
+          LOG_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/production-rento-database-migration/build/$BUILD_ID"
+          echo "📊 View logs: $LOG_URL"
+          echo "LOG_URL=$LOG_URL" >> $GITHUB_ENV
 
-      - name: Check Migration Status
-        working-directory: server
-        env:
-          CI: true
-          MIGRATION_ENV: prod
-        run: |
-          echo "Current production migration status:"
-          npm run db:migrate:prod:status
+          echo ""
+          echo "⏳ Waiting for migration to complete..."
+          echo "This may take 10-15 minutes (includes RDS snapshot creation)"
+          echo ""
 
-      - name: Run Migrations (Production)
-        working-directory: server
-        env:
-          CI: true
-          AUTO_CONFIRM: true
-          MIGRATION_ENV: prod
-        run: npm run db:migrate:prod
+          # Poll until build completes
+          ATTEMPT=0
+          MAX_ATTEMPTS=120  # 20 minutes max (10 second intervals)
 
-      - name: Verify Migration Success
-        working-directory: server
-        env:
-          CI: true
-          MIGRATION_ENV: prod
-        run: |
-          echo "Verifying production database health..."
-          npm run db:migrate:prod:status
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            STATUS=$(aws codebuild batch-get-builds \
+              --ids "$BUILD_ID" \
+              --query 'builds[0].buildStatus' \
+              --output text)
+
+            PHASE=$(aws codebuild batch-get-builds \
+              --ids "$BUILD_ID" \
+              --query 'builds[0].currentPhase' \
+              --output text)
+
+            echo "[$ATTEMPT/$MAX_ATTEMPTS] Status: $STATUS | Phase: $PHASE"
+
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              echo ""
+              echo "=========================================="
+              echo "✅ PRODUCTION Migration Completed"
+              echo "=========================================="
+
+              # Get snapshot ID from build artifacts/logs if available
+              SNAPSHOT_INFO=$(aws codebuild batch-get-builds \
+                --ids "$BUILD_ID" \
+                --query 'builds[0].phases[?phaseType==`PRE_BUILD`].contexts[0].message' \
+                --output text 2>/dev/null || echo "")
+
+              if [ ! -z "$SNAPSHOT_INFO" ]; then
+                echo "Snapshot: $SNAPSHOT_INFO"
+                echo "SNAPSHOT_ID=$SNAPSHOT_INFO" >> $GITHUB_ENV
+              fi
+
+              echo "Build ID: $BUILD_ID"
+              echo "View logs: $LOG_URL"
+              echo "=========================================="
+              exit 0
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "FAULT" ] || [ "$STATUS" = "TIMED_OUT" ] || [ "$STATUS" = "STOPPED" ]; then
+              echo ""
+              echo "=========================================="
+              echo "🚨 PRODUCTION Migration FAILED 🚨"
+              echo "=========================================="
+              echo "Status: $STATUS"
+              echo "Phase: $PHASE"
+              echo "Build ID: $BUILD_ID"
+              echo "View logs: $LOG_URL"
+              echo "=========================================="
+              echo "⚠️  IMMEDIATE ACTION REQUIRED"
+              echo "⚠️  Check database health"
+              echo "⚠️  Consider rollback from snapshot"
+              echo "=========================================="
+              exit 1
+            fi
+
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep 10
+          done
+
+          # Timeout reached
+          echo ""
+          echo "=========================================="
+          echo "⏰ PRODUCTION Build Timeout"
+          echo "=========================================="
+          echo "Build exceeded maximum wait time (20 minutes)"
+          echo "Build ID: $BUILD_ID"
+          echo "View logs: $LOG_URL"
+          echo "=========================================="
+          exit 1
 
       - name: Create GitHub Issue on Failure
         if: failure()

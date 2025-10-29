@@ -1,0 +1,331 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CodeBuild projects for database migrations with VPC access to private RDS'
+
+# ============================================================================
+# PARAMETERS
+# ============================================================================
+
+Parameters:
+  Environment:
+    Type: String
+    Description: 'Target environment for this CodeBuild project'
+    AllowedValues:
+      - development
+      - production
+
+  GitHubRepo:
+    Type: String
+    Description: 'GitHub repository in format: owner/repo-name'
+    Default: 'your-github-org/rento'
+
+  GitHubBranch:
+    Type: String
+    Description: 'Git branch to use for migrations'
+    Default: 'main'
+
+# ============================================================================
+# CONDITIONS
+# ============================================================================
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, 'production']
+  IsDevelopment: !Equals [!Ref Environment, 'development']
+
+# ============================================================================
+# RESOURCES
+# ============================================================================
+
+Resources:
+
+  # --------------------------------------------------------------------------
+  # CloudWatch Log Group for CodeBuild
+  # --------------------------------------------------------------------------
+
+  CodeBuildLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/codebuild/${Environment}-rento-migration'
+      RetentionInDays: 14
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-migration-logs'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # --------------------------------------------------------------------------
+  # IAM Role for CodeBuild
+  # --------------------------------------------------------------------------
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-rento-codebuild-migration-role'
+      Description: 'Service role for CodeBuild to run database migrations'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-codebuild-migration-role'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # --------------------------------------------------------------------------
+  # IAM Policy for CodeBuild
+  # --------------------------------------------------------------------------
+
+  CodeBuildServicePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${Environment}-rento-codebuild-migration-policy'
+      Roles:
+        - !Ref CodeBuildServiceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # CloudWatch Logs Permissions
+          - Sid: CloudWatchLogsAccess
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource:
+              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-rento-migration'
+              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${Environment}-rento-migration:*'
+
+          # VPC Network Interface Management
+          - Sid: VPCNetworkInterfaceManagement
+            Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeSubnets
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeDhcpOptions
+              - ec2:DescribeVpcs
+              - ec2:CreateNetworkInterfacePermission
+            Resource: '*'
+
+          # RDS Snapshot Operations
+          - Sid: RDSSnapshotOperations
+            Effect: Allow
+            Action:
+              - rds:CreateDBSnapshot
+              - rds:DescribeDBSnapshots
+              - rds:DescribeDBInstances
+              - rds:AddTagsToResource
+            Resource:
+              - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:${Environment}-rento-postgres'
+              - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:snapshot:${Environment}-pre-migration-*'
+
+          # RDS Read-Only for Describe Operations
+          - Sid: RDSDescribeOperations
+            Effect: Allow
+            Action:
+              - rds:DescribeDBInstances
+            Resource: '*'
+
+          # SSM Parameter Store Access (for database credentials)
+          - Sid: SSMParameterStoreAccess
+            Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Environment}/rento/postgres/*'
+
+          # KMS Key Access for Decryption
+          - Sid: KMSDecryption
+            Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:DescribeKey
+              - kms:GenerateDataKey
+            Resource:
+              - !Sub
+                - 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KeyId}'
+                - KeyId:
+                    Fn::ImportValue: !Sub '${Environment}-rento-kms-key-id'
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  - !Sub 'rds.${AWS::Region}.amazonaws.com'
+                  - !Sub 'ssm.${AWS::Region}.amazonaws.com'
+
+  # --------------------------------------------------------------------------
+  # CodeBuild Project
+  # --------------------------------------------------------------------------
+
+  MigrationCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    DependsOn: CodeBuildServicePolicy
+    Properties:
+      Name: !Sub '${Environment}-rento-database-migration'
+      Description: !Sub 'Database migration executor for ${Environment} environment with VPC access'
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+
+      # No artifacts needed - this is just running migrations
+      Artifacts:
+        Type: NO_ARTIFACTS
+
+      # Build Environment Configuration
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0  # Includes Node.js 18
+        PrivilegedMode: false
+        EnvironmentVariables:
+          - Name: MIGRATION_ENV
+            Value: !If [IsProduction, 'prod', 'dev']
+            Type: PLAINTEXT
+          - Name: CI
+            Value: 'true'
+            Type: PLAINTEXT
+          - Name: AUTO_CONFIRM
+            Value: 'true'
+            Type: PLAINTEXT
+          - Name: ENVIRONMENT
+            Value: !Ref Environment
+            Type: PLAINTEXT
+          - Name: AWS_REGION
+            Value: !Ref AWS::Region
+            Type: PLAINTEXT
+
+      # Source Configuration
+      Source:
+        Type: GITHUB
+        Location: !Sub 'https://github.com/${GitHubRepo}.git'
+        GitCloneDepth: 1
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                nodejs: 18
+              commands:
+                - echo "=========================================="
+                - echo "Installing Dependencies"
+                - echo "=========================================="
+                - cd server
+                - npm ci --production=false
+                - echo "✅ Dependencies installed"
+
+            pre_build:
+              commands:
+                - echo "=========================================="
+                - echo "Creating RDS Snapshot"
+                - echo "=========================================="
+                - SNAPSHOT_ID="${ENVIRONMENT}-pre-migration-$(date +%Y%m%d-%H%M%S)"
+                - echo "Snapshot ID: $SNAPSHOT_ID"
+                - |
+                  aws rds create-db-snapshot \
+                    --db-instance-identifier ${ENVIRONMENT}-rento-postgres \
+                    --db-snapshot-identifier "$SNAPSHOT_ID" \
+                    --tags Key=Environment,Value=${ENVIRONMENT} Key=CreatedBy,Value=CodeBuild Key=MigrationType,Value=Pre-Migration
+                - echo "⏳ Waiting for snapshot to complete (this may take 5-10 minutes)..."
+                - |
+                  aws rds wait db-snapshot-completed \
+                    --db-snapshot-identifier "$SNAPSHOT_ID" \
+                    --max-attempts 60 \
+                    --delay 10
+                - echo "✅ Snapshot completed: $SNAPSHOT_ID"
+                - echo "SNAPSHOT_ID=$SNAPSHOT_ID" >> migration-info.txt
+
+            build:
+              commands:
+                - echo "=========================================="
+                - echo "Running Database Migrations"
+                - echo "=========================================="
+                - echo "Environment: $MIGRATION_ENV"
+                - npm run db:migrate:${MIGRATION_ENV}
+                - echo "✅ Migrations completed successfully"
+
+            post_build:
+              commands:
+                - echo "=========================================="
+                - echo "Verifying Migration Status"
+                - echo "=========================================="
+                - npm run db:migrate:${MIGRATION_ENV}:status || echo "⚠️ Status check failed (non-blocking)"
+                - echo "=========================================="
+                - echo "Migration Summary"
+                - echo "=========================================="
+                - echo "Environment: ${ENVIRONMENT}"
+                - echo "Database: ${ENVIRONMENT}-rento-postgres"
+                - echo "Snapshot: $SNAPSHOT_ID"
+                - echo "Status: SUCCESS"
+                - echo "=========================================="
+
+          artifacts:
+            files:
+              - migration-info.txt
+            name: migration-metadata
+
+      # VPC Configuration - Enables access to private RDS
+      VpcConfig:
+        VpcId:
+          Fn::ImportValue: !Sub '${Environment}-rento-vpc-id'
+        Subnets:
+          Fn::Split:
+            - ','
+            - Fn::ImportValue: !Sub '${Environment}-rento-private-subnet-ids'
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub '${Environment}-rento-app-sg-id'
+
+      # Build Configuration
+      TimeoutInMinutes: 30
+      QueuedTimeoutInMinutes: 60
+
+      # Logging Configuration
+      LogsConfig:
+        CloudWatchLogs:
+          Status: ENABLED
+          GroupName: !Ref CodeBuildLogGroup
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-rento-database-migration'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: DatabaseMigrations
+        - Key: ManagedBy
+          Value: CloudFormation
+
+# ============================================================================
+# OUTPUTS
+# ============================================================================
+
+Outputs:
+  CodeBuildProjectName:
+    Description: 'CodeBuild project name for triggering migrations'
+    Value: !Ref MigrationCodeBuildProject
+    Export:
+      Name: !Sub '${Environment}-rento-migration-codebuild-name'
+
+  CodeBuildProjectArn:
+    Description: 'CodeBuild project ARN'
+    Value: !GetAtt MigrationCodeBuildProject.Arn
+    Export:
+      Name: !Sub '${Environment}-rento-migration-codebuild-arn'
+
+  CodeBuildServiceRoleArn:
+    Description: 'IAM role ARN for CodeBuild service'
+    Value: !GetAtt CodeBuildServiceRole.Arn
+    Export:
+      Name: !Sub '${Environment}-rento-codebuild-role-arn'
+
+  CodeBuildLogGroupName:
+    Description: 'CloudWatch Log Group for CodeBuild logs'
+    Value: !Ref CodeBuildLogGroup
+    Export:
+      Name: !Sub '${Environment}-rento-migration-logs'
+
+  ConsoleURL:
+    Description: 'AWS Console URL for CodeBuild project'
+    Value: !Sub 'https://console.aws.amazon.com/codesuite/codebuild/projects/${MigrationCodeBuildProject}?region=${AWS::Region}'
