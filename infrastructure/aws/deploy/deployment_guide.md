@@ -2,49 +2,42 @@
 
 ## Overview
 
-This guide walks you through deploying the complete Rento infrastructure to AWS Tokyo region (ap-northeast-1) for APPI compliance.
+The Rento infrastructure consists of multiple CloudFormation stacks with dependencies. This guide walks you through deploying the complete Rento infrastructure to AWS Tokyo region (ap-northeast-1) for APPI compliance.
 
-**Infrastructure Components**:
-1. ✅ **PostgreSQL RDS** - Primary database (Multi-AZ) + VPC with private subnets
-2. ✅ **Redis ElastiCache** - Caching & session storage
-3. ✅ **VPC Public Networking** - Internet Gateway + public subnets (no cost)
-4. ✅ **EC2 GraphQL API** - Application server in public subnet
-5. ✅ **AWS Cognito** - User authentication & authorization
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Deployment Order                         │
+└─────────────────────────────────────────────────────────────┘
 
-**3-Tier Architecture**:
-- Security Layers (3-Tier Architecture):
-- Public Tier:   EC2 GraphQL API (public subnet, internet-facing)
-                 ↓
-  Private Tier:  RDS + Redis (private subnet, NO internet access)
-- Least Privilege: Databases should NEVER be in public subnets -
-  they should only be accessible from application servers
-- APPI Compliance: Separating tiers is actually BETTER for
-  compliance (defense in depth)
-- Flexibility: You can tear down/rebuild the public networking
-  without touching your databases
+ 1. GitHub OIDC Provider & Roles ← START HERE (NEW!)
+    └─ Enables keyless GitHub Actions deployments
 
-Industry Standard Architecture
+ 2. VPC & Networking
+    └─ Creates network foundation
 
-  ┌─────────────────────────────────────────────┐
-  │           Internet (Public)                 │
-  └──────────────────┬──────────────────────────┘
-                     │ HTTPS/TLS
-           ┌─────────▼─────────┐
-           │  Internet Gateway │
-           └─────────┬─────────┘
-                     │
-      ┌──────────────┴──────────────┐
-      │   Public Subnet (10.0.10/24)│  ← EC2 GraphQL API
-      │   - EC2 with Elastic IP     │    (APPI Compliant)
-      │   - Security Group: 443,4000│
-      └──────────────┬──────────────┘
-                     │ Internal VPC routing
-      ┌──────────────▼──────────────┐
-      │  Private Subnet (10.0.1/24) │  ← RDS + Redis
-      │   - PostgreSQL RDS          │    (APPI Compliant)
-      │   - Redis ElastiCache       │
-      │   - NO Internet Access      │
-      └─────────────────────────────┘
+ 3. Security Groups & IAM
+    └─ Sets up security boundaries
+
+ 4. RDS Database
+    └─ Depends on: VPC, Security Groups
+    └─ Creates: Database exports for other stacks
+
+ 5. Redis Cache
+    └─ Depends on: VPC, Security Groups
+
+ 6. CodeBuild Migration Projects
+    └─ Depends on: GitHub OIDC, VPC, RDS
+    └─ Enables: Database migrations via GitHub Actions
+
+ 7. Cognito User Pools
+    └─ User authentication
+
+ 8. EC2 / ECS (if applicable)
+    └─ Application hosting
+
+ 9. Application Deployment
+    └─ Depends on: All above
+```
 
 ---
 
@@ -134,7 +127,81 @@ aws ec2 describe-key-pairs --profile rento-production-sso --region ap-northeast-
 
 Deploys are handled via individual deployment scripts for each AWS resource.
 
-####  Step 1:  Deploy PostgreSQL RDS
+#### Step 1: Deploy GitHub OIDC Provider & Roles 🔐
+
+**Purpose:** Enable GitHub Actions to authenticate with AWS without long-lived credentials
+
+**Command:**
+
+Development: 
+
+```bash
+cd infrastructure/aws/deploy
+./deploy-github-oidc.sh dev
+```
+
+Production: 
+
+```bash
+cd infrastructure/aws/deploy
+./deploy-github-oidc.sh prod
+```
+
+**What it creates:**
+- GitHub OIDC Provider (once per AWS account)
+- IAM Role: `GitHubActionsRole-development`
+- IAM Role: `GitHubActionsRole-production`
+- Policies for CodeBuild triggering
+
+**Post-deployment:**
+1. Copy the role ARNs from the output
+2. Add to GitHub Secrets:
+   - `AWS_ROLE_ARN_DEVELOPMENT`
+   - `AWS_ROLE_ARN_PRODUCTION`
+   - `AWS_ACCOUNT_ID_DEVELOPMENT`
+   - `AWS_ACCOUNT_ID_PRODUCTION`
+
+**Time:** ~2-3 minutes per environment
+
+---
+
+#### Step 2: Deploy VPC & Networking 🌐
+
+**Purpose:** Create the network foundation for all resources
+
+Development: 
+
+```bash
+./deploy-vpc-public-networking.sh development
+```
+
+Production: 
+
+```bash
+./deploy-vpc-public-networking.sh production
+```
+
+**What it creates:**
+- VPC with public and private subnets for EC2
+- Internet Gateway
+- NAT Gateway
+- Route Tables
+- Network ACLs
+
+**Exports:**
+- `{environment}-rento-vpc-id`
+- `{environment}-rento-public-subnet-ids`
+- `{environment}-rento-private-subnet-ids`
+
+**Time:** ~5-7 minutes per environment
+
+---
+
+####  Step 3:  Deploy PostgreSQL RDS Database 🗄️
+
+**Purpose:** PostgreSQL database for application data
+
+**Command:**
 
 Development: 
 
@@ -150,112 +217,60 @@ cd infrastructure/aws/deploy
 ./deploy-rds.sh production
 ```
 
-**Time**: ~15-20 minutes | **What it creates**: VPC + PostgreSQL RDS
+**What it creates:**
+- RDS PostgreSQL instance
+- Security groups
+- KMS encryption key
+- SSM parameters for credentials
+- Automated backups
 
-Verify Deployment: 
+**Exports:**
+- `{environment}-rento-db-endpoint`
+- `{environment}-rento-kms-key-id`
+- `{environment}-rento-app-sg-id`
 
-Output all
+**Dependencies:**
+- ✅ VPC (Step 2)
 
-```bash
-aws cloudformation describe-stacks --profile rento-<environment>-sso
-```
-
-Output VPC
-
-```bash
-aws ec2 describe-vpcs --profile rento-<environment>-sso
-```
-
-Output Security Group
-
-```bash
-aws ec2 describe-security-groups --profile rento-<environment>-sso
-```
+**Time:** ~10-15 minutes per environment
 
 ---
 
-#### Step 2: Deploy Redis ElastiCache
+#### Step 4: Deploy Redis ElastiCache 📦
+
+**Purpose:** ElastiCache Redis for session storage and caching
+
+**Command:**
+
+Development: 
 
 ```bash
 ./deploy-redis.sh development
 ```
 
-**Time**: ~5-7 minutes | **What it creates**: Redis cluster
+Production:
+```bash
+./deploy-redis.sh production
+```
+
+**What it creates:**
+- ElastiCache Redis cluster
+- Security groups
+- Subnet groups
+
+**Exports:**
+- `{environment}-rento-redis-endpoint`
+
+**Dependencies:**
+- ✅ VPC (Step 2)
+
+**Time:** ~5-10 minutes per environment
 
 ---
 
-#### Step 3: Deploy VPC Public Networking
+#### Step 5: Deploy Codebuild Migration Projects 🚀
 
-This enables EC2 instances to use Elastic IPs and be internet-accessible while keeping databases in private subnets (3-tier architecture for APPI compliance).
-
-Development: 
-
-```bash
-./deploy-vpc-public-networking.sh development
-```
-
-Production: 
-
-```bash
-./deploy-vpc-public-networking.sh production
-```
-
-**Time**: ~2-3 minutes | **What it creates**: Internet Gateway + public subnets for EC2
-
----
-
-#### Step 4: Deploy EC2 GraphQL API Infrastructure
-
-```bash
-./deploy-ec2-infrastructure.sh development
-```
-
-**Time**: ~5-10 minutes | **What it creates**: EC2 instance with Node.js + PM2 in public subnet
-
-**Wait 2-3 minutes** after this step for EC2 to initialize before deploying code.
-
----
-
-#### Step 5: Deploy GraphQL Application Code
-
-```bash
-cd ../../../server/deploy
-./deploy-to-ec2.sh development
-```
-
-**Time**: ~2-3 minutes | **What it does**: Builds & deploys your GraphQL server
-
----
-
-#### Step 6: Deploy AWS Cognito + Lambda Triggers
-
-```bash
-./deploy-cognito.sh development
-```
-
-**Time**: ~2-3 minutes | **What it creates**: Cognito User Pool + Lambda functions
-
----
-
-#### Step 6: Deploy GitHub OIDC Provider & Roles
-
-Development: 
-
-```bash
-cd ../../../server/deploy
-./deploy-github-oidc.sh dev
-```
-
-Production: 
-
-```bash
-cd ../../../server/deploy
-./deploy-github-oidc.sh prod
-```
-
-**Time**: ~2-3 minutes | **What it creates**: GitHub Open ID Connect Provider
-
-#### Step 7: Deploy Codebuild
+**Purpose:** Automated database migration execution via GitHub Actions
 
 Development: 
 
@@ -271,7 +286,80 @@ cd ../../../server/deploy
 ./deploy-codebuild.sh prod
 ```
 
-**Time**: ~2-3 minutes | **What it creates**: AWS Codebuild to allow GitHub Actions DB migrations
+**What it creates:**
+- CodeBuild project for migrations
+- IAM role for CodeBuild
+- CloudWatch Log Groups
+- VPC configuration for private RDS access
+
+**Exports:**
+- `{environment}-rento-migration-codebuild-name`
+- `{environment}-rento-migration-codebuild-arn`
+
+**Dependencies:**
+- ✅ GitHub OIDC (Step 1) - for GitHub Actions to trigger
+- ✅ VPC (Step 2) - for VPC access
+- ✅ RDS (Step 3) - for database access
+
+**Time:** ~3-5 minutes per environment
+
+---
+
+#### Step 6: Deploy EC2 GraphQL API Infrastructure
+
+```bash
+./deploy-ec2-infrastructure.sh development
+```
+
+**Time**: ~5-10 minutes | **What it creates**: EC2 instance with Node.js + PM2 in public subnet
+
+**Wait 2-3 minutes** after this step for EC2 to initialize before deploying code.
+
+---
+
+#### Step 7: Deploy GraphQL Application Code
+
+```bash
+cd ../../../server/deploy
+./deploy-to-ec2.sh development
+```
+
+**Time**: ~2-3 minutes | **What it does**: Builds & deploys your GraphQL server
+
+---
+
+#### Step 8: Deploy AWS Cognito + Lambda Triggers 👤
+
+**Purpose:** User authentication and authorization
+
+**Command:**
+
+Development: 
+
+```bash
+./deploy-cognito.sh development
+```
+
+Production: 
+
+```bash
+./deploy-cognito.sh production
+```
+
+**What it creates:**
+- Cognito User Pool
+- User Pool Client
+- Lambda triggers (pre-signup, post-confirmation)
+- IAM roles for Lambda functions
+
+**Exports:**
+- `{environment}-rento-user-pool-id`
+- `{environment}-rento-user-pool-client-id`
+
+**Time:** ~3-5 minutes per environment
+
+---
+
 
 ## Deployment Summary
 
@@ -447,41 +535,41 @@ aws ce get-cost-and-usage \
 
 ## Cleanup (Delete All Resources)
 
-**WARNING**: This deletes all infrastructure and data!
+To remove all infrastructure (in reverse order):
 
 ```bash
-# Delete in reverse order
-
-# Delete Cognito
+# 1. Delete Cognito
 aws cloudformation delete-stack \
-  --profile rento-development-sso \
-  --stack-name rento-cognito-development \
-  --region ap-northeast-1
+  --stack-name rento-cognito-dev \
+  --profile rento-development-sso
 
-# Delete EC2
+# 2. Delete CodeBuild
 aws cloudformation delete-stack \
-  --profile rento-development-sso \
-  --stack-name rento-graphql-ec2-development \
-  --region ap-northeast-1
+  --stack-name rento-codebuild-migrations-dev \
+  --profile rento-development-sso
 
-# Delete VPC Public Networking
+# 3. Delete Redis
 aws cloudformation delete-stack \
-  --profile rento-development-sso \
-  --stack-name rento-vpc-public-networking-development \
-  --region ap-northeast-1
+  --stack-name rento-redis-dev \
+  --profile rento-development-sso
 
-# Delete Redis
+# 4. Delete RDS (WARNING: This deletes your database!)
 aws cloudformation delete-stack \
-  --profile rento-development-sso \
-  --stack-name rento-redis-development \
-  --region ap-northeast-1
+  --stack-name rento-postgres-dev \
+  --profile rento-development-sso
 
-# Delete PostgreSQL (takes longest due to deletion protection)
+# 5. Delete VPC
 aws cloudformation delete-stack \
-  --profile rento-development-sso \
-  --stack-name rento-postgres-development \
-  --region ap-northeast-1
+  --stack-name rento-vpc-dev \
+  --profile rento-development-sso
+
+# 6. Delete GitHub OIDC (last - shared across environments)
+aws cloudformation delete-stack \
+  --stack-name rento-github-oidc-dev \
+  --profile rento-development-sso
 ```
+
+**⚠️  WARNING:** Always take RDS snapshots before deleting production stacks!
 
 ---
 
