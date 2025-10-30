@@ -12,25 +12,11 @@ Generate comprehensive documentation for existing projects optimized for AI deve
 
 ### 1. Initial Project Analysis
 
-**CRITICAL:** First, check if a PDRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
+**CRITICAL**:
 
-## Critical: Archon Access
+Ask the user to provide any of the following:
 
-If you are unable to access Archon notify the user and ask them to check the MCP server connection. 
-Wait for the user to tell you to either try to reconnect or to exit this task prematurely. If reconnect is successful continue with this task.
-
-**IF PDRD EXISTS**:
-
-- Review all `**pdrd.md` files in Archon (if there are no such files in Archon check `.claude/docs` directory) to understand the overall product development roadmap
-- Identify which modules, services, or areas will be affected
-- Skip unrelated parts of the codebase to keep docs lean
-
-**IF NO PDRD EXISTS**:
-Ask the user:
-
-"I notice you haven't provided a PDRD or development roadmap document. To create more focused and useful documentation, I recommend one of these options:
-
-1. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can share?
+1. **Provide existing requirements** - Do you have a requirements documents, epics, or project description you can share?
 
 2. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note: This may create excessive documentation for large projects)
 
@@ -38,8 +24,8 @@ Please let me know your preference, or I can proceed with full documentation if 
 
 Based on their response:
 
-- If they choose option 1-2: Use that context to focus documentation
-- If they choose option 3 or decline: Proceed with comprehensive analysis below
+- If they choose option 1: Use that context to focus documentation
+- If they choose option 2: Proceed with comprehensive analysis below
 
 Begin by conducting analysis of the existing project. Use available tools to:
 
@@ -85,7 +71,7 @@ CRITICAL: Before generating documentation, conduct extensive analysis of the exi
 
 ### 3. Core Documentation Generation
 
-[[LLM: Generate a comprehensive BROWNFIELD architecture document that reflects the ACTUAL state of the codebase.
+[[LLM: Based on your documentation, update the `@/.claude/docs/documentation/architecture.md` file.
 
 **CRITICAL**: This is NOT an aspirational architecture document. Document what EXISTS, including:
 
@@ -97,7 +83,7 @@ CRITICAL: Before generating documentation, conduct extensive analysis of the exi
 
 **Document Structure**:
 
-# [Project Name] Brownfield Architecture Document
+# [Project Name] Architecture Document
 
 ## Introduction
 
@@ -112,7 +98,7 @@ This document captures the CURRENT STATE of the [Project Name] codebase, includi
 
 | Date   | Version | Description                 | Author    |
 | ------ | ------- | --------------------------- | --------- |
-| [Date] | 1.0     | Initial brownfield analysis | [Analyst] |
+| [Date] | 1.0     | Initial codebase analysis | [Analyst] |
 
 ## Quick Reference - Key Files and Entry Points
 
@@ -124,10 +110,6 @@ This document captures the CURRENT STATE of the [Project Name] codebase, includi
 - **API Definitions**: `src/routes/` or link to OpenAPI spec
 - **Database Models**: `src/models/` or link to schema files
 - **Key Algorithms**: [List specific files with complex logic]
-
-### If PDRD Provided - Enhancement Impact Areas
-
-[Highlight which files/modules will be affected by the planned roadmap]
 
 ## High Level Architecture
 
@@ -251,23 +233,6 @@ npm test           # Runs unit tests
 npm run test:integration  # Runs integration tests (requires local DB)
 ```
 
-## If Enhancement PRD Provided - Impact Analysis
-
-### Files That Will Need Modification
-
-Based on the enhancement requirements, these files will be affected:
-
-- `src/services/userService.js` - Add new user fields
-- `src/models/User.js` - Update schema
-- `src/routes/userRoutes.js` - New endpoints
-- [etc...]
-
-### New Files/Modules Needed
-
-- `src/services/newFeatureService.js` - New business logic
-- `src/models/NewFeature.js` - New data model
-- [etc...]
-
 ### Integration Considerations
 
 - Will need to integrate with existing auth middleware
@@ -294,7 +259,7 @@ npm run seed        # Seed test data
 ### 4. Document Delivery
 
 1. **In IDE Environment**:
-   - Create the document as `.claude/docs/brownfield-architecture.md`. If it already exists, then update it with new findings
+   - Update the document as `@/.claude/docs/documentation/architecture.md`. If it does not exist, then create it.
    - Datestamp the document to track changes
    - Inform user this single document contains all architectural information
    - Can be sharded later using PO agent if desired
