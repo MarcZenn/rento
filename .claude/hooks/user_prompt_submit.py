@@ -5,7 +5,6 @@
 #     "python-dotenv",
 # ]
 # ///
-
 import argparse
 import json
 import os
@@ -22,7 +21,7 @@ except ImportError:
     pass  # dotenv is optional
 
 
-def log_user_prompt(session_id, input_data):
+def log_user_prompt(input_data):
     """Log user prompt to logs directory."""
     # Ensure logs directory exists
     log_dir = Path("logs")

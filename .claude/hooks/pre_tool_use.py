@@ -2,7 +2,6 @@
 # /// script
 # requires-python = ">=3.8"
 # ///
-
 import json
 import sys
 import re

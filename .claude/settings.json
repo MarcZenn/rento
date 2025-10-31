@@ -25,7 +25,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre_tool_use.py"
+            "command": "uv run .claude/hooks/pre_tool_use.py"
+          },
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/voice_notifications/handler.py --voice=jarvis"
           }
         ]
       }
@@ -36,7 +40,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/post_tool_use.py"
+            "command": "uv run .claude/hooks/post_tool_use.py"
+          },
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/voice_notifications/handler.py --voice=jarvis"
           }
         ]
       }
@@ -47,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/notification.py --notify"
+            "command": "uv run .claude/hooks/voice_notifications/handler.py --voice=jarvis"
           }
         ]
       }
@@ -58,7 +66,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/stop.py --chat"
+            "command": "uv run .claude/hooks/stop.py --chat"
+          },
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/voice_notifications/handler.py --voice=jarvis"
           }
         ]
       }
@@ -69,7 +81,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/subagent_stop.py --notify"
+            "command": "uv run .claude/hooks/subagent_stop.py --notify"
+          },
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/voice_notifications/handler.py --voice=jarvis"
           }
         ]
       }
@@ -79,18 +95,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/user_prompt_submit.py --log-only --store-last-prompt --name-agent"
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
+            "command": "uv run .claude/hooks/user_prompt_submit.py --log-only --store-last-prompt --name-agent"
+          },
           {
             "type": "command",
-            "command": ".claude/hooks/pre_compact.py"
+            "command": "uv run .claude/hooks/voice_notifications/handler.py --voice=jarvis"
           }
         ]
       }
