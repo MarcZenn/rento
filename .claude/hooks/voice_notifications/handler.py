@@ -38,7 +38,10 @@ import random
 from pathlib import Path
 
 # Add parent directory to path for importing common module
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Use absolute path resolution to handle different execution contexts
+hooks_dir = Path(__file__).parent.parent.resolve()
+if str(hooks_dir) not in sys.path:
+    sys.path.insert(0, str(hooks_dir))
 
 from common import ( # pyright: ignore[reportMissingImports]
     HookEvent,
@@ -103,7 +106,7 @@ logger = setup_module_logger('hooks.voice_notifications')
 def load_sound_mapping() -> SoundMapping:
     """Load sound mapping configuration from JSON file."""
     script_dir = Path(__file__).parent
-    mapping_file = script_dir / "sound_mapping.json"
+    mapping_file = script_dir / "sound_mappings.json"
     
     try:
         with open(mapping_file, 'r', encoding='utf-8') as f:

@@ -1,0 +1,25 @@
+[project]
+name = "claude-hooks"
+version = "1.0.0"
+description = "Claude Code hooks for Rento project"
+requires-python = ">=3.13"
+dependencies = [
+    "pygame>=2.6.1",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Don't auto-discover packages since we're using this as a dependency manager
+py-modules = []
+
+[tool.uv.pip]
+# Config settings passed to build backends (like pygame)
+config-settings = {}
+
+[tool.uv]
+# Manage dependencies without building this as a package
+package = false
