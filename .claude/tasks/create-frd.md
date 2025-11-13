@@ -6,18 +6,12 @@
 
 When this task is invoked:
 
-## Critical: Archon Access
-
-If you are unable to access Archon notify the user and ask them to check the MCP server connection. 
-Wait for the user to tell you to either try to reconnect or to exit this task prematurely. If reconnect is successful continue with task.
-
 ## Processing Flow: Run the following steps sequentially
 
-<!-- TODO:: Once Archon has migrated docs - get file from it -->
-1. **Find PDRD** - List all pdrd files in /.claude/docs/ directory and ask the user to select one
-2. **Read Selected PDRD** - Review and understand the PDRD in its entirety. If there are any areas of the PDRD that are unclear or ambigous for your purposes prompt the user to clarify.
-3. **List Features** - List all of the features outlined in the PDRD as a numbered list to the user and ask the user to select one.
-4. **Create FRD** - Run task create-doc.md with template frd-tmpl.yaml for the selected feature.
+1. **Receive Feature Description** - Ask the user to provide you with a new feature description. Once it is given, move on to next step.
+2. **Understand Feature Description** - Review and understand the feature description in its entirety. If there are any aspects of the feature that are unclear or ambigous for your purposes prompt the user to clarify.
+3. **Gather Additional Context** - Ask the user if there are any other supporting documents or information that you can use as additional context for the feature description. Once an answer is given, move on to the next step.
+4. **Create FRD** - Run task create-doc.md and use template `frd-tmpl.yaml` to create a Feature Requirements Document for the selected feature.
 
 
 

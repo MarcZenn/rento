@@ -1,4 +1,4 @@
-# /create-tickets Task
+# /create-tasks Task
 
 ## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
 
@@ -6,18 +6,13 @@
 
 When this task is invoked:
 
-## Critical: Archon Access
-
-If you are unable to access Archon notify the user and ask them to check the MCP server connection. 
-Wait for the user to tell you to either try to reconnect or to exit this task prematurely. If reconnect is successful continue with task.
 
 ## Processing Flow: Run the following steps sequentially
 
-<!-- 1. **List TDDs** - List all of the **tdd.md files stored in the Archon Rento project and ask the user to select one -->
-1. **List TDDs** - List all of the **tdd.md files stored in the `.claude/docs` directory and ask the user to select one
-2. **Read Selected TDD** - Review and understand the selected TDD in its entirety. If there are any areas of the selected TDD that are unclear or ambigous for your purposes prompt the user to clarify.
-3. **Define Dev Work** - With a clear understanding of the technical design and implementation oultined in the selected TDD, begin to break up the work into simple and manageable development tasks. Think of these tasks as Jira tickets.
-4. **Create Archon Todo Tasks** - Add each development task into the Archon Rento project under the tasks Todo list. 
+1. **Receive TDD** - Ask the user to provide a Technical Requirements Document (TDD). This is the document you will need to create actionable tasks.
+2. **Understand TDD** - Review and understand the provided TDD in its entirety. If there are any areas of the selected TDD that are unclear or ambigous for your purposes prompt the user to clarify.
+3. **Define Dev Work** - With a clear understanding of the technical design and implementation oultined in the provided TDD, begin to break up the work into simple and manageable development tasks.
+4. **Create Tasks** - Create a new markdown file with the name of the feature and outline all of tasks in it. Add this file to the `@/.claude/docs/tdds` directory. 
 
 ## Critical: Task Creation Guidelines
 

@@ -8,34 +8,24 @@
       ],
       "env": {}
     },
-    "convex": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "convex@latest",
-        "mcp",
-        "start"
-      ],
-      "env": {
-        "CONVEX_URL": "${EXPO_PUBLIC_CONVEX_URL}"
-      }
-    },
     "Ref": {
       "type": "http",
       "url": "<Ref-api-key>"
     },
-    "ElevenLabs": {
-      "command": "uvx",
-      "args": [
-        "elevenlabs-mcp"
-      ],
-      "env": {
-        "ELEVENLABS_API_KEY": "<sample-api-key>"
-      }
-    },
     "archon": {
       "type": "http",
       "url": "http://localhost:8051/mcp"
+    },
+    "semgrep": {
+      "type": "stdio",
+      "command": "semgrep",
+      "args": [
+        "--isolated",
+        "--with",
+        "fastmcp==2.9.*",
+        "semgrep-mcp"
+      ],
+      "env": {}
     }
   }
 }

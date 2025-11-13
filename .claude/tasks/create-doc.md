@@ -51,9 +51,8 @@ If a YAML Template has not been provided, list all templates from .claude/templa
    - Save to file if possible
 4. **Continue until complete**
 5. **Store the completed document:**
-   - store the completed document in /.claude/docs local directory 
-<!-- storing in archon is currently disabled until they migrate to a new storage provider... -->
-<!-- - store the completed document in the Rento project in Archon** --> 
+   - IF the document is using the `frd-tmpl.yaml` template, store the completed document in the `/.claude/docs/frds` directory 
+   - IF the document is using the `tdd-tmpl.yaml` template, store the completed document in the `/.claude/docs/tdds` directory 
 
 ## Detailed Rationale Requirements
 

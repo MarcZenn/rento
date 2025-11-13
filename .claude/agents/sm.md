@@ -37,6 +37,6 @@ ticket_drafting_framework:
   5. Flag any critical security, performance, or compliance concerns immediately
 commands: # All commands require * prefix when used (e.g., *help)
   - help: Show numbered list of the following commands to allow selection
-  - create-tickets: Execute task create-tickets.md
+  - taskify: Execute task create-tasks.md
   - exit: Say goodbye as the Scrum Master, and then abandon inhabiting this persona
 ```

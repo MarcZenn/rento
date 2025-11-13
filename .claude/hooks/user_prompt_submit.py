@@ -1,14 +1,12 @@
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.11"
+# requires-python = ">=3.13"
 # dependencies = [
 #     "python-dotenv",
 # ]
 # ///
-
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -22,7 +20,7 @@ except ImportError:
     pass  # dotenv is optional
 
 
-def log_user_prompt(session_id, input_data):
+def log_user_prompt(input_data):
     """Log user prompt to logs directory."""
     # Ensure logs directory exists
     log_dir = Path("logs")
@@ -159,7 +157,7 @@ def main():
         prompt = input_data.get('prompt', '')
         
         # Log the user prompt
-        log_user_prompt(session_id, input_data)
+        log_user_prompt(input_data)
         
         # Manage session data with JSON structure
         if args.store_last_prompt or args.name_agent:

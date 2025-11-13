@@ -95,3 +95,14 @@ server/.env
 infrastructure/aws/lambda/**/*.zip
 infrastructure/aws/lambda/**/index.js
 infrastructure/aws/lambda/**/index.js.map
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.python-version
+*.egg-info/
+dist/
+build/
