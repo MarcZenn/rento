@@ -1,12 +1,18 @@
 # RENTO MONOREPO
 
-...under construction...
+...currently under construction...
 
 ## Structure
 
+This codebase consists of:
 
+- `/app` - Front-end react-native application
+- `/client` - Apollo client to enable API communication
+- `/server` - GraphQL API server & PostgresSQL DB schema, configs & migrations
+- `/infrastructure` - AWS infrastructure setup for self-hosted PostgreSQL + Redis & Lambda
+- `/claude` - Claude-based prompt system for agentic-driven development
 
-## Rento Build Guide
+## Build Guide
 
 This project uses **custom native code** - which means:
 - ❌ Expo Go is NOT supported
@@ -273,26 +279,3 @@ jobs:
 ```
 
 ---
-
-## Cost Considerations
-
-### EAS Build Pricing (as of 2025)
-- **Free tier**: Limited builds per month
-- **Production**: $29/month (priority builds)
-- **Enterprise**: Custom pricing
-
-### Local Builds
-- **Free** (only compute time)
-- Requires local hardware/software
-
----
-
-## Summary
-
-| Build Type | Command | Use Case |
-|------------|---------|----------|
-| **Development** | `npx expo run:ios` | Daily coding |
-| **EAS Production** | `./scripts/build-client.sh ios` | App Store release |
-| **Local Production** | `./scripts/build-client.sh ios --method=local` | Advanced users |
-
-For most teams, **EAS Build** is the recommended approach for production releases.

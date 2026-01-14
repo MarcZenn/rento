@@ -6,9 +6,9 @@ import { useForm } from 'react-hook-form';
 
 import { verify } from '@client/services/auth/verify';
 import { useVerifyEmailSchema } from '@/client/services/auth/schemas';
-import { CustomInput } from '@/client/components/custom/inputs/CustomInput';
-import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
-import { Header } from '@/client/components/Header';
+import { CustomInput } from '@/app/components/custom/inputs/CustomInput';
+import { CustomButton } from '@/app/components/custom/buttons/CustomButton';
+import { Header } from '@/app/components/Header';
 
 import { useLocalSearchParams } from 'expo-router';
 

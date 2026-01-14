@@ -2,14 +2,14 @@
 
 ## Overview
 
-The Rento infrastructure consists of multiple CloudFormation stacks with dependencies. This guide walks you through deploying the complete Rento infrastructure to AWS Tokyo region (ap-northeast-1) for APPI compliance.
+Infrastructure consists of multiple CloudFormation stacks with dependencies. This guide walks you through deploying the complete infrastructure to AWS Tokyo region (ap-northeast-1).
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Deployment Order                         │
+│                   Infra Deployment Order                    │
 └─────────────────────────────────────────────────────────────┘
 
- 1. GitHub OIDC Provider & Roles ← START HERE (NEW!)
+ 1. GitHub OIDC Provider & Roles ← START HERE
     └─ Enables keyless GitHub Actions deployments
 
  2. VPC & Networking

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { Slot, useNavigationContainerRef } from 'expo-router';
 import { ApolloProvider } from '@/client/apollo';
@@ -6,9 +6,9 @@ import { configureAmplify } from '@/client/apollo/config';
 import * as Sentry from '@sentry/react-native';
 import { useGetCurrentUser } from '@/client/services/auth/hooks/useGetCurrentUser';
 
-import { ThemeProvider } from '@/client/theme/ThemeProvider';
+import { ThemeProvider } from '@/app/theme/ThemeProvider';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from '@/client/theme/useFonts';
+import { useFonts } from '@/app/theme/useFonts';
 import '@/client/i18n';
 
 // Construct a new instrumentation instance. This is needed to communicate between the integration and React

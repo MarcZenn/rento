@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Stack, router, useSegments } from 'expo-router';
 import { useCheckAuth } from '@/client/services/auth/hooks/useCheckAuth';
-import { LoadingSpinner } from '@/client/components/custom/loaders/Loading';
+import { LoadingSpinner } from '@/app/components/custom/loaders/Loading';
 
 const PublicLayout = () => {
   const { isSignedIn, isLoading } = useCheckAuth();

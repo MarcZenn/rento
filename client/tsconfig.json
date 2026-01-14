@@ -1,7 +1,13 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "..",
+    "paths": {
+      "@/*": ["./*"],
+      "@client/*": ["./client/*"],
+      "@server/*": ["./server/*"],
+      "@shared/*": ["./shared/*"]
+    },
     "jsx": "react-native",
     "lib": ["DOM", "ESNext"],
     "module": "preserve",

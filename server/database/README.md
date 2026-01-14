@@ -1,6 +1,6 @@
 # Rento PostgreSQL Database Schema
 
-This directory contains the complete APPI-compliant PostgreSQL database schema for the Rento Japanese rental application.
+This directory contains the complete APPI-compliant PostgreSQL database schema.
 
 **CRITICAL**: This schema contains production-ready APPI compliance features but requires proper security configuration before deployment. Always test in a development environment first.
 

@@ -5,10 +5,10 @@ import { Link } from 'expo-router';
 
 import { images } from '@/client/constants/images';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { HeroLogo } from '@/client/components/HeroLogo';
-import { Header } from '@/client/components/Header';
-import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
-import { SignInWith } from '@/client/components/SignInWith';
+import { HeroLogo } from '@/app/components/HeroLogo';
+import { Header } from '@/app/components/Header';
+import { CustomButton } from '@/app/components/custom/buttons/CustomButton';
+import { SignInWith } from '@/app/components/SignInWith';
 
 export default function Welcome() {
   const { t } = useTranslation();

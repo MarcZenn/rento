@@ -12,7 +12,7 @@ When this task is invoked:
 1. **Receive TDD** - Ask the user to provide a Technical Requirements Document (TDD). This is the document you will need to create actionable tasks.
 2. **Understand TDD** - Review and understand the provided TDD in its entirety. If there are any areas of the selected TDD that are unclear or ambigous for your purposes prompt the user to clarify.
 3. **Define Dev Work** - With a clear understanding of the technical design and implementation oultined in the provided TDD, begin to break up the work into simple and manageable development tasks.
-4. **Create Tasks** - Create a new markdown file with the name of the feature and outline all of tasks in it. Add this file to the `@/.claude/docs/tdds` directory. 
+4. **Create Tasks** - Create a new markdown file with the name of the feature prefixed in the tile, for example `{{feature_name}}-dev-tasks.td`. Add all of the previously defined tasks to it. Add this file to the `@/.claude/docs/tasks` directory. 
 
 ## Critical: Task Creation Guidelines
 

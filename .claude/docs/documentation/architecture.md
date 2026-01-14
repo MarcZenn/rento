@@ -35,22 +35,6 @@ Based on the planned roadmap, these areas will be most affected:
 - `src/lib/i18n/` - Translation infrastructure (foundation exists)
 - Authentication flows in `app/(auth)/` (Clerk integration established)
 
-## High Level Architecture
-
-### Actual Tech Stack (from package.json)
-
-| Category        | Technology           | Version | Notes                                          |
-| --------------- | -------------------- | ------- | ---------------------------------------------- |
-| Runtime         | React Native         | 0.79.2  | Latest stable, React 19 support               |
-| Framework       | Expo                 | ~53.0.8 | Expo Router v5 for navigation                 |
-| Database/BaaS   | Convex               | ^1.24.1 | **REQUIRES self-hosting for APPI compliance** |
-| Authentication  | Clerk                | ^2.11.2 | **REQUIRES migration to JP-compliant provider** |
-| Styling         | React Native Unistyles | ^3.0.0-rc.5 | Unified theme system                     |
-| State Mgmt      | React Hooks + Convex | -       | No external state management library           |
-| i18n            | react-i18next        | ^15.5.1 | EN/JA support configured                       |
-| Forms           | React Hook Form      | ^7.56.3 | With Zod validation                            |
-| Dev Tools       | TypeScript + ESLint  | 5.8.3   | ESLint config needs migration (legacy format) |
-
 ### Repository Structure Reality Check
 
 - **Type**: Monorepo structure with single package.json

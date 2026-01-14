@@ -4,8 +4,8 @@ import { StyleSheet } from 'react-native-unistyles';
 // import Ionicons from '@expo/vector-icons/Ionicons';
 import { signOut } from '@/client/services/auth/signout';
 
-import { Header } from '@/client/components/Header';
-import { ProfileHeader } from '@/client/components/ProfileHeader';
+import { Header } from '@/app/components/Header';
+import { ProfileHeader } from '@/app/components/ProfileHeader';
 
 const Profile = () => {
   // const logOut = async () => {

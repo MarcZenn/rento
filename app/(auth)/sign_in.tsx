@@ -6,11 +6,11 @@ import { signIn } from '@/client/services/auth/signin';
 import { useForm } from 'react-hook-form';
 import { Link } from 'expo-router';
 
-import { CustomInput } from '@/client/components/custom/inputs/CustomInput';
-import { CustomButton } from '@/client/components/custom/buttons/CustomButton';
+import { CustomInput } from '@/app/components/custom/inputs/CustomInput';
+import { CustomButton } from '@/app/components/custom/buttons/CustomButton';
 import { useSignInSchema } from '@/client/services/auth/schemas';
-import { HeroLogo } from '@/client/components/HeroLogo';
-import { Header } from '@/client/components/Header';
+import { HeroLogo } from '@/app/components/HeroLogo';
+import { Header } from '@/app/components/Header';
 
 const SignIn = () => {
   const { t } = useTranslation();
